@@ -4,7 +4,7 @@ import { createWriteStream, unlinkSync } from 'fs'
 import { arch, platform, tmpdir } from 'os'
 import { join, resolve } from 'path'
 
-import { config, INSTALL_DIR } from './autorestic'
+import { config, INSTALL_DIR, CONFIG_FILE } from './autorestic'
 import { checkAndConfigureBackends, getEnvFromBackend } from './backend'
 import { backupAll } from './backup'
 import { Backends, Flags, Locations } from './types'
@@ -170,7 +170,7 @@ export const help = () => {
 	console.log('\nAutorestic'.blue + ' - Easy Restic CLI Utility'
 		+ '\n'
 		+ '\nOptions:'.yellow
-		+ '\n  -c, --config  [default=config.yml]                                    Specify config file'
+		+ `\n  -c, --config                                                          Specify config file. Default: ${CONFIG_FILE}`
 		+ '\n'
 		+ '\nCommands:'.yellow
 		+ '\n  check    [-b, --backend]  [-a, --all]                                 Check backends'
