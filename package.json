@@ -1,0 +1,24 @@
+{
+	"private": true,
+	"scripts": {
+		"build": "tsc",
+		"build:watch": "tsc -w",
+		"dev": "tsnd --no-notify --respawn ./src/autorestic.ts",
+		"bin": "npm run build && pkg lib/autorestic.js --out-path bin"
+	},
+	"devDependencies": {
+		"@types/decompress": "^4.2.3",
+		"@types/js-yaml": "^3.12.1",
+		"@types/minimist": "^1.2.0",
+		"pkg": "^4.4.0",
+		"ts-node-dev": "^1.0.0-pre.40",
+		"typescript": "^3.5.1"
+	},
+	"dependencies": {
+		"axios": "^0.19.0",
+		"clitastic": "0.0.1",
+		"colors": "^1.3.3",
+		"js-yaml": "^3.13.1",
+		"minimist": "^1.2.0"
+	}
+}
