@@ -1,14 +1,21 @@
 import axios from 'axios'
 import { Writer } from 'clitastic'
-import { createWriteStream, unlinkSync } from 'fs'
-import { arch, platform, tmpdir } from 'os'
+import { unlinkSync } from 'fs'
+import { tmpdir } from 'os'
 import { join, resolve } from 'path'
 
-import { config, INSTALL_DIR, CONFIG_FILE } from './autorestic'
+import { config, CONFIG_FILE, INSTALL_DIR, VERSION } from './autorestic'
 import { checkAndConfigureBackends, getEnvFromBackend } from './backend'
 import { backupAll } from './backup'
 import { Backends, Flags, Locations } from './types'
-import { checkIfCommandIsAvailable, checkIfResticIsAvailable, exec, filterObjectByKey, singleToArray } from './utils'
+import {
+	checkIfCommandIsAvailable,
+	checkIfResticIsAvailable,
+	downloadFile,
+	exec,
+	filterObjectByKey,
+	singleToArray,
+} from './utils'
 
 export type Handlers = { [command: string]: (args: string[], flags: Flags) => void }
 
@@ -114,60 +121,73 @@ const handlers: Handlers = {
 		}
 
 		w.replaceLn('Downloading binary... 🌎')
-		const name = `${json.name.replace(' ', '_')}_${platform()}_${archMap[arch()]}.bz2`
+		const name = `${json.name.replace(' ', '_')}_${process.platform}_${archMap[process.arch]}.bz2`
 		const dl = json.assets.find((asset: any) => asset.name === name)
 		if (!dl) return console.log(
 			'Cannot get the right binary.'.red,
 			'Please see https://bit.ly/2Y1Rzai',
 		)
 
-		const { data: file } = await axios({
-			method: 'get',
-			url: dl.browser_download_url,
-			responseType: 'stream',
-		})
+		const tmp = join(tmpdir(), name)
+		const extracted = tmp.slice(0, -4) //without the .bz2
 
-		const from = join(tmpdir(), name)
-		const to = from.slice(0, -4)
+		await downloadFile(dl.browser_download_url, tmp)
 
-		w.replaceLn('Decompressing binary... 📦')
-		const stream = createWriteStream(from)
-		await new Promise(res => {
-			const writer = file.pipe(stream)
-			writer.on('close', res)
-		})
-		stream.close()
-
-		w.replaceLn(`Moving to ${INSTALL_DIR} 🚙`)
 		// TODO: Native bz2
 		// Decompress
-		exec('bzip2', ['-dk', from])
-		// Remove .bz2
-		exec('chmod', ['+x', to])
-		exec('mv', [to, INSTALL_DIR + '/restic'])
+		w.replaceLn('Decompressing binary... 📦')
+		exec('bzip2', ['-dk', tmp])
+		unlinkSync(tmp)
 
-		unlinkSync(from)
+		w.replaceLn(`Moving to ${INSTALL_DIR} 🚙`)
+		exec('chmod', ['+x', extracted])
+		exec('mv', [extracted, INSTALL_DIR + '/restic'])
 
 		w.done(`\nFinished! restic is installed under: ${INSTALL_DIR}`.underline + ' 🎉')
 	},
 	uninstall() {
-		try {
-			unlinkSync(INSTALL_DIR + '/restic')
-			console.log(`Finished! restic was uninstalled`)
-		} catch (e) {
-			console.log('restic is already uninstalled'.red)
-		}
+		for (const bin of ['restic', 'autorestic'])
+			try {
+				unlinkSync(INSTALL_DIR + '/' + bin)
+				console.log(`Finished! ${bin} was uninstalled`)
+			} catch (e) {
+				console.log(`${bin} is already uninstalled`.red)
+			}
 	},
-	update() {
+	async update() {
 		checkIfResticIsAvailable()
-		const w = new Writer('Checking for new restic version... ⏳')
+		const w = new Writer('Checking for latest restic version... ⏳')
 		exec('restic', ['self-update'])
+
+
+		w.replaceLn('Checking for latest autorestic version... ⏳')
+		const { data: json } = await axios({
+			method: 'get',
+			url: 'https://api.github.com/repos/cupcakearmy/autorestic/releases/latest',
+			responseType: 'json',
+		})
+
+		if (json.tag_name != VERSION) {
+			const platformMap: { [key: string]: string } = {
+				'darwin': 'macos',
+			}
+
+			const name = `autorestic_${platformMap[process.platform] || process.platform}_${process.arch}`
+			const dl = json.assets.find((asset: any) => asset.name === name)
+
+			const to = INSTALL_DIR + '/autorestic'
+			w.replaceLn('Downloading binary... 🌎')
+			await downloadFile(dl.browser_download_url, to)
+
+			exec('chmod', ['+x', to])
+		}
+
 		w.done('All up to date! 🚀')
 	},
 }
 
 export const help = () => {
-	console.log('\nAutorestic'.blue + ' - Easy Restic CLI Utility'
+	console.log('\nAutorestic'.blue + ` - ${VERSION} - Easy Restic CLI Utility`
 		+ '\n'
 		+ '\nOptions:'.yellow
 		+ `\n  -c, --config                                                          Specify config file. Default: ${CONFIG_FILE}`

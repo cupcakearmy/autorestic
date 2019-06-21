@@ -1,5 +1,6 @@
 import 'colors'
 import minimist from 'minimist'
+import { homedir } from 'os'
 import { resolve } from 'path'
 
 import { init } from './config'
@@ -26,9 +27,9 @@ export const { _: commands, ...flags } = minimist(process.argv.slice(2), {
 })
 
 export const VERSION = '0.1'
-export const DEFAULT_CONFIG = '~/.autorestic.yml'
+export const DEFAULT_CONFIG = '/.autorestic.yml'
 export const INSTALL_DIR = '/usr/local/bin'
-export const CONFIG_FILE: string = resolve(flags.config || DEFAULT_CONFIG)
+export const CONFIG_FILE: string = resolve(flags.config || homedir() + DEFAULT_CONFIG)
 export const VERBOSE = flags.verbose
 
 export const config: Config = init()
