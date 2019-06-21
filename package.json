@@ -4,7 +4,7 @@
 		"build": "tsc",
 		"build:watch": "tsc -w",
 		"dev": "tsnd --no-notify --respawn ./src/autorestic.ts",
-		"bin": "npm run build && pkg lib/autorestic.js --out-path bin"
+		"bin": "npm run build && pkg lib/autorestic.js --targets latest-macos-x64,latest-linux-x64 --out-path bin"
 	},
 	"devDependencies": {
 		"@types/decompress": "^4.2.3",
