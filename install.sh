@@ -18,4 +18,5 @@ curl -s https://api.github.com/repos/cupcakearmy/autorestic/releases/latest \
 | wget -O ${OUT_FILE} -i -
 chmod +x ${OUT_FILE}
 
+autorestic install
 autorestic
