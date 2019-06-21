@@ -1,5 +1,7 @@
+import axios from 'axios'
 import { spawnSync, SpawnSyncOptions } from 'child_process'
 import { randomBytes } from 'crypto'
+import { createWriteStream } from 'fs'
 
 export const exec = (command: string, args: string[], { env, ...rest }: SpawnSyncOptions = {}) => {
 
@@ -43,3 +45,19 @@ export const singleToArray = <T>(singleOrArray: T | T[]): T[] => Array.isArray(s
 export const filterObject = <T>(obj: { [key: string]: T }, filter: (item: [string, T]) => boolean): { [key: string]: T } => Object.fromEntries(Object.entries(obj).filter(filter))
 
 export const filterObjectByKey = <T>(obj: { [key: string]: T }, keys: string[]) => filterObject(obj, ([key]) => keys.includes(key))
+
+export const downloadFile = async (url: string, to: string) => new Promise<void>(async res => {
+	const { data: file } = await axios({
+		method: 'get',
+		url: url,
+		responseType: 'stream',
+	})
+
+	const stream = createWriteStream(to)
+
+	const writer = file.pipe(stream)
+	writer.on('close', () => {
+		stream.close()
+		res()
+	})
+})
