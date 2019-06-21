@@ -26,7 +26,7 @@ export const { _: commands, ...flags } = minimist(process.argv.slice(2), {
 	string: ['l', 'b'],
 })
 
-export const VERSION = '0.3'
+export const VERSION = '0.4'
 export const DEFAULT_CONFIG = '/.autorestic.yml'
 export const INSTALL_DIR = '/usr/local/bin'
 export const CONFIG_FILE: string = resolve(flags.config || homedir() + DEFAULT_CONFIG)
@@ -34,10 +34,17 @@ export const VERBOSE = flags.verbose
 
 export const config: Config = init()
 
-if (commands.length < 1)
-	help()
-else {
+function main() {
+	if (flags.version)
+		return console.log('version'.grey, VERSION)
+
+	if (commands.length < 1)
+		return help()
+
+
 	const command: string = commands[0]
 	const args: string[] = commands.slice(1)
 	;(handlers[command] || error)(args, flags)
 }
+
+main()
