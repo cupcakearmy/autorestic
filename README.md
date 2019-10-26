@@ -91,7 +91,7 @@ Backends are the place where you data will be saved. Backups are incremental and
 
 ### Fields
 
-###### `type`
+##### `type`
 
 Type of the backend see a list [here](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html)
 
@@ -105,12 +105,12 @@ Supported are:
 
 For each backend you need to specify the right variables as shown in the example below.
 
-###### `path`
+##### `path`
 
 The path on the remote server.
 For object storages as 
 
-###### Example
+##### Example
 
 ```yaml
 backends:
@@ -123,7 +123,7 @@ backends:
 
 
 
-###### Note
+##### Note
 
 Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. You should keep a copy of the keys somewhere in case your server dies. Otherwise DATA IS LOST!
 
