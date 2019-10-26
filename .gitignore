@@ -1,6 +1,7 @@
 node_modules/
 package-lock.json
 .idea
+yarn.lock
 
 config.yml
 bin

@@ -10,6 +10,7 @@
 		"@types/decompress": "^4.2.3",
 		"@types/js-yaml": "^3.12.1",
 		"@types/minimist": "^1.2.0",
+		"@types/node": "^12.11.7",
 		"pkg": "^4.4.0",
 		"ts-node-dev": "^1.0.0-pre.40",
 		"typescript": "^3.5.1"
