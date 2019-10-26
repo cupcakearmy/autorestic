@@ -87,6 +87,40 @@ locations:
 
 ## 💽 Backends
 
+Backends are the place where you data will be saved. Backups are incremental and encrypted.
+
+### Fields
+
+#### `type`
+
+Type of the backend see a list [here](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html)
+
+Supported are:
+- [Local](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#local)
+- [Backblaze B2](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#backblaze-b2)
+- [Amazon S3](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#amazon-s3)
+- [Minio](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#minio-server)
+- [Google Cloud Storage](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#google-cloud-storage)
+- [Microsoft Azure Storage](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#microsoft-azure-blob-storage)
+
+For each backend you need to specify the right variables as shown in the example below.
+
+#### `path`
+
+The path on the remote server.
+For object storages as 
+
+```yaml
+backends:
+  name-of-backend:
+    type: b2
+    path: 'myAccount:myBucket/my/path'
+    B2_ACCOUNT_ID: backblaze_account_id
+    B2_ACCOUNT_KEY: backblaze_account_key
+```
+
+
+
 ###### Note
 
 Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. You should keep a copy of the keys somewhere in case your server dies. Otherwise DATA IS LOST!
