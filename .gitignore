@@ -3,7 +3,8 @@ package-lock.json
 .idea
 yarn.lock
 
-config.yml
 bin
 lib
 data
+
+.autorestic.yml
