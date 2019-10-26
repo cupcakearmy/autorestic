@@ -5,13 +5,17 @@ import { getEnvFromBackend } from './backend'
 import { Locations, Location } from './types'
 import { exec, ConfigError } from './utils'
 import { CONFIG_FILE } from './config'
-import { resolve, dirname } from 'path'
+import { resolve, dirname, isAbsolute } from 'path'
 
 export const backupSingle = (name: string, from: string, to: string) => {
   if (!config) throw ConfigError
   const writer = new Writer(name + to.blue + ' : ' + 'Backing up... ⏳')
   const backend = config.backends[to]
-  const pathRelativeToConfigFile = resolve(dirname(CONFIG_FILE), from)
+
+  // Check if is an absolute path, otherwise get the path relative to the config file
+  const pathRelativeToConfigFile = isAbsolute(from)
+    ? from
+    : resolve(dirname(CONFIG_FILE), from)
 
   const cmd = exec('restic', ['backup', pathRelativeToConfigFile], {
     env: getEnvFromBackend(backend),
