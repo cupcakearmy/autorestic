@@ -203,6 +203,9 @@ const handlers: Handlers = {
 
     w.done('All up to date! 🚀')
   },
+  version() {
+    console.log('version'.grey, VERSION)
+  },
 }
 
 export const help = () => {

@@ -51,7 +51,7 @@ export const normalizeAndCheckBackups = (config: Config) => {
   }
 }
 
-const findConfigFile = (): string => {
+const findConfigFile = (): string | undefined => {
   const config = '.autorestic.yml'
   const paths = [
     resolve(flags.config || ''),
@@ -64,17 +64,14 @@ const findConfigFile = (): string => {
       if (file.isFile()) return path
     } catch (e) {}
   }
-  throw new Error('No Config file found')
 }
 
 export let CONFIG_FILE: string = ''
 
 export const init = (): Config | undefined => {
-  try {
-    CONFIG_FILE = findConfigFile()
-  } catch (e) {
-    return
-  }
+  const file = findConfigFile()
+  if (file) CONFIG_FILE = file
+  else return
 
   const raw: Config = makeObjectKeysLowercase(
     yaml.safeLoad(readFileSync(CONFIG_FILE).toString())

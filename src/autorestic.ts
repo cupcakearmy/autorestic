@@ -27,11 +27,6 @@ export const VERSION = '0.5'
 export const INSTALL_DIR = '/usr/local/bin'
 export const VERBOSE = flags.verbose
 
-if (flags.version) {
-  console.log('version'.grey, VERSION)
-  process.exit(0)
-}
-
 export const config = init()
 
 function main() {
