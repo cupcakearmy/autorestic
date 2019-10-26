@@ -32,7 +32,7 @@ if (flags.version) {
   process.exit(0)
 }
 
-export const config: Config = init()
+export const config = init()
 
 function main() {
   if (commands.length < 1) return help()

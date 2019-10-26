@@ -69,8 +69,13 @@ const findConfigFile = (): string => {
 
 export let CONFIG_FILE: string = ''
 
-export const init = (): Config => {
-  CONFIG_FILE = findConfigFile()
+export const init = (): Config | undefined => {
+  try {
+    CONFIG_FILE = findConfigFile()
+  } catch (e) {
+    return
+  }
+
   const raw: Config = makeObjectKeysLowercase(
     yaml.safeLoad(readFileSync(CONFIG_FILE).toString())
   )

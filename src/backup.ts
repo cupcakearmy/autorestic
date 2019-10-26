@@ -3,11 +3,12 @@ import { Writer } from 'clitastic'
 import { config, VERBOSE } from './autorestic'
 import { getEnvFromBackend } from './backend'
 import { Locations, Location } from './types'
-import { exec } from './utils'
+import { exec, ConfigError } from './utils'
 import { CONFIG_FILE } from './config'
 import { resolve, dirname } from 'path'
 
 export const backupSingle = (name: string, from: string, to: string) => {
+  if (!config) throw ConfigError
   const writer = new Writer(name + to.blue + ' : ' + 'Backing up... ⏳')
   const backend = config.backends[to]
   const pathRelativeToConfigFile = resolve(dirname(CONFIG_FILE), from)
@@ -34,7 +35,12 @@ export const backupLocation = (name: string, backup: Location) => {
   } else backupSingle(display, backup.from, backup.to)
 }
 
-export const backupAll = (backups: Locations = config.locations) => {
+export const backupAll = (backups?: Locations) => {
+  if (!backups) {
+    if (!config) throw ConfigError
+    backups = config.locations
+  }
+
   console.log('\nBacking Up'.underline.grey)
   for (const [name, backup] of Object.entries(backups))
     backupLocation(name, backup)
