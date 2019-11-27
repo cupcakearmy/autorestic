@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 OUT_FILE=/usr/local/bin/autorestic
 

@@ -16,7 +16,7 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 ## Installation
 
 ```
-curl -s https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/install.sh | sh
+curl -s https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/install.sh | bash
 ```
 
 ## 🚀 Quickstart
