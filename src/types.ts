@@ -62,9 +62,21 @@ export type Backend =
 
 export type Backends = { [name: string]: Backend }
 
+export type ForgetPolicy = {
+  last?: number,
+  hourly?: number,
+  daily?: number,
+  weekly?: number,
+  monthly?: number,
+  yearly?: number,
+  within?: string,
+  tags?: string[],
+}
+
 export type Location = {
   from: string
   to: string | string[]
+  keep?: ForgetPolicy
 }
 
 export type Locations = { [name: string]: Location }
