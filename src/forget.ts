@@ -18,8 +18,8 @@ export const forgetSingle = (dryRun: boolean, name: string, from: string, to: st
     flags.push('--dry-run')
   }
   const env = getEnvFromBackend(backend)
-  writer.appendLn(name + to.blue + ' : ' + 'Forgeting old snapshots… ⏳')
-  const cmd = exec('restic', ['forget', '--path', from, '--prune', ...flags], {env})
+  writer.replaceLn(name + to.blue + ' : ' + 'Forgeting old snapshots… ⏳')
+  const cmd = exec('restic', ['forget', '--path', from, '--prune', ...flags], { env })
 
   if (VERBOSE) console.log(cmd.out, cmd.err)
   writer.done(name + to.blue + ' : ' + 'Done ✓'.green)
@@ -42,7 +42,7 @@ export const forgetLocation = (dryRun: boolean, name: string, backup: Location, 
       }
     } else forgetSingle(dryRun, display, backup.from, backup.to, policy)
   }
-  }
+}
 
 export const forgetAll = (dryRun: boolean, backups?: Locations) => {
   if (!config) throw ConfigError
