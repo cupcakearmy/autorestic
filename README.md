@@ -130,3 +130,4 @@ Note that the data is automatically encrypted on the server. The key will be gen
 ## Contributors
 
 - @ChanceM
+- @EliotBerriot
