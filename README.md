@@ -1,7 +1,7 @@
 # autorestic
 High backup level CLI utility for [restic](https://restic.net/).
 
-Autorestic is a wrapper around the amazing [restic](https://restic.net/). While being amazing the restic cli can be a bit overwhelming and difficoult to manage if you habe many different location that you want to backup to multiple locations. This utility is aimed at making this easier 🙂
+Autorestic is a wrapper around the amazing [restic](https://restic.net/). While being amazing the restic cli can be a bit overwhelming and difficoult to manage if you have many different location that you want to backup to multiple locations. This utility is aimed at making this easier 🙂
 
 ![Sketch](./docs/Sketch.png)
 
@@ -174,3 +174,8 @@ f8f8f976  2019-12-02 12:11:08  computer                within 2w  /etc
 ##### Note
 
 Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. You should keep a copy of the keys somewhere in case your server dies. Otherwise DATA IS LOST!
+
+## Contributors
+
+- @ChanceM
+- @EliotBerriot
