@@ -169,8 +169,6 @@ const handlers: Handlers = {
 
 		await downloadFile(dl.browser_download_url, tmp)
 
-		// TODO: Native bz2
-		// Decompress
 		w.replaceLn('Decompressing binary... 📦')
 		exec('bzip2', ['-dk', tmp])
 		unlinkSync(tmp)
