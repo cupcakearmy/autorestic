@@ -4,7 +4,7 @@ import { config, VERBOSE } from './autorestic'
 import { Backend, Backends } from './types'
 import { exec, ConfigError } from './utils'
 
-const ALREADY_EXISTS = /(?=.*exists)(?=.*already)(?=.*config).*/
+const ALREADY_EXISTS = /(?=.*already)(?=.*config).*/
 
 export const getPathFromBackend = (backend: Backend): string => {
   switch (backend.type) {
