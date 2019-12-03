@@ -7,7 +7,6 @@
 		"bin": "npm run build && pkg lib/autorestic.js --targets latest-macos-x64,latest-linux-x64 --out-path bin"
 	},
 	"devDependencies": {
-		"@types/decompress": "^4.2.3",
 		"@types/js-yaml": "^3.12.1",
 		"@types/minimist": "^1.2.0",
 		"@types/node": "^12.11.7",
