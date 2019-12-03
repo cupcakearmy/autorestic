@@ -7,6 +7,7 @@ import { join, resolve } from 'path'
 import { config, INSTALL_DIR, VERSION } from './autorestic'
 import { checkAndConfigureBackends, getEnvFromBackend } from './backend'
 import { backupAll } from './backup'
+import { forgetAll } from './forget'
 import { Backends, Flags, Locations } from './types'
 import {
   checkIfCommandIsAvailable,
@@ -101,6 +102,22 @@ const handlers: Handlers = {
       )
       w.done(name.green + '\t\tDone 🎉')
     }
+  },
+  forget(args, flags) {
+    if (!config) throw ConfigError
+    checkIfResticIsAvailable()
+    const locations: Locations = parseLocations(flags)
+
+    const backends = new Set<string>()
+    for (const to of Object.values(locations).map(location => location.to))
+      Array.isArray(to) ? to.forEach(t => backends.add(t)) : backends.add(to)
+
+    checkAndConfigureBackends(
+      filterObjectByKey(config.backends, Array.from(backends))
+    )
+    forgetAll(flags['dry-run'], locations)
+
+    console.log('\nFinished!'.underline + ' 🎉')
   },
   exec(args, flags) {
     checkIfResticIsAvailable()
@@ -219,6 +236,7 @@ export const help = () => {
       '\nCommands:'.yellow +
       '\n  check    [-b, --backend]  [-a, --all]                                 Check backends' +
       '\n  backup   [-l, --location] [-a, --all]                                 Backup all or specified locations' +
+      '\n  forget   [-l, --location] [-a, --all] [--dry-run]                     Forget old snapshots according to declared policies' +
       '\n  restore  [-l, --location] [-- --target <out dir>]                     Restore all or specified locations' +
       '\n' +
       '\n  exec     [-b, --backend]  [-a, --all] <command> -- [native options]   Execute native restic command' +

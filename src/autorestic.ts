@@ -18,8 +18,9 @@ export const { _: commands, ...flags } = minimist(process.argv.slice(2), {
     a: 'all',
     l: 'location',
     b: 'backend',
+    d: 'dry-run',
   },
-  boolean: ['a'],
+  boolean: ['a', 'd'],
   string: ['l', 'b'],
 })
 
