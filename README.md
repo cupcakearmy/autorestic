@@ -127,3 +127,6 @@ backends:
 
 Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. You should keep a copy of the keys somewhere in case your server dies. Otherwise DATA IS LOST!
 
+## Contributors
+
+- @ChanceM
