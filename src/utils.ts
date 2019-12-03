@@ -2,6 +2,8 @@ import axios from 'axios'
 import { spawnSync, SpawnSyncOptions } from 'child_process'
 import { randomBytes } from 'crypto'
 import { createWriteStream } from 'fs'
+import { isAbsolute, resolve, dirname } from 'path'
+import { CONFIG_FILE } from './config'
 
 export const exec = (
   command: string,
@@ -26,7 +28,7 @@ export const checkIfResticIsAvailable = () =>
   checkIfCommandIsAvailable(
     'restic',
     'Restic is not installed'.red +
-      ' https://restic.readthedocs.io/en/latest/020_installation.html#stable-releases'
+    ' https://restic.readthedocs.io/en/latest/020_installation.html#stable-releases'
   )
 
 export const checkIfCommandIsAvailable = (cmd: string, errorMsg?: string) => {
@@ -73,5 +75,10 @@ export const downloadFile = async (url: string, to: string) =>
       res()
     })
   })
+
+// Check if is an absolute path, otherwise get the path relative to the config file
+export const pathRelativeToConfigFile = (path: string): string => isAbsolute(path)
+  ? path
+  : resolve(dirname(CONFIG_FILE), path)
 
 export const ConfigError = new Error('Config file not found')
