@@ -177,5 +177,7 @@ Note that the data is automatically encrypted on the server. The key will be gen
 
 ## Contributors
 
-- @ChanceM
-- @EliotBerriot
+This amazing people helped the project!
+
+- @ChanceM [Docs]
+- @EliotBerriot [Docs, Pruning, S3]
