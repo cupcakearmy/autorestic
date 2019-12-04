@@ -3,46 +3,46 @@ import { Writer } from 'clitastic'
 import { config, VERBOSE } from './autorestic'
 import { getEnvFromBackend } from './backend'
 import { Locations, Location } from './types'
-import { exec, ConfigError, pathRelativeToConfigFile } from './utils'
+import { exec, ConfigError, pathRelativeToConfigFile, getFlagsFromLocation } from './utils'
 
 
 
-export const backupSingle = (name: string, from: string, to: string) => {
+export const backupSingle = (name: string, to: string, location: Location) => {
 	if (!config) throw ConfigError
 	const writer = new Writer(name + to.blue + ' : ' + 'Backing up... ⏳')
 	const backend = config.backends[to]
 
-	const path = pathRelativeToConfigFile(to)
+	const path = pathRelativeToConfigFile(location.from)
 
-	const cmd = exec('restic', ['backup', path], {
-		env: getEnvFromBackend(backend),
-	})
+	const cmd = exec(
+		'restic',
+		['backup', path, ...getFlagsFromLocation(location, 'backup')],
+		{ env: getEnvFromBackend(backend) },
+	)
 
 	if (VERBOSE) console.log(cmd.out, cmd.err)
 	writer.done(name + to.blue + ' : ' + 'Done ✓'.green)
 }
 
-export const backupLocation = (name: string, backup: Location) => {
+export const backupLocation = (name: string, location: Location) => {
 	const display = name.yellow + ' ▶ '
-	if (Array.isArray(backup.to)) {
+	const filler = new Array(name.length + 3).fill(' ').join('')
+	if (Array.isArray(location.to)) {
 		let first = true
-		for (const t of backup.to) {
-			const nameOrBlankSpaces: string = first
-				? display
-				: new Array(name.length + 3).fill(' ').join('')
-			backupSingle(nameOrBlankSpaces, backup.from, t)
+		for (const t of location.to) {
+			backupSingle(first ? display : filler, t, location)
 			if (first) first = false
 		}
-	} else backupSingle(display, backup.from, backup.to)
+	} else backupSingle(display, location.from, location)
 }
 
-export const backupAll = (backups?: Locations) => {
-	if (!backups) {
+export const backupAll = (locations?: Locations) => {
+	if (!locations) {
 		if (!config) throw ConfigError
-		backups = config.locations
+		locations = config.locations
 	}
 
 	console.log('\nBacking Up'.underline.grey)
-	for (const [name, backup] of Object.entries(backups))
-		backupLocation(name, backup)
+	for (const [name, location] of Object.entries(locations))
+		backupLocation(name, location)
 }
