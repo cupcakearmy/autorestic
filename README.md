@@ -54,13 +54,11 @@ backends:
 
 Then we check if everything is correct by running the `check` command. We will pass the `-a` (or `--all`) to tell autorestic to check all the locations.
 
-Lets see a more realistic example (from the config above)
+If we would check only one location we could run the following: `autorestic check -l home`. Otherwise simpply check all locations with `autorestic check -a`
 
-```
-autorestic check -l important
-```
+##### Note
 
-If we would check only one location we could run the following: `autorestic -l home check`.
+Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. You should keep a copy of the keys somewhere in case your server dies. Otherwise DATA IS LOST!
 
 ### Backup
 
@@ -76,6 +74,7 @@ autorestic restore -a --to /path/where/to/restore
 
 This will restore all the locations to the selected target. If for one location there are more than one backends specified autorestic will take the first one.
 
+Lets see a more realistic example (from the config above)
 ```
 autorestic restore -l home --from hdd --to /path/where/to/restore
 ```
@@ -176,10 +175,6 @@ f8f8f976  2019-12-02 12:11:08  computer                within 2w  /etc
 -----------------------------------------------------------------------------
 3 snapshots
 ```
-
-##### Note
-
-Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. You should keep a copy of the keys somewhere in case your server dies. Otherwise DATA IS LOST!
 
 ## Contributors
 
