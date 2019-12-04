@@ -2,46 +2,46 @@ import { Writer } from 'clitastic'
 
 import { config, VERBOSE } from './autorestic'
 import { getEnvFromBackend } from './backend'
-import { Locations, Location, ForgetPolicy, Flags } from './types'
-import { exec, ConfigError } from './utils'
+import { Locations, Location, Flags } from './types'
+import { exec, ConfigError, pathRelativeToConfigFile, getFlagsFromLocation } from './utils'
 
 
 
-export const forgetSingle = (dryRun: boolean, name: string, from: string, to: string, policy: ForgetPolicy) => {
+export const forgetSingle = (name: string, to: string, location: Location, dryRun: boolean) => {
 	if (!config) throw ConfigError
-	const writer = new Writer(name + to.blue + ' : ' + 'Removing old spnapshots… ⏳')
+	const base = name + to.blue + ' : '
+	const writer = new Writer(base + 'Removing old snapshots… ⏳')
+
 	const backend = config.backends[to]
-	const flags = [] as any[]
-	for (const [name, value] of Object.entries(policy)) {
-		flags.push(`--keep-${name}`)
-		flags.push(value)
+	const path = pathRelativeToConfigFile(location.from)
+	const flags = getFlagsFromLocation(location, 'forget')
+
+	if (flags.length == 0) {
+		writer.done(base + 'skipping, no policy declared')
+		return
 	}
-	if (dryRun) {
-		flags.push('--dry-run')
-	}
-	const env = getEnvFromBackend(backend)
-	writer.replaceLn(name + to.blue + ' : ' + 'Forgeting old snapshots… ⏳')
-	const cmd = exec('restic', ['forget', '--path', from, '--prune', ...flags], { env })
+	if (dryRun) flags.push('--dry-run')
+
+	writer.replaceLn(base + 'Forgetting old snapshots… ⏳')
+	const cmd = exec(
+		'restic',
+		['forget', '--path', path, '--prune', ...flags],
+		{ env: getEnvFromBackend(backend) },
+	)
 
 	if (VERBOSE) console.log(cmd.out, cmd.err)
-	writer.done(name + to.blue + ' : ' + 'Done ✓'.green)
+	writer.done(base + 'Done ✓'.green)
 }
 
-export const forgetLocation = (dryRun: boolean, name: string, backup: Location, policy?: ForgetPolicy) => {
+export const forgetLocation = (name: string, backup: Location, dryRun: boolean) => {
 	const display = name.yellow + ' ▶ '
-	if (!policy) {
-		console.log(display + 'skipping, no policy declared')
-	} else {
-		if (Array.isArray(backup.to)) {
-			let first = true
-			for (const t of backup.to) {
-				const nameOrBlankSpaces: string = first
-					? display
-					: new Array(name.length + 3).fill(' ').join('')
-				forgetSingle(dryRun, nameOrBlankSpaces, backup.from, t, policy)
-				if (first) first = false
-			}
-		} else forgetSingle(dryRun, display, backup.from, backup.to, policy)
+	const filler = new Array(name.length + 3).fill(' ').join('')
+	let first = true
+
+	for (const t of Array.isArray(backup.to) ? backup.to : [backup.to]) {
+		const nameOrBlankSpaces: string = first ? display : filler
+		forgetSingle(nameOrBlankSpaces, t, backup, dryRun)
+		if (first) first = false
 	}
 }
 
@@ -51,12 +51,10 @@ export const forgetAll = (backups?: Locations, flags?: Flags) => {
 		backups = config.locations
 	}
 
-	console.log('\nRemoving old shapshots according to policy'.underline.grey)
+	console.log('\nRemoving old snapshots according to policy'.underline.grey)
 	const dryRun = flags ? flags['dry-run'] : false
 	if (dryRun) console.log('Running in dry-run mode, not touching data\n'.yellow)
 
-	for (const [name, backup] of Object.entries(backups)) {
-		const policy = config.locations[name].keep
-		forgetLocation(dryRun, name, backup, policy)
-	}
+	for (const [name, backup] of Object.entries(backups))
+		forgetLocation(name, backup, dryRun)
 }
