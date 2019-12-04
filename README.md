@@ -14,7 +14,17 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 - Simple interface
 - Fully encrypted
 
-## Installation
+###### 📒 Docs
+
+- [Locations](#-locations)
+- [Backends](#-backends)
+- [Pruning & Deleting old files](#pruning-and-snapshot-policies)
+- [Excluding files](#excluding-filesfolders)
+- [Hooks](#before--after-hooks)
+
+## 🛳 Installation
+
+Linux & macOS. Windows is not supported.
 
 ```
 curl -s https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/install.sh | bash
@@ -98,43 +108,7 @@ locations:
       - also-backup-to-this-backend
 ```
 
-## 💽 Backends
-
-Backends are the place where you data will be saved. Backups are incremental and encrypted.
-
-### Fields
-
-##### `type`
-
-Type of the backend see a list [here](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html)
-
-Supported are:
-- [Local](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#local)
-- [Backblaze B2](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#backblaze-b2)
-- [Amazon S3](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#amazon-s3)
-- [Minio](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#minio-server)
-- [Google Cloud Storage](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#google-cloud-storage)
-- [Microsoft Azure Storage](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#microsoft-azure-blob-storage)
-
-For each backend you need to specify the right variables as shown in the example below.
-
-##### `path`
-
-The path on the remote server.
-For object storages as
-
-##### Example
-
-```yaml
-backends:
-  name-of-backend:
-    type: b2
-    path: 'myAccount:myBucket/my/path'
-    B2_ACCOUNT_ID: backblaze_account_id
-    B2_ACCOUNT_KEY: backblaze_account_key
-```
-
-### Pruning and snapshot policies
+#### Pruning and snapshot policies
 
 Autorestic supports declaring snapshot policies for location to avoid keeping old snapshot around if you don't need them.
 
@@ -179,7 +153,7 @@ f8f8f976  2019-12-02 12:11:08  computer                within 2w  /etc
 3 snapshots
 ```
 
-### Excluding files/folders
+#### Excluding files/folders
 
 If you want to exclude certain files or folders it done easily by specifiyng the right flags in the location you desire to filter. The flags are taken straight from the [restic cli exclude rules](https://restic.readthedocs.io/en/latest/040_backup.html#excluding-files).
 
@@ -204,7 +178,7 @@ backends:
     ...
 ```
 
-### Before / After hooks
+#### Before / After hooks
 
 Sometimes you might want to stop an app/db before backing up data and start the service again after the backup has completed. This is what the hooks are made for. Simply add them to your location config. You can have as many commands as you wish.
 
@@ -221,6 +195,42 @@ locations:
         - echo "Human"
       after:
         - echo "kthxbye"
+```
+
+## 💽 Backends
+
+Backends are the place where you data will be saved. Backups are incremental and encrypted.
+
+### Fields
+
+##### `type`
+
+Type of the backend see a list [here](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html)
+
+Supported are:
+- [Local](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#local)
+- [Backblaze B2](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#backblaze-b2)
+- [Amazon S3](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#amazon-s3)
+- [Minio](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#minio-server)
+- [Google Cloud Storage](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#google-cloud-storage)
+- [Microsoft Azure Storage](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#microsoft-azure-blob-storage)
+
+For each backend you need to specify the right variables as shown in the example below.
+
+##### `path`
+
+The path on the remote server.
+For object storages as
+
+##### Example
+
+```yaml
+backends:
+  name-of-backend:
+    type: b2
+    path: 'myAccount:myBucket/my/path'
+    B2_ACCOUNT_ID: backblaze_account_id
+    B2_ACCOUNT_KEY: backblaze_account_key
 ```
 
 ## Contributors
