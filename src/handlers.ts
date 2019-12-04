@@ -85,7 +85,7 @@ const handlers: Handlers = {
 		if (!config) throw ConfigError
 		checkIfResticIsAvailable()
 
-		if(!flags.to) {
+		if (!flags.to) {
 			console.log(`You need to specify the restore path with --to`.red)
 			return
 		}
@@ -259,6 +259,7 @@ export const help = () => {
 		'\n',
 	)
 }
+
 export const error = () => {
 	help()
 	console.log(

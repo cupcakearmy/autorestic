@@ -26,7 +26,7 @@ export const { _: commands, ...flags } = minimist(process.argv.slice(2), {
 	string: ['l', 'b'],
 })
 
-export const VERSION = '0.6'
+export const VERSION = '0.7'
 export const INSTALL_DIR = '/usr/local/bin'
 export const VERBOSE = flags.verbose
 
