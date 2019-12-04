@@ -3,7 +3,6 @@ import minimist from 'minimist'
 
 import { init } from './config'
 import handlers, { error, help } from './handlers'
-import { Config } from './types'
 
 
 
@@ -26,7 +25,7 @@ export const { _: commands, ...flags } = minimist(process.argv.slice(2), {
 	string: ['l', 'b'],
 })
 
-export const VERSION = '0.8'
+export const VERSION = '0.9'
 export const INSTALL_DIR = '/usr/local/bin'
 export const VERBOSE = flags.verbose
 
