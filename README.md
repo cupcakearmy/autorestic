@@ -54,8 +54,10 @@ backends:
 
 Then we check if everything is correct by running the `check` command. We will pass the `-a` (or `--all`) to tell autorestic to check all the locations.
 
+Lets see a more realistic example (from the config above)
+
 ```
-autorestic check -a
+autorestic check -l important
 ```
 
 If we would check only one location we could run the following: `autorestic -l home check`.
@@ -69,8 +71,16 @@ autorestic backup -a
 ### Restore
 
 ```
-autorestic restore -a -- --target /path/where/to/restore
+autorestic restore -a --to /path/where/to/restore
 ```
+
+This will restore all the locations to the selected target. If for one location there are more than one backends specified autorestic will take the first one.
+
+```
+autorestic restore -l home --from hdd --to /path/where/to/restore
+```
+
+This will restore the location `home` to the `/path/where/to/restore` folder and taking the data from the backend `hdd`
 
 
 ## 🗂 Locations
