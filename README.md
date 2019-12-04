@@ -132,7 +132,7 @@ backends:
     B2_ACCOUNT_KEY: backblaze_account_key
 ```
 
-## Pruning and snapshot policies
+### Pruning and snapshot policies
 
 Autorestic supports declaring snapshot policies for location to avoid keeping old snapshot around if you don't need them.
 
@@ -143,24 +143,20 @@ locations:
   etc:
     from: /etc
     to: local
-    keep:
-      # options matches the --keep-* options used in the restic forget CLI
-      # cf https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy
-      last: 5             # always keep at least 5 snapshots
-      hourly: 3           # keep 3 last hourly shapshots
-      daily: 4            # keep 4 last daily shapshots
-      weekly: 1           # keep 1 last weekly shapshots
-      monthly: 12         # keep 12 last monthly shapshots
-      yearly: 7           # keep 7 last yearly shapshots
-      within: "2w"        # keep snapshots from the last 2 weeks
+    options:
+      forget:
+        keep-last: 5             # always keep at least 5 snapshots
+        keep-hourly: 3           # keep 3 last hourly shapshots
+        keep-daily: 4            # keep 4 last daily shapshots
+        keep-weekly: 1           # keep 1 last weekly shapshots
+        keep-monthly: 12         # keep 12 last monthly shapshots
+        keep-yearly: 7           # keep 7 last yearly shapshots
+        keep-within: "2w"        # keep snapshots from the last 2 weeks
 ```
 
 Pruning can be triggered using `autorestic forget -a`, for all locations, or selectively with `autorestic forget -l <location>`. **please note that contrary to the restic CLI, `restic forget` will call `restic prune` internally.**
 
-
-
 Run with the `--dry-run` flag to only print information about the process without actually pruning the snapshots. This is especially useful for debugging or testing policies:
-
 ```
 $ autorestic forget -a --dry-run --verbose
 
