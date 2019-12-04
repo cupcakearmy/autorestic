@@ -3,7 +3,7 @@ import { Writer } from 'clitastic'
 import { config, VERBOSE } from './autorestic'
 import { getEnvFromBackend } from './backend'
 import { Locations, Location, Flags } from './types'
-import { exec, ConfigError, pathRelativeToConfigFile, getFlagsFromLocation } from './utils'
+import { exec, ConfigError, pathRelativeToConfigFile, getFlagsFromLocation, makeArrayIfIsNot } from './utils'
 
 
 
@@ -38,7 +38,7 @@ export const forgetLocation = (name: string, backup: Location, dryRun: boolean) 
 	const filler = new Array(name.length + 3).fill(' ').join('')
 	let first = true
 
-	for (const t of Array.isArray(backup.to) ? backup.to : [backup.to]) {
+	for (const t of makeArrayIfIsNot(backup.to)) {
 		const nameOrBlankSpaces: string = first ? display : filler
 		forgetSingle(nameOrBlankSpaces, t, backup, dryRun)
 		if (first) first = false

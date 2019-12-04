@@ -8,15 +8,14 @@ import { config, INSTALL_DIR, VERSION } from './autorestic'
 import { checkAndConfigureBackends, getBackendsFromLocations, getEnvFromBackend } from './backend'
 import { backupAll } from './backup'
 import { forgetAll } from './forget'
-import { Backend, Backends, Flags, Locations } from './types'
+import { Backends, Flags, Locations } from './types'
 import {
 	checkIfCommandIsAvailable,
 	checkIfResticIsAvailable,
 	downloadFile,
 	exec,
 	filterObjectByKey,
-	singleToArray,
-	ConfigError,
+	ConfigError, makeArrayIfIsNot,
 } from './utils'
 
 
@@ -35,7 +34,7 @@ const parseBackend = (flags: Flags): Backends => {
 		)
 	if (flags.all) return config.backends
 	else {
-		const backends = singleToArray<string>(flags.backend)
+		const backends = makeArrayIfIsNot<string>(flags.backend)
 		for (const backend of backends)
 			if (!config.backends[backend])
 				throw new Error('Invalid backend: '.red + backend)
@@ -55,7 +54,7 @@ const parseLocations = (flags: Flags): Locations => {
 	if (flags.all) {
 		return config.locations
 	} else {
-		const locations = singleToArray<string>(flags.location)
+		const locations = makeArrayIfIsNot<string>(flags.location)
 		for (const location of locations)
 			if (!config.locations[location])
 				throw new Error('Invalid location: '.red + location)

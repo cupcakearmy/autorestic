@@ -3,7 +3,7 @@ import { resolve } from 'path'
 import yaml from 'js-yaml'
 import { flags } from './autorestic'
 import { Backend, Config } from './types'
-import { makeObjectKeysLowercase, rand } from './utils'
+import { makeArrayIfIsNot, makeObjectKeysLowercase, rand } from './utils'
 import { homedir } from 'os'
 
 
@@ -48,8 +48,8 @@ export const normalizeAndCheckBackups = (config: Config) => {
 				`The backup "${name}" is missing some required attributes`,
 			)
 
-		if (Array.isArray(to)) for (const t of to) checkDestination(t, name)
-		else checkDestination(to, name)
+		for (const t of makeArrayIfIsNot(to))
+			checkDestination(t, name)
 	}
 }
 
