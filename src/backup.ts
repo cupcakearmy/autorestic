@@ -10,8 +10,8 @@ import { exec, ConfigError, pathRelativeToConfigFile, getFlagsFromLocation } fro
 export const backupSingle = (name: string, to: string, location: Location) => {
 	if (!config) throw ConfigError
 	const writer = new Writer(name + to.blue + ' : ' + 'Backing up... ⏳')
-	const backend = config.backends[to]
 
+	const backend = config.backends[to]
 	const path = pathRelativeToConfigFile(location.from)
 
 	const cmd = exec(
@@ -27,13 +27,12 @@ export const backupSingle = (name: string, to: string, location: Location) => {
 export const backupLocation = (name: string, location: Location) => {
 	const display = name.yellow + ' ▶ '
 	const filler = new Array(name.length + 3).fill(' ').join('')
-	if (Array.isArray(location.to)) {
-		let first = true
-		for (const t of location.to) {
-			backupSingle(first ? display : filler, t, location)
-			if (first) first = false
-		}
-	} else backupSingle(display, location.from, location)
+	let first = true
+
+	for (const t of Array.isArray(location.to) ? location.to : [location.to]) {
+		backupSingle(first ? display : filler, t, location)
+		if (first) first = false
+	}
 }
 
 export const backupAll = (locations?: Locations) => {
