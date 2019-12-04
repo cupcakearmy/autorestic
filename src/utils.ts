@@ -103,7 +103,7 @@ export const getFlagsFromLocation = (location: Location, command?: string): stri
 			values = [values]
 
 		for (const value of values)
-			flags = [...flags, `--${flag}`, value]
+			flags = [...flags, `--${String(flag)}`, String(value)]
 	}
 	return flags
 }
