@@ -85,6 +85,11 @@ const handlers: Handlers = {
 		if (!config) throw ConfigError
 		checkIfResticIsAvailable()
 
+		if(!flags.to) {
+			console.log(`You need to specify the restore path with --to`.red)
+			return
+		}
+
 		const locations = parseLocations(flags)
 		for (const [name, location] of Object.entries(locations)) {
 			const baseText = name.green + '\t\t'
@@ -105,7 +110,7 @@ const handlers: Handlers = {
 
 			exec(
 				'restic',
-				['restore', 'latest', '--path', resolve(location.from), ...args],
+				['restore', 'latest', '--path', resolve(location.from), '--target', flags.to],
 				{ env },
 			)
 			w.done(name.green + '\t\tDone 🎉')
@@ -240,7 +245,7 @@ export const help = () => {
 		'\n  check    [-b, --backend]  [-a, --all]                                 Check backends' +
 		'\n  backup   [-l, --location] [-a, --all]                                 Backup all or specified locations' +
 		'\n  forget   [-l, --location] [-a, --all] [--dry-run]                     Forget old snapshots according to declared policies' +
-		'\n  restore  [-l, --location] [--from backend] [-- --target <out dir>]    Restore all or specified locations' +
+		'\n  restore  [-l, --location] [--from backend] [--to <out dir>]           Restore all or specified locations' +
 		'\n' +
 		'\n  exec     [-b, --backend]  [-a, --all] <command> -- [native options]   Execute native restic command' +
 		'\n' +
