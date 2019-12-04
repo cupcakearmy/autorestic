@@ -176,6 +176,31 @@ f8f8f976  2019-12-02 12:11:08  computer                within 2w  /etc
 3 snapshots
 ```
 
+### Excluding files/folders
+
+If you want to exclude certain files or folders it done easily by specifiyng the right flags in the location you desire to filter. The flags are taken straight from the [restic cli exclude rules](https://restic.readthedocs.io/en/latest/040_backup.html#excluding-files).
+
+```yaml
+locations:
+  my-location:
+    from: /data
+    to:
+      - local
+      - remote
+    options:
+      backup:
+        exclude:
+          - '*.nope'
+          - '*.abc'
+        exclude-file: .gitignore
+
+backends:
+  local:
+    ...
+   remote:
+    ...
+```
+
 ## Contributors
 
 This amazing people helped the project!
