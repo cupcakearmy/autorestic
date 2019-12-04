@@ -54,13 +54,11 @@ backends:
 
 Then we check if everything is correct by running the `check` command. We will pass the `-a` (or `--all`) to tell autorestic to check all the locations.
 
-Lets see a more realistic example (from the config above)
+If we would check only one location we could run the following: `autorestic check -l home`. Otherwise simpply check all locations with `autorestic check -a`
 
-```
-autorestic check -l important
-```
+##### Note
 
-If we would check only one location we could run the following: `autorestic -l home check`.
+Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. You should keep a copy of the keys somewhere in case your server dies. Otherwise DATA IS LOST!
 
 ### Backup
 
@@ -76,6 +74,7 @@ autorestic restore -a --to /path/where/to/restore
 
 This will restore all the locations to the selected target. If for one location there are more than one backends specified autorestic will take the first one.
 
+Lets see a more realistic example (from the config above)
 ```
 autorestic restore -l home --from hdd --to /path/where/to/restore
 ```
@@ -132,7 +131,7 @@ backends:
     B2_ACCOUNT_KEY: backblaze_account_key
 ```
 
-## Pruning and snapshot policies
+### Pruning and snapshot policies
 
 Autorestic supports declaring snapshot policies for location to avoid keeping old snapshot around if you don't need them.
 
@@ -143,24 +142,20 @@ locations:
   etc:
     from: /etc
     to: local
-    keep:
-      # options matches the --keep-* options used in the restic forget CLI
-      # cf https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy
-      last: 5             # always keep at least 5 snapshots
-      hourly: 3           # keep 3 last hourly shapshots
-      daily: 4            # keep 4 last daily shapshots
-      weekly: 1           # keep 1 last weekly shapshots
-      monthly: 12         # keep 12 last monthly shapshots
-      yearly: 7           # keep 7 last yearly shapshots
-      within: "2w"        # keep snapshots from the last 2 weeks
+    options:
+      forget:
+        keep-last: 5             # always keep at least 5 snapshots
+        keep-hourly: 3           # keep 3 last hourly shapshots
+        keep-daily: 4            # keep 4 last daily shapshots
+        keep-weekly: 1           # keep 1 last weekly shapshots
+        keep-monthly: 12         # keep 12 last monthly shapshots
+        keep-yearly: 7           # keep 7 last yearly shapshots
+        keep-within: "2w"        # keep snapshots from the last 2 weeks
 ```
 
 Pruning can be triggered using `autorestic forget -a`, for all locations, or selectively with `autorestic forget -l <location>`. **please note that contrary to the restic CLI, `restic forget` will call `restic prune` internally.**
 
-
-
 Run with the `--dry-run` flag to only print information about the process without actually pruning the snapshots. This is especially useful for debugging or testing policies:
-
 ```
 $ autorestic forget -a --dry-run --verbose
 
@@ -181,9 +176,30 @@ f8f8f976  2019-12-02 12:11:08  computer                within 2w  /etc
 3 snapshots
 ```
 
-##### Note
+### Excluding files/folders
 
-Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. You should keep a copy of the keys somewhere in case your server dies. Otherwise DATA IS LOST!
+If you want to exclude certain files or folders it done easily by specifiyng the right flags in the location you desire to filter. The flags are taken straight from the [restic cli exclude rules](https://restic.readthedocs.io/en/latest/040_backup.html#excluding-files).
+
+```yaml
+locations:
+  my-location:
+    from: /data
+    to:
+      - local
+      - remote
+    options:
+      backup:
+        exclude:
+          - '*.nope'
+          - '*.abc'
+        exclude-file: .gitignore
+
+backends:
+  local:
+    ...
+   remote:
+    ...
+```
 
 ## Contributors
 
