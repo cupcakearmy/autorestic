@@ -215,8 +215,7 @@ const handlers: Handlers = {
 				darwin: 'macos',
 			}
 
-			const name = `autorestic_${platformMap[process.platform] ||
-			process.platform}_${process.arch}`
+			const name = `autorestic_${platformMap[process.platform] || process.platform}_${process.arch}`
 			const dl = json.assets.find((asset: any) => asset.name === name)
 
 			const to = INSTALL_DIR + '/autorestic'
