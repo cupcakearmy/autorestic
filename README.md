@@ -201,6 +201,25 @@ backends:
     ...
 ```
 
+### Before / After hooks
+
+Sometimes you might want to stop an app/db before backing up data and start the service again after the backup has completed. This is what the hooks are made for. Simply add them to your location config. You can have as many commands as you wish.
+
+```yaml
+locations:
+  my-location:
+    from: /data
+    to:
+      - local
+      - remote
+    hooks:
+      before:
+        - echo "Hello"
+        - echo "Human"
+      after:
+        - echo "kthxbye"
+```
+
 ## Contributors
 
 This amazing people helped the project!
