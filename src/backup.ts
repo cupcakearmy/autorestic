@@ -3,7 +3,7 @@ import { Writer } from 'clitastic'
 import { config, VERBOSE } from './autorestic'
 import { getEnvFromBackend } from './backend'
 import { Locations, Location } from './types'
-import { exec, ConfigError, pathRelativeToConfigFile, getFlagsFromLocation } from './utils'
+import { exec, ConfigError, pathRelativeToConfigFile, getFlagsFromLocation, makeArrayIfIsNot, execPlain } from './utils'
 
 
 
@@ -29,10 +29,22 @@ export const backupLocation = (name: string, location: Location) => {
 	const filler = new Array(name.length + 3).fill(' ').join('')
 	let first = true
 
-	for (const t of Array.isArray(location.to) ? location.to : [location.to]) {
+	if (location.hooks && location.hooks.before)
+		for (const command of makeArrayIfIsNot(location.hooks.before)) {
+			const cmd = execPlain(command)
+			if (cmd) console.log(cmd.out, cmd.err)
+		}
+
+	for (const t of makeArrayIfIsNot(location.to)) {
 		backupSingle(first ? display : filler, t, location)
 		if (first) first = false
 	}
+
+	if (location.hooks && location.hooks.after)
+		for (const command of makeArrayIfIsNot(location.hooks.after)) {
+			const cmd = execPlain(command)
+			if (cmd) console.log(cmd.out, cmd.err)
+		}
 }
 
 export const backupAll = (locations?: Locations) => {
