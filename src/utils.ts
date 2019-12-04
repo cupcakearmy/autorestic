@@ -2,7 +2,7 @@ import axios from 'axios'
 import { spawnSync, SpawnSyncOptions } from 'child_process'
 import { randomBytes } from 'crypto'
 import { createWriteStream } from 'fs'
-import { isAbsolute, resolve, dirname } from 'path'
+import { dirname, isAbsolute, resolve } from 'path'
 import { CONFIG_FILE } from './config'
 import { Location } from './types'
 
@@ -27,6 +27,16 @@ export const exec = (
 	return { out, err }
 }
 
+export const execPlain = (command: string, opt: SpawnSyncOptions = {}) => {
+	const split = command.split(' ')
+	if (split.length < 1) {
+		console.log(`The command ${command} is not valid`.red)
+		return
+	}
+
+	return exec(split[0], split.slice(1), opt)
+}
+
 export const checkIfResticIsAvailable = () =>
 	checkIfCommandIsAvailable(
 		'restic',
@@ -49,9 +59,6 @@ export function rand(length = 32): string {
 	return randomBytes(length / 2).toString('hex')
 }
 
-
-export const singleToArray = <T>(singleOrArray: T | T[]): T[] =>
-	Array.isArray(singleOrArray) ? singleOrArray : [singleOrArray]
 
 export const filterObject = <T>(
 	obj: { [key: string]: T },
@@ -98,12 +105,11 @@ export const getFlagsFromLocation = (location: Location, command?: string): stri
 
 	let flags: string[] = []
 	// Map the flags to an array for the exec function.
-	for (let [flag, values] of Object.entries(all)) {
-		if (!Array.isArray(values))
-			values = [values]
-
-		for (const value of values)
+	for (let [flag, values] of Object.entries(all))
+		for (const value of makeArrayIfIsNot(values))
 			flags = [...flags, `--${String(flag)}`, String(value)]
-	}
+
 	return flags
 }
+
+export const makeArrayIfIsNot = <T>(maybeArray: T | T[]): T[] => Array.isArray(maybeArray) ? maybeArray : [maybeArray]
