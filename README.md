@@ -60,13 +60,13 @@ If we would check only one location we could run the following: `autorestic chec
 
 Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. You should keep a copy of the keys somewhere in case your server dies. Otherwise DATA IS LOST!
 
-### Backup
+### 📦 Backup
 
 ```
 autorestic backup -a
 ```
 
-### Restore
+### 📼 Restore
 
 ```
 autorestic restore -a --to /path/where/to/restore
@@ -81,6 +81,9 @@ autorestic restore -l home --from hdd --to /path/where/to/restore
 
 This will restore the location `home` to the `/path/where/to/restore` folder and taking the data from the backend `hdd`
 
+### 📲 Updates
+
+Autorestic can update itself! Super handy right? Simply run `autorestic update` and we will check for you if there are updates for restic and autorestic and install them if necessary.
 
 ## 🗂 Locations
 
