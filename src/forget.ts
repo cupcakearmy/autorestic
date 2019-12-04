@@ -45,17 +45,18 @@ export const forgetLocation = (dryRun: boolean, name: string, backup: Location, 
 	}
 }
 
-export const forgetAll = (dryRun: boolean, backups?: Locations) => {
+export const forgetAll = (backups?: Locations, flags?: Flags) => {
 	if (!config) throw ConfigError
 	if (!backups) {
 		backups = config.locations
 	}
 
 	console.log('\nRemoving old shapshots according to policy'.underline.grey)
+	const dryRun = flags ? flags['dry-run'] : false
 	if (dryRun) console.log('Running in dry-run mode, not touching data\n'.yellow)
 
 	for (const [name, backup] of Object.entries(backups)) {
-		var policy = config.locations[name].keep
+		const policy = config.locations[name].keep
 		forgetLocation(dryRun, name, backup, policy)
 	}
 }
