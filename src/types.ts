@@ -77,6 +77,11 @@ export type Location = {
 	from: string
 	to: string | string[]
 	keep?: ForgetPolicy
+	options?: {
+		[key: string]: {
+			[key: string]: string | string[]
+		}
+	}
 }
 
 export type Locations = { [name: string]: Location }
