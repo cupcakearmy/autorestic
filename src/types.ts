@@ -1,3 +1,7 @@
+export type StringOrArray = string | string[]
+
+// BACKENDS
+
 type BackendLocal = {
 	type: 'local'
 	key: string
@@ -62,29 +66,25 @@ export type Backend =
 
 export type Backends = { [name: string]: Backend }
 
-export type ForgetPolicy = {
-	last?: number,
-	hourly?: number,
-	daily?: number,
-	weekly?: number,
-	monthly?: number,
-	yearly?: number,
-	within?: string,
-	tags?: string[],
-}
+// LOCATIONS
 
 export type Location = {
 	from: string
-	to: string | string[]
-	keep?: ForgetPolicy
+	to: StringOrArray
+	hooks?: {
+		before?: StringOrArray
+		after?: StringOrArray
+	}
 	options?: {
 		[key: string]: {
-			[key: string]: string | string[]
+			[key: string]: StringOrArray
 		}
 	}
 }
 
 export type Locations = { [name: string]: Location }
+
+// OTHER
 
 export type Config = {
 	locations: Locations
