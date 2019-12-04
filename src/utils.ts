@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto'
 import { createWriteStream } from 'fs'
 import { isAbsolute, resolve, dirname } from 'path'
 import { CONFIG_FILE } from './config'
+import { Location } from './types'
 
 
 
@@ -86,3 +87,23 @@ export const pathRelativeToConfigFile = (path: string): string => isAbsolute(pat
 	: resolve(dirname(CONFIG_FILE), path)
 
 export const ConfigError = new Error('Config file not found')
+
+export const getFlagsFromLocation = (location: Location, command?: string): string[] => {
+	if (!location.options) return []
+
+	const all = {
+		...location.options.global,
+		...(location.options[command || ''] || {}),
+	}
+
+	let flags: string[] = []
+	// Map the flags to an array for the exec function.
+	for (let [flag, values] of Object.entries(all)) {
+		if (!Array.isArray(values))
+			values = [values]
+
+		for (const value of values)
+			flags = [...flags, `--${flag}`, value]
+	}
+	return flags
+}
