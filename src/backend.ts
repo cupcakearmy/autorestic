@@ -1,7 +1,7 @@
 import { Writer } from 'clitastic'
 
 import { config, VERBOSE } from './autorestic'
-import { Backend, Backends } from './types'
+import { Backend, Backends, Locations } from './types'
 import { exec, ConfigError } from './utils'
 
 
@@ -32,6 +32,13 @@ export const getEnvFromBackend = (backend: Backend) => {
 		RESTIC_REPOSITORY: getPathFromBackend(backend),
 		...rest,
 	}
+}
+
+export const getBackendsFromLocations = (locations: Locations): string[] => {
+	const backends = new Set<string>()
+	for (const to of Object.values(locations).map(location => location.to))
+		Array.isArray(to) ? to.forEach(t => backends.add(t)) : backends.add(to)
+	return Array.from(backends)
 }
 
 export const checkAndConfigureBackend = (name: string, backend: Backend) => {
