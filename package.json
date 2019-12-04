@@ -4,7 +4,7 @@
 		"build": "tsc",
 		"build:watch": "tsc -w",
 		"dev": "tsnd --no-notify --respawn ./src/autorestic.ts",
-		"bin": "npm run build && pkg lib/autorestic.js --targets latest-macos-x64,latest-linux-x64 --out-path bin"
+		"bin": "yarn run build && pkg lib/autorestic.js --targets latest-macos-x64,latest-linux-x64 --out-path bin"
 	},
 	"devDependencies": {
 		"@types/js-yaml": "^3.12.1",
@@ -12,7 +12,7 @@
 		"@types/node": "^12.11.7",
 		"pkg": "^4.4.0",
 		"ts-node-dev": "^1.0.0-pre.40",
-		"typescript": "^3.5.1"
+		"typescript": "^3.7"
 	},
 	"dependencies": {
 		"axios": "^0.19.0",
