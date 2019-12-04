@@ -5,10 +5,10 @@ import { tmpdir } from 'os'
 import { join, resolve } from 'path'
 
 import { config, INSTALL_DIR, VERSION } from './autorestic'
-import { checkAndConfigureBackends, getEnvFromBackend } from './backend'
+import { checkAndConfigureBackends, getBackendsFromLocations, getEnvFromBackend } from './backend'
 import { backupAll } from './backup'
 import { forgetAll } from './forget'
-import { Backends, Flags, Locations } from './types'
+import { Backend, Backends, Flags, Locations } from './types'
 import {
 	checkIfCommandIsAvailable,
 	checkIfResticIsAvailable,
@@ -74,12 +74,8 @@ const handlers: Handlers = {
 		checkIfResticIsAvailable()
 		const locations: Locations = parseLocations(flags)
 
-		const backends = new Set<string>()
-		for (const to of Object.values(locations).map(location => location.to))
-			Array.isArray(to) ? to.forEach(t => backends.add(t)) : backends.add(to)
-
 		checkAndConfigureBackends(
-			filterObjectByKey(config.backends, Array.from(backends)),
+			filterObjectByKey(config.backends, getBackendsFromLocations(locations)),
 		)
 		backupAll(locations)
 
@@ -88,14 +84,24 @@ const handlers: Handlers = {
 	restore(args, flags) {
 		if (!config) throw ConfigError
 		checkIfResticIsAvailable()
+
 		const locations = parseLocations(flags)
 		for (const [name, location] of Object.entries(locations)) {
-			const w = new Writer(name.green + `\t\tRestoring... ⏳`)
-			const env = getEnvFromBackend(
-				config.backends[
-					Array.isArray(location.to) ? location.to[0] : location.to
-					],
-			)
+			const baseText = name.green + '\t\t'
+			const w = new Writer(baseText + `Starting...`)
+
+			let backend: string = Array.isArray(location.to) ? location.to[0] : location.to
+			if (flags.from) {
+				if (!location.to.includes(flags.from)) {
+					w.done(baseText + `Backend ${flags.from} is not a valid location for ${name}`.red)
+					continue
+				}
+				backend = flags.from
+				w.replaceLn(baseText + `Restoring from ${backend.blue}...`)
+			} else if (Array.isArray(location.to) && location.to.length > 1) {
+				w.replaceLn(baseText + `Restoring from ${backend.blue}...\tTo select a specific backend pass the ${'--from'.blue} flag`)
+			}
+			const env = getEnvFromBackend(config.backends[backend])
 
 			exec(
 				'restic',
@@ -110,14 +116,10 @@ const handlers: Handlers = {
 		checkIfResticIsAvailable()
 		const locations: Locations = parseLocations(flags)
 
-		const backends = new Set<string>()
-		for (const to of Object.values(locations).map(location => location.to))
-			Array.isArray(to) ? to.forEach(t => backends.add(t)) : backends.add(to)
-
 		checkAndConfigureBackends(
-			filterObjectByKey(config.backends, Array.from(backends)),
+			filterObjectByKey(config.backends, getBackendsFromLocations(locations)),
 		)
-		forgetAll(flags['dry-run'], locations)
+		forgetAll(locations, flags)
 
 		console.log('\nFinished!'.underline + ' 🎉')
 	},
@@ -238,7 +240,7 @@ export const help = () => {
 		'\n  check    [-b, --backend]  [-a, --all]                                 Check backends' +
 		'\n  backup   [-l, --location] [-a, --all]                                 Backup all or specified locations' +
 		'\n  forget   [-l, --location] [-a, --all] [--dry-run]                     Forget old snapshots according to declared policies' +
-		'\n  restore  [-l, --location] [-- --target <out dir>]                     Restore all or specified locations' +
+		'\n  restore  [-l, --location] [--from backend] [-- --target <out dir>]    Restore all or specified locations' +
 		'\n' +
 		'\n  exec     [-b, --backend]  [-a, --all] <command> -- [native options]   Execute native restic command' +
 		'\n' +
