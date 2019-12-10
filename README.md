@@ -14,13 +14,27 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 - Simple interface
 - Fully encrypted
 
-###### 📒 Docs
+### 📒 Docs
 
 - [Locations](#-locations)
   - [Pruning & Deleting old files](#pruning-and-snapshot-policies)
   - [Excluding files](#excluding-filesfolders)
   - [Hooks](#before--after-hooks)
 - [Backends](#-backends)
+
+### Commands
+
+- info
+- check
+- backup
+- forget
+- restore
+- exec
+
+- intall
+- uninstall
+- upgrade
+- help
 
 ## 🛳 Installation
 
@@ -79,17 +93,8 @@ autorestic backup -a
 ### 📼 Restore
 
 ```
-autorestic restore -a --to /path/where/to/restore
-```
-
-This will restore all the locations to the selected target. If for one location there are more than one backends specified autorestic will take the first one.
-
-Lets see a more realistic example (from the config above)
-```
 autorestic restore -l home --from hdd --to /path/where/to/restore
 ```
-
-This will restore the location `home` to the `/path/where/to/restore` folder and taking the data from the backend `hdd`
 
 ### 📲 Updates
 
@@ -232,6 +237,93 @@ backends:
     B2_ACCOUNT_ID: backblaze_account_id
     B2_ACCOUNT_KEY: backblaze_account_key
 ```
+
+## Commands
+
+### Info
+
+```
+autorestic info
+```
+
+Shows all the information in the config file. Usefull for a quick overview of what location backups where.
+
+Pro tip: if it gets a bit long you can read it more easily with `autorestic info | less` 😉
+
+### Check
+
+```
+autorestic check [-b, --backend]  [-a, --all]
+```
+
+Checks the backends and configures them if needed. Can be applied to all with the `-a` flag or by specifying one or more backends with the `-b` or `--backend` flag.
+
+
+### Backup
+
+```
+autorestic backup [-l, --location] [-a, --all]
+```
+
+Performes a backup of all locations if the `-a` flag is passed. To only backup some locations pass one or more `-l` or `--location` flags.
+
+
+### Restore
+
+```
+autorestic restore [-l, --location] [--from backend] [--to <out dir>]
+```
+
+This will restore all the locations to the selected target. If for one location there are more than one backends specified autorestic will take the first one.
+
+Lets see a more realistic example (from the config above)
+```
+autorestic restore -l home --from hdd --to /path/where/to/restore
+```
+
+This will restore the location `home` to the `/path/where/to/restore` folder and taking the data from the backend `hdd`
+
+```
+autorestic restore
+```
+
+Performes a backup of all locations if the `-a` flag is passed. To only backup some locations pass one or more `-l` or `--location` flags.
+
+### Forget
+
+
+```
+autorestic forget [-l, --location] [-a, --all] [--dry-run]
+```
+
+This will prune and remove old data form the backends according to the [keep policy you have specified for the location](#pruning-and-snapshot-policies)
+
+The `--dry-run` flag will do a dry run showing what would have been deleted, but won't touch the actual data.
+
+
+### Exec
+
+```
+autorestic exec [-b, --backend]  [-a, --all] <command> -- [native options]
+```
+
+This is avery handy command which enables you to run any native restic command on desired backends. An example would be listing all the snapshots of all your backends:
+
+```
+autorestic exec -a -- snapshots
+```
+
+#### Install
+
+Installs both restic and autorestic
+
+#### Uninstall 
+
+Uninstall both restic and autorestic
+
+#### Upgrade
+
+Upgrades both restic and autorestic automagically
 
 ## Contributors
 
