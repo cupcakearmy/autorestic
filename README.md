@@ -16,11 +16,12 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 
 ### 📒 Docs
 
-- [Locations](#-locations)
-  - [Pruning & Deleting old files](#pruning-and-snapshot-policies)
-  - [Excluding files](#excluding-filesfolders)
-  - [Hooks](#before--after-hooks)
-- [Backends](#-backends)
+* [Locations](#-locations)
+  * [Pruning & Deleting old files](#pruning-and-snapshot-policies)
+  * [Excluding files](#excluding-filesfolders)
+  * [Hooks](#before--after-hooks)
+* [Backends](#-backends)
+* [Commands](#-commands)
 
 ## 🛳 Installation
 
