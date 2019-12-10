@@ -8,6 +8,7 @@ import { config, INSTALL_DIR, VERSION } from './autorestic'
 import { checkAndConfigureBackends, getBackendsFromLocations, getEnvFromBackend } from './backend'
 import { backupAll } from './backup'
 import { forgetAll } from './forget'
+import showAll from './info'
 import { Backends, Flags, Locations } from './types'
 import {
 	checkIfCommandIsAvailable,
@@ -138,6 +139,9 @@ const handlers: Handlers = {
 			console.log(out, err)
 		}
 	},
+	async info() {
+		showAll()
+	},
 	async install() {
 		try {
 			checkIfResticIsAvailable()
@@ -240,6 +244,7 @@ export const help = () => {
 		`\n  -c, --config                                                          Specify config file. Default: .autorestic.yml` +
 		'\n' +
 		'\nCommands:'.yellow +
+		'\n  info                                                                  Show all locations and backends' +
 		'\n  check    [-b, --backend]  [-a, --all]                                 Check backends' +
 		'\n  backup   [-l, --location] [-a, --all]                                 Backup all or specified locations' +
 		'\n  forget   [-l, --location] [-a, --all] [--dry-run]                     Forget old snapshots according to declared policies' +
