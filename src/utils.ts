@@ -3,6 +3,8 @@ import { spawnSync, SpawnSyncOptions } from 'child_process'
 import { randomBytes } from 'crypto'
 import { createWriteStream } from 'fs'
 import { dirname, isAbsolute, resolve } from 'path'
+import { Duration, Humanizer } from 'uhrwerk'
+
 import { CONFIG_FILE } from './config'
 import { Location } from './types'
 
@@ -113,3 +115,44 @@ export const getFlagsFromLocation = (location: Location, command?: string): stri
 }
 
 export const makeArrayIfIsNot = <T>(maybeArray: T | T[]): T[] => Array.isArray(maybeArray) ? maybeArray : [maybeArray]
+
+export const fill = (length: number, filler = ' '): string => new Array(length).fill(filler).join('')
+
+export const capitalize = (string: string): string => string.charAt(0).toUpperCase() + string.slice(1)
+
+export const treeToString = (obj: Object, highlight = [] as string[]): string => {
+	let cleaned = JSON.stringify(obj, null, 2)
+		.replace(/[{}"\[\],]/g, '')
+		.replace(/^ {2}/mg, '')
+		.replace(/\n\s*\n/g, '\n')
+		.trim()
+
+	for (const word of highlight)
+		cleaned = cleaned.replace(word, capitalize(word).green)
+
+	return cleaned
+}
+
+
+export class MeasureDuration {
+	private static Humanizer: Humanizer = [
+		[d => d.hours() > 0, d => `${d.hours()}h ${d.minutes()}min`],
+		[d => d.minutes() > 0, d => `${d.minutes()}min ${d.seconds()}s`],
+		[d => d.seconds() > 0, d => `${d.seconds()}s`],
+		[() => true, d => `${d.milliseconds()}ms`],
+	]
+
+	private start = Date.now()
+
+
+	finished(human?: false): number
+	finished(human?: true): string
+	finished(human?: boolean): number | string {
+		const delta = Date.now() - this.start
+
+		return human
+			? new Duration(delta, 'ms').humanize(MeasureDuration.Humanizer)
+			: delta
+	}
+
+}

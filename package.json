@@ -19,6 +19,7 @@
 		"clitastic": "0.0.1",
 		"colors": "^1.3.3",
 		"js-yaml": "^3.13.1",
-		"minimist": "^1.2.0"
+		"minimist": "^1.2.0",
+		"uhrwerk": "^1.0.0"
 	}
 }
