@@ -22,21 +22,6 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
   - [Hooks](#before--after-hooks)
 - [Backends](#-backends)
 
-### Commands
-
-
-- [info](#info)
-- [check](#check)
-- [backup](#backup)
-- [forget](#forget)
-- [restore](#restore)
-- [exec](#exec)
-
-- [intall](#install)
-- [uninstall](#uninstall)
-- [upgrade](#upgrade)
-
-
 ## 🛳 Installation
 
 Linux & macOS. Windows is not supported.
@@ -239,7 +224,18 @@ backends:
     B2_ACCOUNT_KEY: backblaze_account_key
 ```
 
-## Commands
+## 👉 Commands
+
+* [info](#info)
+* [check](#check)
+* [backup](#backup)
+* [forget](#forget)
+* [restore](#restore)
+* [exec](#exec)
+* [intall](#install)
+* [uninstall](#uninstall)
+* [upgrade](#upgrade)
+
 
 ### Info
 
