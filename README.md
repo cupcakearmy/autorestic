@@ -24,17 +24,18 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 
 ### Commands
 
-- info
-- check
-- backup
-- forget
-- restore
-- exec
 
-- intall
-- uninstall
-- upgrade
-- help
+- [info](#info)
+- [check](#check)
+- [backup](#backup)
+- [forget](#forget)
+- [restore](#restore)
+- [exec](#exec)
+
+- [intall](#install)
+- [uninstall](#uninstall)
+- [upgrade](#upgrade)
+
 
 ## 🛳 Installation
 
