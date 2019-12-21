@@ -1,8 +1,10 @@
-import axios from 'axios'
 import { spawnSync, SpawnSyncOptions } from 'child_process'
 import { randomBytes } from 'crypto'
 import { createWriteStream } from 'fs'
-import { dirname, isAbsolute, resolve } from 'path'
+import { dirname, isAbsolute, join, resolve } from 'path'
+import { homedir } from 'os'
+
+import axios from 'axios'
 import { Duration, Humanizer } from 'uhrwerk'
 
 import { CONFIG_FILE } from './config'
@@ -95,6 +97,11 @@ export const pathRelativeToConfigFile = (path: string): string => isAbsolute(pat
 	? path
 	: resolve(dirname(CONFIG_FILE), path)
 
+export const resolveTildePath = (path: string): string | null =>
+	(path.length === 0 || path[0] !== '~')
+		? null
+		: join(homedir(), path.slice(1))
+
 export const ConfigError = new Error('Config file not found')
 
 export const getFlagsFromLocation = (location: Location, command?: string): string[] => {
@@ -108,8 +115,11 @@ export const getFlagsFromLocation = (location: Location, command?: string): stri
 	let flags: string[] = []
 	// Map the flags to an array for the exec function.
 	for (let [flag, values] of Object.entries(all))
-		for (const value of makeArrayIfIsNot(values))
-			flags = [...flags, `--${String(flag)}`, String(value)]
+		for (const value of makeArrayIfIsNot(values)) {
+			const stringValue = String(value)
+			const resolvedTilde = resolveTildePath(stringValue)
+			flags = [...flags, `--${String(flag)}`, resolvedTilde === null ? stringValue : resolvedTilde]
+		}
 
 	return flags
 }
