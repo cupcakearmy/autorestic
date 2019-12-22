@@ -1,10 +1,12 @@
 import { readFileSync, writeFileSync, statSync } from 'fs'
 import { resolve } from 'path'
+import { homedir } from 'os'
+
 import yaml from 'js-yaml'
+
 import { flags } from './autorestic'
 import { Backend, Config } from './types'
 import { makeArrayIfIsNot, makeObjectKeysLowercase, rand } from './utils'
-import { homedir } from 'os'
 
 
 
