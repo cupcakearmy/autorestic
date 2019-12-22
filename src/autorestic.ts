@@ -25,20 +25,22 @@ export const { _: commands, ...flags } = minimist(process.argv.slice(2), {
 	string: ['l', 'b'],
 })
 
-export const VERSION = '0.11'
+export const VERSION = '0.12'
 export const INSTALL_DIR = '/usr/local/bin'
 export const VERBOSE = flags.verbose
 
 export const config = init()
 
 
-function main() {
+async function main() {
 	if (commands.length < 1) return help()
 
 	const command: string = commands[0]
 	const args: string[] = commands.slice(1)
-	;(handlers[command] || error)(args, flags)
+
+	const fn = handlers[command] || error
+	await fn(args, flags)
 }
 
 
-main()
+main().catch((e: Error) => console.error(e.message))
