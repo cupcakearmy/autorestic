@@ -1,8 +1,9 @@
-import axios from 'axios'
-import { Writer } from 'clitastic'
-import { unlinkSync } from 'fs'
+import { chmodSync, renameSync, unlinkSync } from 'fs'
 import { tmpdir } from 'os'
 import { join, resolve } from 'path'
+
+import axios from 'axios'
+import { Writer } from 'clitastic'
 
 import { config, INSTALL_DIR, VERSION } from './autorestic'
 import { checkAndConfigureBackends, getBackendsFromLocations, getEnvFromBackend } from './backend'
@@ -147,7 +148,7 @@ const handlers: Handlers = {
 			checkIfResticIsAvailable()
 			console.log('Restic is already installed')
 			return
-		} catch (e) {
+		} catch {
 		}
 
 		const w = new Writer('Checking latest version... ⏳')
@@ -164,9 +165,7 @@ const handlers: Handlers = {
 		}
 
 		w.replaceLn('Downloading binary... 🌎')
-		const name = `${json.name.replace(' ', '_')}_${process.platform}_${
-			archMap[process.arch]
-		}.bz2`
+		const name = `${json.name.replace(' ', '_')}_${process.platform}_${archMap[process.arch]}.bz2`
 		const dl = json.assets.find((asset: any) => asset.name === name)
 		if (!dl)
 			return console.log(
@@ -184,8 +183,8 @@ const handlers: Handlers = {
 		unlinkSync(tmp)
 
 		w.replaceLn(`Moving to ${INSTALL_DIR} 🚙`)
-		exec('chmod', ['+x', extracted])
-		exec('mv', [extracted, INSTALL_DIR + '/restic'])
+		chmodSync(extracted, 0o755)
+		renameSync(extracted, INSTALL_DIR + '/restic')
 
 		w.done(
 			`\nFinished! restic is installed under: ${INSTALL_DIR}`.underline + ' 🎉',

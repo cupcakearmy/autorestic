@@ -1,8 +1,8 @@
 import { spawnSync, SpawnSyncOptions } from 'child_process'
 import { randomBytes } from 'crypto'
-import { createWriteStream } from 'fs'
+import { createWriteStream, unlinkSync, renameSync } from 'fs'
 import { dirname, isAbsolute, join, resolve } from 'path'
-import { homedir } from 'os'
+import { homedir, tmpdir } from 'os'
 
 import axios from 'axios'
 import { Duration, Humanizer } from 'uhrwerk'
@@ -44,13 +44,14 @@ export const execPlain = (command: string, opt: SpawnSyncOptions = {}) => {
 export const checkIfResticIsAvailable = () =>
 	checkIfCommandIsAvailable(
 		'restic',
-		'Restic is not installed'.red +
-		' https://restic.readthedocs.io/en/latest/020_installation.html#stable-releases',
+		'restic is not installed'.red +
+		'\nEither run ' + 'autorestic install'.green +
+		'\nOr go to https://restic.readthedocs.io/en/latest/020_installation.html#stable-releases',
 	)
 
 export const checkIfCommandIsAvailable = (cmd: string, errorMsg?: string) => {
-	if (require('child_process').spawnSync(cmd).error)
-		throw new Error(errorMsg ? errorMsg : `"${errorMsg}" is not installed`.red)
+	if (spawnSync(cmd).error)
+		throw new Error(errorMsg ? errorMsg : `"${cmd}" is not installed`.red)
 }
 
 export const makeObjectKeysLowercase = (object: Object): any =>
@@ -83,11 +84,19 @@ export const downloadFile = async (url: string, to: string) =>
 			responseType: 'stream',
 		})
 
-		const stream = createWriteStream(to)
+		const tmp = join(tmpdir(), rand(64))
+		const stream = createWriteStream(tmp)
 
 		const writer = file.pipe(stream)
 		writer.on('close', () => {
 			stream.close()
+			try {
+				// Delete file if already exists. Needed if the binary wants to replace itself.
+				// Unix does not allow to overwrite a file that is being executed, but you can remove it and save other one at its place
+				unlinkSync(to)
+			} catch {
+			}
+			renameSync(tmp, to)
 			res()
 		})
 	})
