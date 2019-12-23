@@ -281,12 +281,6 @@ autorestic restore -l home --from hdd --to /path/where/to/restore
 
 This will restore the location `home` to the `/path/where/to/restore` folder and taking the data from the backend `hdd`
 
-```
-autorestic restore
-```
-
-Performes a backup of all locations if the `-a` flag is passed. To only backup some locations pass one or more `-l` or `--location` flags.
-
 ### Forget
 
 
