@@ -4,6 +4,7 @@
 
 - Restored files are now without the prefix path.
 - Support for making backups of docker volumes and restoring them (not incremental).
+- Show error to user during backup
 
 ## 0.12
 
