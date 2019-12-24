@@ -13,6 +13,7 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 - Snapshot policies and pruning
 - Simple interface
 - Fully encrypted
+- Backup & Restore docker volumes
 
 ### 📒 Docs
 
@@ -20,6 +21,7 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
   * [Pruning & Deleting old files](#pruning-and-snapshot-policies)
   * [Excluding files](#excluding-filesfolders)
   * [Hooks](#before--after-hooks)
+  * [Docker volumes](#-Docker-volumes)
 * [Backends](#-backends)
 * [Commands](#-commands)
 * [Examples](#-examples)
@@ -189,6 +191,64 @@ locations:
       after:
         - echo "kthxbye"
 ```
+
+#### 🐳 Docker volumes
+
+Since version 0.13 autorestic supports docker volumes directly, without needing them to be mounted to the host filesystem.
+
+Let see an example.
+
+###### docker-compose.yml
+
+```yaml
+version: '3.7'
+
+volumes:
+  data:
+    name: my-data
+
+services:
+  api:
+    image: alpine
+    volumes:
+      - data:/foo/bar
+```
+
+###### .autorestic.yml
+
+```yaml
+locations:
+  hello:
+    from: 'volume:my-data'
+    to:
+      - remote
+    options:
+      forget:
+        keep-last: 2
+
+backends:
+  remote:
+    ...
+```
+
+Now you can backup and restore as always.
+
+```sh
+autorestic -l hello backup
+```
+
+```sh
+autorestic -l hello restore
+```
+
+If the volume does not exist on restore, autorestic will create it for you and then fill it with the data.
+
+### Limitations
+
+Unfortunately there are some limitations when backing up directly from a docker volume without mounting the volume to the host. If you are curious or have ideas how to improve this, please [read more here](https://github.com/cupcakearmy/autorestic/issues/4#issuecomment-568771951). Any help is welcomed 🙂
+
+1. Incremental updates are not possible right now due to how the current docker mounting works.
+2. Exclude patterns and files also do not work as restic only sees a compressed tarball as source and not the actual data.
 
 ## 💽 Backends
 
