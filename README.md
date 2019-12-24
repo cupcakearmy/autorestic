@@ -22,6 +22,7 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
   * [Hooks](#before--after-hooks)
 * [Backends](#-backends)
 * [Commands](#-commands)
+* [Examples](#-examples)
 
 ## 🛳 Installation
 
@@ -316,6 +317,22 @@ Uninstall both restic and autorestic
 #### Upgrade
 
 Upgrades both restic and autorestic automagically
+
+## 🐣 Examples
+
+### List all the snapshots for all the backends
+
+```
+autorestic -a exec snapshots
+```
+
+### Unlock a locked repository
+
+⚠️ Only do this if you know what you are doing. E.g. if you accidentally cancelled a running operation
+
+```
+autorestic -b my-backend exec unlock
+```
 
 ## Contributors
 
