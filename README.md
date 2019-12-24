@@ -22,7 +22,7 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
   * [Hooks](#before--after-hooks)
 * [Backends](#-backends)
 * [Commands](#-commands)
-* [Examples](#examples)
+* [Examples](#-examples)
 
 ## 🛳 Installation
 
