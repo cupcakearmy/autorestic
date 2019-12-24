@@ -24,7 +24,7 @@ export const forgetSingle = (name: string, to: string, location: Location, dryRu
 	const flags = getFlagsFromLocation(location, 'forget')
 
 	if (flags.length == 0) {
-		writer.done(base + 'skipping, no policy declared')
+		writer.done(base + 'Skipping, no policy declared')
 		return
 	}
 	if (dryRun) flags.push('--dry-run')
