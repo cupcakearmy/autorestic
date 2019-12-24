@@ -188,6 +188,8 @@ export const decodeLocationFromPrefix = (from: string): [LocationFromPrefixes, s
 
 export const hash = (plain: string): string => createHash('sha1').update(plain).digest().toString('hex')
 
+export const getPathFromVolume = (volume: string) => pathRelativeToConfigFile(hash(volume))
+
 export const checkIfDockerVolumeExistsOrFail = (volume: string) => {
 	const cmd = exec('docker', [
 		'volume', 'inspect', volume,
@@ -195,3 +197,4 @@ export const checkIfDockerVolumeExistsOrFail = (volume: string) => {
 	if (cmd.err.length > 0)
 		throw new Error('Volume not found')
 }
+

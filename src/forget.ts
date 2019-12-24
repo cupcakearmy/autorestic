@@ -2,6 +2,7 @@ import { Writer } from 'clitastic'
 
 import { config, VERBOSE } from './autorestic'
 import { getEnvFromBackend } from './backend'
+import { LocationFromPrefixes } from './config'
 import { Locations, Location, Flags } from './types'
 import {
 	exec,
@@ -9,7 +10,7 @@ import {
 	pathRelativeToConfigFile,
 	getFlagsFromLocation,
 	makeArrayIfIsNot,
-	fill,
+	fill, decodeLocationFromPrefix, getPathFromVolume,
 } from './utils'
 
 
@@ -20,8 +21,18 @@ export const forgetSingle = (name: string, to: string, location: Location, dryRu
 	const writer = new Writer(base + 'Removing old snapshots… ⏳')
 
 	const backend = config.backends[to]
-	const path = pathRelativeToConfigFile(location.from)
 	const flags = getFlagsFromLocation(location, 'forget')
+
+	const [type, value] = decodeLocationFromPrefix(location.from)
+	let path: string
+	switch (type) {
+		case LocationFromPrefixes.Filesystem:
+			path = pathRelativeToConfigFile(value)
+			break
+		case LocationFromPrefixes.DockerVolume:
+			path = getPathFromVolume(value)
+			break
+	}
 
 	if (flags.length == 0) {
 		writer.done(base + 'Skipping, no policy declared')

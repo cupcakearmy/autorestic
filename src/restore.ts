@@ -9,9 +9,9 @@ import {
 	checkIfDockerVolumeExistsOrFail,
 	ConfigError,
 	decodeLocationFromPrefix,
-	exec, execPlain,
-	hash,
-	pathRelativeToConfigFile,
+	exec,
+	execPlain,
+	getPathFromVolume,
 } from './utils'
 
 
@@ -25,8 +25,7 @@ export const restoreToFilesystem = (from: string, to: string, backend: Backend) 
 }
 
 export const restoreToVolume = (volume: string, backend: Backend) => {
-	const tmp = pathRelativeToConfigFile(hash(volume))
-
+	const tmp = getPathFromVolume(volume)
 	try {
 		restoreToFilesystem(tmp, tmp, backend)
 		try {

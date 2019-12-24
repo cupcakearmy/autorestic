@@ -15,7 +15,8 @@ import {
 	MeasureDuration,
 	fill,
 	decodeLocationFromPrefix,
-	hash, checkIfDockerVolumeExistsOrFail,
+	checkIfDockerVolumeExistsOrFail,
+	getPathFromVolume,
 } from './utils'
 
 
@@ -33,7 +34,7 @@ export const backupFromFilesystem = (from: string, location: Location, backend: 
 }
 
 export const backupFromVolume = (volume: string, location: Location, backend: Backend) => {
-	const tmp = pathRelativeToConfigFile(hash(volume))
+	const tmp = getPathFromVolume(volume)
 	try {
 		mkdirSync(tmp)
 		checkIfDockerVolumeExistsOrFail(volume)
