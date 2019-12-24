@@ -49,7 +49,7 @@ export const restoreSingle = (locationName: string, from: string, to?: string) =
 	const location = config.locations[locationName]
 
 	const baseText = locationName.green + '\t\t'
-	const w = new Writer(baseText + `Starting...`)
+	const w = new Writer(baseText + `Restoring...`)
 
 	let backendName: string = Array.isArray(location.to) ? location.to[0] : location.to
 	if (from) {
