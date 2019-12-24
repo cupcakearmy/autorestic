@@ -1,23 +1,18 @@
-import { spawnSync, SpawnSyncOptions } from 'child_process'
-import { randomBytes } from 'crypto'
-import { createWriteStream, unlinkSync, renameSync } from 'fs'
-import { dirname, isAbsolute, join, resolve } from 'path'
-import { homedir, tmpdir } from 'os'
-
 import axios from 'axios'
+import { spawnSync, SpawnSyncOptions } from 'child_process'
+import { createHash, randomBytes } from 'crypto'
+import { createWriteStream, renameSync, unlinkSync } from 'fs'
+import { homedir, tmpdir } from 'os'
+import { dirname, isAbsolute, join, resolve } from 'path'
 import { Duration, Humanizer } from 'uhrwerk'
 
-import { CONFIG_FILE } from './config'
+import { CONFIG_FILE, LocationFromPrefixes } from './config'
 import { Location } from './types'
 
 
 
-export const exec = (
-	command: string,
-	args: string[],
-	{ env, ...rest }: SpawnSyncOptions = {},
-) => {
-	const cmd = spawnSync(command, args, {
+export const exec = (command: string, args: string[], { env, ...rest }: SpawnSyncOptions = {}) => {
+	const { stdout, stderr, status } = spawnSync(command, args, {
 		...rest,
 		env: {
 			...process.env,
@@ -25,18 +20,15 @@ export const exec = (
 		},
 	})
 
-	const out = cmd.stdout && cmd.stdout.toString().trim()
-	const err = cmd.stderr && cmd.stderr.toString().trim()
+	const out = stdout && stdout.toString().trim()
+	const err = stderr && stderr.toString().trim()
 
-	return { out, err }
+	return { out, err, status }
 }
 
 export const execPlain = (command: string, opt: SpawnSyncOptions = {}) => {
 	const split = command.split(' ')
-	if (split.length < 1) {
-		console.log(`The command ${command} is not valid`.red)
-		return
-	}
+	if (split.length < 1) throw new Error(`The command ${command} is not valid`.red)
 
 	return exec(split[0], split.slice(1), opt)
 }
@@ -174,4 +166,32 @@ export class MeasureDuration {
 			: delta
 	}
 
+}
+
+
+export const decodeLocationFromPrefix = (from: string): [LocationFromPrefixes, string] => {
+	const firstDelimiter = from.indexOf(':')
+	if (firstDelimiter === -1) return [LocationFromPrefixes.Filesystem, from]
+
+	const type = from.substr(0, firstDelimiter)
+	const value = from.substr(firstDelimiter + 1)
+
+	switch (type.toLowerCase()) {
+		case 'volume':
+			return [LocationFromPrefixes.DockerVolume, value]
+		case 'path':
+			return [LocationFromPrefixes.Filesystem, value]
+		default:
+			throw new Error(`Could not decode the location from: ${from}`.red)
+	}
+}
+
+export const hash = (plain: string): string => createHash('sha1').update(plain).digest().toString('hex')
+
+export const checkIfDockerVolumeExistsOrFail = (volume: string) => {
+	const cmd = exec('docker', [
+		'volume', 'inspect', volume,
+	])
+	if (cmd.err.length > 0)
+		throw new Error('Volume not found')
 }

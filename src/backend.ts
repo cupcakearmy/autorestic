@@ -2,7 +2,7 @@ import { Writer } from 'clitastic'
 
 import { config, VERBOSE } from './autorestic'
 import { Backend, Backends, Locations } from './types'
-import { exec, ConfigError } from './utils'
+import { exec, ConfigError, pathRelativeToConfigFile } from './utils'
 
 
 
@@ -11,7 +11,7 @@ const ALREADY_EXISTS = /(?=.*already)(?=.*config).*/
 export const getPathFromBackend = (backend: Backend): string => {
 	switch (backend.type) {
 		case 'local':
-			return backend.path
+			return pathRelativeToConfigFile(backend.path)
 		case 'b2':
 		case 'azure':
 		case 'gs':

@@ -10,6 +10,12 @@ import { makeArrayIfIsNot, makeObjectKeysLowercase, rand } from './utils'
 
 
 
+export enum LocationFromPrefixes {
+	Filesystem,
+	DockerVolume
+}
+
+
 export const normalizeAndCheckBackends = (config: Config) => {
 	config.backends = makeObjectKeysLowercase(config.backends)
 

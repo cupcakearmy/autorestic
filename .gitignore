@@ -1,10 +1,19 @@
+# Editors
+.idea
+
+# Node
 node_modules/
 package-lock.json
-.idea
 yarn.lock
 
+# Build & Runtime
 bin
 lib
 data
+restore
+docker
+Dockerfile
 
+# Config
 .autorestic.yml
+.docker.yml

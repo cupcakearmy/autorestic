@@ -10,6 +10,7 @@ import { checkAndConfigureBackends, getBackendsFromLocations, getEnvFromBackend 
 import { backupAll } from './backup'
 import { forgetAll } from './forget'
 import showAll from './info'
+import { restoreSingle } from './restore'
 import { Backends, Flags, Locations } from './types'
 import {
 	checkIfCommandIsAvailable,
@@ -86,36 +87,12 @@ const handlers: Handlers = {
 		if (!config) throw ConfigError
 		checkIfResticIsAvailable()
 
-		if (!flags.to) {
-			console.log(`You need to specify the restore path with --to`.red)
-			return
-		}
-
 		const locations = parseLocations(flags)
-		for (const [name, location] of Object.entries(locations)) {
-			const baseText = name.green + '\t\t'
-			const w = new Writer(baseText + `Starting...`)
+		const keys = Object.keys(locations)
+		if (keys.length < 1) throw new Error(`You need to specify the location to restore with --location`.red)
+		if (keys.length > 2) throw new Error(`Only one location is supported at a time when restoring`.red)
 
-			let backend: string = Array.isArray(location.to) ? location.to[0] : location.to
-			if (flags.from) {
-				if (!location.to.includes(flags.from)) {
-					w.done(baseText + `Backend ${flags.from} is not a valid location for ${name}`.red)
-					continue
-				}
-				backend = flags.from
-				w.replaceLn(baseText + `Restoring from ${backend.blue}...`)
-			} else if (Array.isArray(location.to) && location.to.length > 1) {
-				w.replaceLn(baseText + `Restoring from ${backend.blue}...\tTo select a specific backend pass the ${'--from'.blue} flag`)
-			}
-			const env = getEnvFromBackend(config.backends[backend])
-
-			exec(
-				'restic',
-				['restore', 'latest', '--path', resolve(location.from), '--target', flags.to],
-				{ env },
-			)
-			w.done(name.green + '\t\tDone 🎉')
-		}
+		restoreSingle(keys[0], flags.from, flags.to)
 	},
 	forget(args, flags) {
 		if (!config) throw ConfigError
@@ -140,7 +117,7 @@ const handlers: Handlers = {
 			console.log(out, err)
 		}
 	},
-	async info() {
+	info() {
 		showAll()
 	},
 	async install() {
@@ -224,7 +201,7 @@ const handlers: Handlers = {
 			w.replaceLn('Downloading binary... 🌎')
 			await downloadFile(dl.browser_download_url, to)
 
-			exec('chmod', ['+x', to])
+			chmodSync(to, 0o755)
 		}
 
 		w.done('All up to date! 🚀')
