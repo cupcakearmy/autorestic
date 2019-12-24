@@ -24,13 +24,15 @@ import {
 export const backupFromFilesystem = (from: string, location: Location, backend: Backend, tags?: string[]) => {
 	const path = pathRelativeToConfigFile(from)
 
-	const cmd = exec(
+	const { out, err, status } = exec(
 		'restic',
 		['backup', '.', ...getFlagsFromLocation(location, 'backup')],
 		{ env: getEnvFromBackend(backend), cwd: path },
 	)
 
-	if (VERBOSE) console.log(cmd.out, cmd.err)
+	if (VERBOSE) console.log(out, err)
+	if (status != 0 || err.length > 0)
+		throw new Error(err)
 }
 
 export const backupFromVolume = (volume: string, location: Location, backend: Backend) => {
@@ -44,6 +46,8 @@ export const backupFromVolume = (volume: string, location: Location, backend: Ba
 		execPlain(`docker run --rm -v ${volume}:/data -v ${tmp}:/backup alpine tar cf /backup/archive.tar -C /data .`)
 
 		backupFromFilesystem(tmp, location, backend)
+	} catch (e) {
+		throw e
 	} finally {
 		execPlain(`rm -rf ${tmp}`)
 	}
