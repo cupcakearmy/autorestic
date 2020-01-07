@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.14
+
+- Fixed #17 enable sftp
+- Fixed #18 help command
+
 ## 0.13
 
 - Restored files are now without the prefix path.
