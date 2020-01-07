@@ -275,7 +275,16 @@ For each backend you need to specify the right variables as shown in the example
 The path on the remote server.
 For object storages as
 
-##### Example
+##### Example Local
+
+```yaml
+backends:
+  name-of-backend:
+    type: local
+    path: /data/my/backups
+```
+
+##### Example Backblaze
 
 ```yaml
 backends:
@@ -284,6 +293,19 @@ backends:
     path: 'myAccount:myBucket/my/path'
     B2_ACCOUNT_ID: backblaze_account_id
     B2_ACCOUNT_KEY: backblaze_account_key
+```
+
+##### Example S3 / Minio
+
+```yaml
+backends:
+  name-of-backend:
+    type: s3
+    path: s3.amazonaws.com/bucket_name
+    # Minio
+    # path: http://localhost:9000/bucket_name
+    AWS_ACCESS_KEY_ID: my_key
+    AWS_SECRET_ACCESS_KEY: my_secret
 ```
 
 ## 👉 Commands
