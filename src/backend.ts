@@ -16,8 +16,8 @@ export const getPathFromBackend = (backend: Backend): string => {
 		case 'azure':
 		case 'gs':
 		case 's3':
-			return `${backend.type}:${backend.path}`
 		case 'sftp':
+			return `${backend.type}:${backend.path}`
 		case 'rest':
 			throw new Error(`Unsupported backend type: "${backend.type}"`)
 		default:
