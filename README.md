@@ -308,6 +308,17 @@ backends:
     AWS_SECRET_ACCESS_KEY: my_secret
 ```
 
+##### Example SFTP
+
+For SFTP to work you need to use configure your host inside of `~/.ssh/config` as password prompt is not supported. For more information on this topic please see the [official docs on the matter](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html#sftp).
+
+```yaml
+backends:
+  name-of-backend:
+    type: sftp
+    path: my-host:/remote/path/on/the/server
+```
+
 ## 👉 Commands
 
 * [info](#info)
