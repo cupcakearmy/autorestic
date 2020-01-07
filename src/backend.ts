@@ -43,16 +43,20 @@ export const getBackendsFromLocations = (locations: Locations): string[] => {
 
 export const checkAndConfigureBackend = (name: string, backend: Backend) => {
 	const writer = new Writer(name.blue + ' : ' + 'Configuring... ⏳')
-	const env = getEnvFromBackend(backend)
+	try {
+		const env = getEnvFromBackend(backend)
 
-	const { out, err } = exec('restic', ['init'], { env })
+		const { out, err } = exec('restic', ['init'], { env })
 
-	if (err.length > 0 && !ALREADY_EXISTS.test(err))
-		throw new Error(`Could not load the backend "${name}": ${err}`)
+		if (err.length > 0 && !ALREADY_EXISTS.test(err))
+			throw new Error(`Could not load the backend "${name}": ${err}`)
 
-	if (VERBOSE && out.length > 0) console.log(out)
+		if (VERBOSE && out.length > 0) console.log(out)
 
-	writer.done(name.blue + ' : ' + 'Done ✓'.green)
+		writer.done(name.blue + ' : ' + 'Done ✓'.green)
+	} catch (e) {
+		writer.done(name.blue + ' : ' + 'Error ⚠️ ' + e.message.red)
+	}
 }
 
 export const checkAndConfigureBackends = (backends?: Backends) => {
