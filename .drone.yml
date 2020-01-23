@@ -1,3 +1,4 @@
+---
 kind: pipeline
 name: default
 
@@ -23,3 +24,8 @@ steps:
     note: CHANGELOG.md
   when:
     event: tag
+---
+kind: signature
+hmac: 3b1f235f6a6f0ee1aa3f572d0833c4f0eec931dbe0378f31b9efa336a7462912
+
+...
