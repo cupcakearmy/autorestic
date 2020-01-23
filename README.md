@@ -5,6 +5,10 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 
 ![Sketch](./docs/Sketch.png)
 
+## ✈️ Roadmap
+
+I would like to make the official `1.0` release in the coming months. Until then please feel free to file issues or feature requests so that the tool is as flexible as possible :)
+
 ## 🌈 Features
 
 - Config files, no CLI
