@@ -4,7 +4,8 @@
 		"build": "tsc",
 		"build:watch": "tsc -w",
 		"dev": "tsnd --no-notify --respawn ./src/autorestic.ts",
-		"bin": "yarn run build && pkg lib/autorestic.js --targets latest-macos-x64,latest-linux-x64 --out-path bin"
+		"move": "mv bin/autorestic-linux bin/autorestic_linux_x64 && mv bin/autorestic-macos bin/autorestic_macos_x64",
+		"bin": "yarn run build && pkg lib/autorestic.js --targets latest-macos-x64,latest-linux-x64 --out-path bin && yarn run move"
 	},
 	"devDependencies": {
 		"@types/js-yaml": "^3.12.1",
