@@ -32,7 +32,7 @@ I would like to make the official `1.0` release in the coming months. Until then
 
 ## 🛳 Installation
 
-Linux & macOS. Windows is not supported.
+Linux & macOS. Windows is not supported. If you have problems installing please open an issue :)
 
 ```
 curl -s https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/install.sh | bash
