@@ -40,6 +40,12 @@ curl -s https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/install.
 
 ## 🚀 Quickstart
 
+##### ⚠️ Note ⚠️
+
+Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. **You should keep a copy of the keys or config file somewhere in case your server dies**. Otherwise DATA IS LOST!
+
+Also, currently comments in the config file will be deleted, due how the yaml parsing library works. I will fix this soon :)
+
 ### Setup
 
 First we need to configure our locations and backends. Simply create a `.autorestic.yml` either in your home directory of in the folder from which you will execute `autorestic`.
@@ -73,12 +79,6 @@ backends:
 Then we check if everything is correct by running the `check` command. We will pass the `-a` (or `--all`) to tell autorestic to check all the locations.
 
 If we would check only one location we could run the following: `autorestic check -l home`. Otherwise simpply check all locations with `autorestic check -a`
-
-##### ⚠️ Note ⚠️
-
-Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. **You should keep a copy of the keys or config file somewhere in case your server dies**. Otherwise DATA IS LOST!
-
-Also, currently comments in the config file will be deleted, due how the yaml parsing library works. I will fix this soon :)
 
 ### 📦 Backup
 
