@@ -74,9 +74,11 @@ Then we check if everything is correct by running the `check` command. We will p
 
 If we would check only one location we could run the following: `autorestic check -l home`. Otherwise simpply check all locations with `autorestic check -a`
 
-##### Note
+##### ⚠️ Note ⚠️
 
-Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. You should keep a copy of the keys somewhere in case your server dies. Otherwise DATA IS LOST!
+Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. **You should keep a copy of the keys or config file somewhere in case your server dies**. Otherwise DATA IS LOST!
+
+Also, currently comments in the config file will be deleted, due how the yaml parsing library works. I will fix this soon :)
 
 ### 📦 Backup
 
