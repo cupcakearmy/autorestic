@@ -1,4 +1,3 @@
-## 0.15
+## 0.16
 
-- automatic binary releases
-- code signing
+- notify user if config file was overwritten and make a copy of it as backup

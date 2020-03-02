@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, statSync } from 'fs'
+import { readFileSync, writeFileSync, statSync, copyFileSync } from 'fs'
 import { resolve } from 'path'
 import { homedir } from 'os'
 
@@ -88,10 +88,27 @@ export const init = (): Config | undefined => {
 		yaml.safeLoad(readFileSync(CONFIG_FILE).toString()),
 	)
 
+	const current = JSON.stringify(raw)
+
 	normalizeAndCheckBackends(raw)
 	normalizeAndCheckBackups(raw)
 
-	writeFileSync(CONFIG_FILE, yaml.safeDump(raw))
+	const changed = JSON.stringify(raw) !== current
+
+	if (changed) {
+		const OLD_CONFIG_FILE = CONFIG_FILE + '.old'
+		copyFileSync(CONFIG_FILE, OLD_CONFIG_FILE)
+		writeFileSync(CONFIG_FILE, yaml.safeDump(raw))
+		console.log(
+			'\n' +
+			'⚠️ MOVED OLD CONFIG FILE TO: ⚠️'.red.underline.bold +
+			'\n' +
+			OLD_CONFIG_FILE +
+			'\n' +
+			'What? Why? '.grey + 'https://git.io/Jv2D0'.underline.grey +
+			'\n'
+		)
+	}
 
 	return raw
 }
