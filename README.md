@@ -29,6 +29,7 @@ I would like to make the official `1.0` release in the coming months. Until then
 * [Backends](#-backends)
 * [Commands](#-commands)
 * [Examples](#-examples)
+* [QA](#-qa)
 
 ## 🛳 Installation
 
