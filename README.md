@@ -35,6 +35,8 @@ I would like to make the official `1.0` release in the coming months. Until then
 
 Linux & macOS. Windows is not supported. If you have problems installing please open an issue :)
 
+Autorestic requires `curl`, `wget` and `bzip2` to be installed. For most systems these should be already installed.
+
 ```
 curl -s https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/install.sh | bash
 ```
