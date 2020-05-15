@@ -18,6 +18,7 @@ I would like to make the official `1.0` release in the coming months. Until then
 - Simple interface
 - Fully encrypted
 - Backup & Restore docker volumes
+- ~~Seamless cron jobs for automatic backup~~ [in development](https://github.com/cupcakearmy/autorestic/issues/21).
 
 ### 📒 Docs
 
