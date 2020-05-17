@@ -8,20 +8,20 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 
 ## ✈️ Roadmap
 
-I would like to make the official `1.0` release in the coming months. Until then please feel free to file issues or feature requests so that the tool is as flexible as possible :)
+~~I would like to make the official `1.0` release in the coming months. Until then please feel free to file issues or feature requests so that the tool is as flexible as possible :)~~
+
+As of version `0.18` crons are supported wich where the last feature missing for a `1.0`. Will test this for a few weeks and then it's time for the first "real" release! 🎉 Also we now have waaay better docs 📒
 
 ## 🌈 Features
 
 - YAML config files, no CLI
-- Predictable
 - Incremental -> Minimal space is used
 - Backup locations to multiple backends
 - Snapshot policies and pruning
-- Simple interface
 - Fully encrypted
 - Pre/After hooks
 - Exclude pattern/files
+- Cron jobs for automatic backup
 - Backup & Restore docker volumes
-- ~~Seamless cron jobs for automatic backup~~ [in development](https://github.com/cupcakearmy/autorestic/issues/21).
 
 > :ToCPrevNext

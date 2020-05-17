@@ -1,6 +1,8 @@
 # Docker
 
-Since version 0.13 autorestic supports docker volumes directly, without needing them to be mounted to the host filesystem.
+autorestic supports docker volumes directly, without needing them to be mounted to the host filesystem.
+
+> Available since version 0.13
 
 Let see an example.
 
