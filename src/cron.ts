@@ -1,49 +1,21 @@
-import fs from 'fs'
-
 import CronParser from 'cron-parser'
 
 import { config } from './autorestic'
 import { checkAndConfigureBackendsForLocations } from './backend'
-import { Location, Lockfile } from './types'
+import { Location } from './types'
 import { backupLocation } from './backup'
-import { pathRelativeToConfigFile } from './utils'
+import { readLock, writeLock } from './lock'
 
-
-const getLockFileName = () => {
-  const LOCK_FILE = '.autorestic.lock'
-  return pathRelativeToConfigFile(LOCK_FILE)
-}
-
-const readLock = (): Lockfile => {
-  const name = getLockFileName()
-  let lock = {}
-  try {
-    lock = JSON.parse(fs.readFileSync(name, { encoding: 'utf-8' }))
-  } catch { }
-  return lock
-}
-const writeLock = (diff: Lockfile = {}) => {
-  const name = getLockFileName()
-  const newLock = Object.assign(
-    readLock(),
-    diff
-  )
-  fs.writeFileSync(name, JSON.stringify(newLock, null, 2), { encoding: 'utf-8' })
-}
 
 const runCronForLocation = (name: string, location: Location) => {
-  const lock = readLock()[name]
+  const lock = readLock()
   const parsed = CronParser.parseExpression(location.cron || '')
   const last = parsed.prev()
 
-  if (!lock || last.toDate().getTime() > lock.lastRun) {
+  if (!lock.crons[name] || last.toDate().getTime() > lock.crons[name].lastRun) {
     backupLocation(name, location)
-    writeLock({
-      [name]: {
-        ...lock,
-        lastRun: Date.now()
-      }
-    })
+    lock.crons[name] = { lastRun: Date.now() }
+    writeLock(lock)
   } else {
     console.log(`${name.yellow} ▶ Skipping. Sheduled for: ${parsed.next().toString().underline.blue}`)
   }

@@ -93,8 +93,11 @@ export type Config = {
 }
 
 export type Lockfile = {
-	[name: string]: {
-		lastRun: number
+	running: boolean
+	crons: {
+		[name: string]: {
+			lastRun: number
+		}
 	}
 }
 

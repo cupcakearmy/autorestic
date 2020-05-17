@@ -4,11 +4,11 @@ import minimist from 'minimist'
 import { init } from './config'
 import handlers, { error, help } from './handlers'
 import { Config } from './types'
-
-
+import { readLock, writeLock, unlock } from './lock'
 
 process.on('uncaughtException', err => {
 	console.log(err.message)
+	unlock()
 	process.exit(1)
 })
 
@@ -36,6 +36,17 @@ export let config: Config
 async function main() {
 	config = init()
 
+	// Don't let 2 instances run on the same config
+	const lock = readLock()
+	if (lock.running) {
+		console.log('An instance of autorestic is already running for this config file'.red)
+		return
+	}
+	writeLock({
+		...lock,
+		running: true,
+	})
+
 	// For dev
 	// return await handlers['cron']([], { ...flags, all: true })
 
@@ -46,6 +57,7 @@ async function main() {
 
 	const fn = handlers[command] || error
 	await fn(args, flags)
+	unlock()
 }
 
 
