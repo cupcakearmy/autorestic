@@ -34,11 +34,11 @@ export let config: Config
 
 
 async function main() {
-	config = await init()
-	
+	config = init()
+
 	// For dev
 	// return await handlers['check']([], { ...flags, all: true })
-	
+
 	if (commands.length < 1 || commands[0] === 'help') return help()
 
 	const command: string = commands[0]
