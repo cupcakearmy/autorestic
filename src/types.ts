@@ -92,4 +92,10 @@ export type Config = {
 	backends: Backends
 }
 
+export type Lockfile = {
+	[name: string]: {
+		lastRun: number
+	}
+}
+
 export type Flags = { [arg: string]: any }

@@ -16,4 +16,5 @@ Dockerfile
 
 # Config
 .autorestic.yml
+.autorestic.lock
 .docker.yml

@@ -37,7 +37,7 @@ async function main() {
 	config = init()
 
 	// For dev
-	// return await handlers['check']([], { ...flags, all: true })
+	// return await handlers['cron']([], { ...flags, all: true })
 
 	if (commands.length < 1 || commands[0] === 'help') return help()
 

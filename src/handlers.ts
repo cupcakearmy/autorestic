@@ -6,8 +6,9 @@ import axios from 'axios'
 import { Writer } from 'clitastic'
 
 import { config, INSTALL_DIR, VERSION } from './autorestic'
-import { checkAndConfigureBackends, getBackendsFromLocations, getEnvFromBackend } from './backend'
+import { checkAndConfigureBackends, getEnvFromBackend, checkAndConfigureBackendsForLocations } from './backend'
 import { backupAll } from './backup'
+import { runCron } from './cron'
 import { forgetAll } from './forget'
 import showAll from './info'
 import { restoreSingle } from './restore'
@@ -72,13 +73,14 @@ const handlers: Handlers = {
 	backup(args, flags) {
 		checkIfResticIsAvailable()
 		const locations: Locations = parseLocations(flags)
-
-		checkAndConfigureBackends(
-			filterObjectByKey(config.backends, getBackendsFromLocations(locations)),
-		)
+		checkAndConfigureBackendsForLocations(locations)
 		backupAll(locations)
 
 		console.log('\nFinished!'.underline + ' 🎉')
+	},
+	cron(args, flags) {
+		checkIfResticIsAvailable()
+		runCron()
 	},
 	restore(args, flags) {
 		checkIfResticIsAvailable()
@@ -93,10 +95,7 @@ const handlers: Handlers = {
 	forget(args, flags) {
 		checkIfResticIsAvailable()
 		const locations: Locations = parseLocations(flags)
-
-		checkAndConfigureBackends(
-			filterObjectByKey(config.backends, getBackendsFromLocations(locations)),
-		)
+		checkAndConfigureBackendsForLocations(locations)
 		forgetAll(locations, flags)
 
 		console.log('\nFinished!'.underline + ' 🎉')
