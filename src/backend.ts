@@ -2,7 +2,7 @@ import { Writer } from 'clitastic'
 
 import { config, VERBOSE } from './autorestic'
 import { Backend, Backends, Locations } from './types'
-import { exec, ConfigError, pathRelativeToConfigFile } from './utils'
+import { exec, pathRelativeToConfigFile } from './utils'
 
 
 
@@ -60,10 +60,8 @@ export const checkAndConfigureBackend = (name: string, backend: Backend) => {
 }
 
 export const checkAndConfigureBackends = (backends?: Backends) => {
-	if (!backends) {
-		if (!config) throw ConfigError
+	if (!backends)
 		backends = config.backends
-	}
 
 	console.log('\nConfiguring Backends'.grey.underline)
 	for (const [name, backend] of Object.entries(backends))

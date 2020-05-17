@@ -39,16 +39,16 @@ export const normalizeAndCheckBackends = (config: Config) => {
 	}
 }
 
-export const normalizeAndCheckBackups = (config: Config) => {
+export const normalizeAndCheckLocations = async (config: Config) => {
 	config.locations = makeObjectKeysLowercase(config.locations)
 	const backends = Object.keys(config.backends)
 
-	const checkDestination = (backend: string, backup: string) => {
+	const checkDestination = (backend: string, location: string) => {
 		if (!backends.includes(backend))
-			throw new Error(`Cannot find the backend "${backend}" for "${backup}"`)
+			throw new Error(`Cannot find the backend "${backend}" for "${location}"`)
 	}
 
-	for (const [name, { from, to, ...rest }] of Object.entries(
+	for (const [name, { from, to, cron, ...rest }] of Object.entries(
 		config.locations,
 	)) {
 		if (!from || !to)
@@ -61,7 +61,7 @@ export const normalizeAndCheckBackups = (config: Config) => {
 	}
 }
 
-const findConfigFile = (): string | undefined => {
+const findConfigFile = (): string => {
 	const config = '.autorestic.yml'
 	const paths = [
 		resolve(flags.config || ''),
@@ -75,14 +75,14 @@ const findConfigFile = (): string | undefined => {
 		} catch (e) {
 		}
 	}
+	throw new Error('Config file not found')
 }
 
 export let CONFIG_FILE: string = ''
 
-export const init = (): Config | undefined => {
+export const init = async (): Promise<Config> => {
 	const file = findConfigFile()
-	if (file) CONFIG_FILE = file
-	else return
+	CONFIG_FILE = file
 
 	const raw: Config = makeObjectKeysLowercase(
 		yaml.safeLoad(readFileSync(CONFIG_FILE).toString()),
@@ -91,7 +91,7 @@ export const init = (): Config | undefined => {
 	const current = JSON.stringify(raw)
 
 	normalizeAndCheckBackends(raw)
-	normalizeAndCheckBackups(raw)
+	await normalizeAndCheckLocations(raw)
 
 	const changed = JSON.stringify(raw) !== current
 

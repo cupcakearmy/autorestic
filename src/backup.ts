@@ -7,7 +7,6 @@ import { LocationFromPrefixes } from './config'
 import { Locations, Location, Backend } from './types'
 import {
 	exec,
-	ConfigError,
 	pathRelativeToConfigFile,
 	getFlagsFromLocation,
 	makeArrayIfIsNot,
@@ -54,7 +53,6 @@ export const backupFromVolume = (volume: string, location: Location, backend: Ba
 }
 
 export const backupSingle = (name: string, to: string, location: Location) => {
-	if (!config) throw ConfigError
 	const delta = new MeasureDuration()
 	const writer = new Writer(name + to.blue + ' : ' + 'Backing up... ⏳')
 
@@ -104,10 +102,8 @@ export const backupLocation = (name: string, location: Location) => {
 }
 
 export const backupAll = (locations?: Locations) => {
-	if (!locations) {
-		if (!config) throw ConfigError
+	if (!locations)
 		locations = config.locations
-	}
 
 	console.log('\nBacking Up'.underline.grey)
 	for (const [name, location] of Object.entries(locations))

@@ -71,6 +71,7 @@ export type Backends = { [name: string]: Backend }
 export type Location = {
 	from: string
 	to: StringOrArray
+	cron?: string
 	hooks?: {
 		before?: StringOrArray
 		after?: StringOrArray

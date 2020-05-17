@@ -3,6 +3,7 @@ import minimist from 'minimist'
 
 import { init } from './config'
 import handlers, { error, help } from './handlers'
+import { Config } from './types'
 
 
 
@@ -25,14 +26,19 @@ export const { _: commands, ...flags } = minimist(process.argv.slice(2), {
 	string: ['l', 'b'],
 })
 
-export const VERSION = '0.16'
+export const VERSION = '0.17'
 export const INSTALL_DIR = '/usr/local/bin'
 export const VERBOSE = flags.verbose
 
-export const config = init()
+export let config: Config
 
 
 async function main() {
+	config = await init()
+	
+	// For dev
+	// return await handlers['check']([], { ...flags, all: true })
+	
 	if (commands.length < 1 || commands[0] === 'help') return help()
 
 	const command: string = commands[0]

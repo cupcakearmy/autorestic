@@ -103,8 +103,6 @@ export const resolveTildePath = (path: string): string | null =>
 		? null
 		: join(homedir(), path.slice(1))
 
-export const ConfigError = new Error('Config file not found')
-
 export const getFlagsFromLocation = (location: Location, command?: string): string[] => {
 	if (!location.options) return []
 
@@ -197,4 +195,3 @@ export const checkIfDockerVolumeExistsOrFail = (volume: string) => {
 	if (cmd.err.length > 0)
 		throw new Error('Volume not found')
 }
-

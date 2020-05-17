@@ -7,7 +7,6 @@ import { LocationFromPrefixes } from './config'
 import { Backend } from './types'
 import {
 	checkIfDockerVolumeExistsOrFail,
-	ConfigError,
 	decodeLocationFromPrefix,
 	exec,
 	execPlain,
@@ -43,8 +42,6 @@ export const restoreToVolume = (volume: string, backend: Backend) => {
 }
 
 export const restoreSingle = (locationName: string, from: string, to?: string) => {
-	if (!config) throw ConfigError
-
 	const location = config.locations[locationName]
 
 	const baseText = locationName.green + '\t\t'

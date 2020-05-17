@@ -6,7 +6,6 @@ import { LocationFromPrefixes } from './config'
 import { Locations, Location, Flags } from './types'
 import {
 	exec,
-	ConfigError,
 	pathRelativeToConfigFile,
 	getFlagsFromLocation,
 	makeArrayIfIsNot,
@@ -16,7 +15,6 @@ import {
 
 
 export const forgetSingle = (name: string, to: string, location: Location, dryRun: boolean) => {
-	if (!config) throw ConfigError
 	const base = name + to.blue + ' : '
 	const writer = new Writer(base + 'Removing old snapshots… ⏳')
 
@@ -64,7 +62,6 @@ export const forgetLocation = (name: string, backup: Location, dryRun: boolean) 
 }
 
 export const forgetAll = (backups?: Locations, flags?: Flags) => {
-	if (!config) throw ConfigError
 	if (!backups) {
 		backups = config.locations
 	}

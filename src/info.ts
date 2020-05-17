@@ -1,11 +1,9 @@
 import { config } from './autorestic'
-import { ConfigError, fill, treeToString } from './utils'
+import { fill, treeToString } from './utils'
 
 
 
 const showAll = () => {
-	if (!config) throw ConfigError
-
 	console.log('\n\n' + fill(32, '_') + 'LOCATIONS:'.underline)
 	for (const [key, data] of Object.entries(config.locations)) {
 		console.log(`\n${key.blue.underline}:`)

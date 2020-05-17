@@ -18,7 +18,7 @@ import {
 	downloadFile,
 	exec,
 	filterObjectByKey,
-	ConfigError, makeArrayIfIsNot,
+	makeArrayIfIsNot,
 } from './utils'
 
 
@@ -28,7 +28,6 @@ export type Handlers = {
 }
 
 const parseBackend = (flags: Flags): Backends => {
-	if (!config) throw ConfigError
 	if (!flags.all && !flags.backend)
 		throw new Error(
 			'No backends specified.'.red +
@@ -46,7 +45,6 @@ const parseBackend = (flags: Flags): Backends => {
 }
 
 const parseLocations = (flags: Flags): Locations => {
-	if (!config) throw ConfigError
 	if (!flags.all && !flags.location)
 		throw new Error(
 			'No locations specified.'.red +
@@ -72,7 +70,6 @@ const handlers: Handlers = {
 		checkAndConfigureBackends(backends)
 	},
 	backup(args, flags) {
-		if (!config) throw ConfigError
 		checkIfResticIsAvailable()
 		const locations: Locations = parseLocations(flags)
 
@@ -84,7 +81,6 @@ const handlers: Handlers = {
 		console.log('\nFinished!'.underline + ' 🎉')
 	},
 	restore(args, flags) {
-		if (!config) throw ConfigError
 		checkIfResticIsAvailable()
 
 		const locations = parseLocations(flags)
@@ -95,7 +91,6 @@ const handlers: Handlers = {
 		restoreSingle(keys[0], flags.from, flags.to)
 	},
 	forget(args, flags) {
-		if (!config) throw ConfigError
 		checkIfResticIsAvailable()
 		const locations: Locations = parseLocations(flags)
 
