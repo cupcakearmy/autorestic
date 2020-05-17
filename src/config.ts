@@ -51,9 +51,9 @@ export const normalizeAndCheckLocations = (config: Config) => {
 
 	for (const [name, { from, to, cron, ...rest }] of Object.entries(config.locations)) {
 		if (!from)
-			throw new Error(`The location "${name.blue}" is missing the "${'from'.underline.red}" source folder. See https://git.io/Jf0Hw`)
+			throw new Error(`The location "${name.blue}" is missing the "${'from'.underline.red}" source folder. See https://git.io/Jf0xw`)
 		if (!to || (Array.isArray(to) && !to.length))
-			throw new Error(`The location "${name.blue}" has no backend "${'to'.underline.red}" to save the backups. See https://git.io/Jf0Hw`)
+			throw new Error(`The location "${name.blue}" has no backend "${'to'.underline.red}" to save the backups. See https://git.io/Jf0xw`)
 
 		for (const t of makeArrayIfIsNot(to))
 			checkDestination(t, name)
@@ -62,8 +62,7 @@ export const normalizeAndCheckLocations = (config: Config) => {
 			try {
 				CronParser.parseExpression(cron)
 			} catch {
-				// TODO provide link to docs
-				throw new Error(`The location "${name.blue}" has an invalid ${'cron'.underline.red} entry`)
+				throw new Error(`The location "${name.blue}" has an invalid ${'cron'.underline.red} entry. See https://git.io/Jf0xP`)
 			}
 		}
 	}
@@ -113,7 +112,7 @@ export const init = (): Config => {
 			'\n' +
 			OLD_CONFIG_FILE +
 			'\n' +
-			'What? Why? '.grey + 'https://git.io/Jv2D0'.underline.grey +
+			'What? Why? '.grey + 'https://git.io/Jf0xK'.underline.grey +
 			'\n'
 		)
 	}

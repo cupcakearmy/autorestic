@@ -228,7 +228,7 @@ export const help = () => {
 		'\n  help                                                                  Show help' +
 		'\n' +
 		'\nExamples: '.yellow +
-		'https://git.io/fjVbg' +
+		'https://git.io/Jf0x6' +
 		'\n',
 	)
 }
