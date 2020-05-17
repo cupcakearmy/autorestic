@@ -9,7 +9,7 @@ const showAll = () => {
 		console.log(`\n${key.blue.underline}:`)
 		console.log(treeToString(
 			data,
-			['to:', 'from:', 'hooks:', 'options:'],
+			['to:', 'from:', 'hooks:', 'options:', 'cron:'],
 		))
 	}
 
