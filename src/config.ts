@@ -3,6 +3,7 @@ import { resolve } from 'path'
 import { homedir } from 'os'
 
 import yaml from 'js-yaml'
+import CronParser from 'cron-parser'
 
 import { flags } from './autorestic'
 import { Backend, Config } from './types'
@@ -39,7 +40,7 @@ export const normalizeAndCheckBackends = (config: Config) => {
 	}
 }
 
-export const normalizeAndCheckLocations = async (config: Config) => {
+export const normalizeAndCheckLocations = (config: Config) => {
 	config.locations = makeObjectKeysLowercase(config.locations)
 	const backends = Object.keys(config.backends)
 
@@ -48,16 +49,23 @@ export const normalizeAndCheckLocations = async (config: Config) => {
 			throw new Error(`Cannot find the backend "${backend}" for "${location}"`)
 	}
 
-	for (const [name, { from, to, cron, ...rest }] of Object.entries(
-		config.locations,
-	)) {
-		if (!from || !to)
-			throw new Error(
-				`The backup "${name}" is missing some required attributes`,
-			)
+	for (const [name, { from, to, cron, ...rest }] of Object.entries(config.locations)) {
+		if (!from)
+			throw new Error(`The location "${name.blue}" is missing the "${'from'.underline.red}" source folder. See https://git.io/Jf0Hw`)
+		if (!to || (Array.isArray(to) && !to.length))
+			throw new Error(`The location "${name.blue}" has no backend "${'to'.underline.red}" to save the backups. See https://git.io/Jf0Hw`)
 
 		for (const t of makeArrayIfIsNot(to))
 			checkDestination(t, name)
+
+		if (cron) {
+			try {
+				CronParser.parseExpression(cron)
+			} catch {
+				// TODO provide link to docs
+				throw new Error(`The location "${name.blue}" has an invalid ${'cron'.underline.red} entry`)
+			}
+		}
 	}
 }
 
@@ -80,7 +88,7 @@ const findConfigFile = (): string => {
 
 export let CONFIG_FILE: string = ''
 
-export const init = async (): Promise<Config> => {
+export const init = (): Config => {
 	const file = findConfigFile()
 	CONFIG_FILE = file
 
@@ -91,7 +99,7 @@ export const init = async (): Promise<Config> => {
 	const current = JSON.stringify(raw)
 
 	normalizeAndCheckBackends(raw)
-	await normalizeAndCheckLocations(raw)
+	normalizeAndCheckLocations(raw)
 
 	const changed = JSON.stringify(raw) !== current
 
