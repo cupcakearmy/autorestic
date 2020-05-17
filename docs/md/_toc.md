@@ -5,12 +5,12 @@
 
 > :Collapse label=Locations
 >
-> [Overview](/locations/overview)
-> [Hooks](/locations/hooks)
-> [Exluding Files](/locations/exclude)
-> [Forget Policy](/locations/forget)
-> [Cron](/locations/cron)
-> [Docker Volumes](/locations/docker)
+> [Overview](/location/overview)
+> [Hooks](/location/hooks)
+> [Exluding Files](/location/exclude)
+> [Forget Policy](/location/forget)
+> [Cron](/location/cron)
+> [Docker Volumes](/location/docker)
 
 > :Collapse label=Backend
 >
