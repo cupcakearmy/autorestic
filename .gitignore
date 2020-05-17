@@ -18,3 +18,6 @@ Dockerfile
 .autorestic.yml
 .autorestic.lock
 .docker.yml
+
+# Docs
+.codedoc

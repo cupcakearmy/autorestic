@@ -5,9 +5,11 @@
 		"build:watch": "tsc -w",
 		"dev": "tsnd --no-notify --respawn ./src/autorestic.ts",
 		"move": "mv bin/autorestic-linux bin/autorestic_linux_x64 && mv bin/autorestic-macos bin/autorestic_macos_x64",
-		"bin": "yarn run build && pkg lib/autorestic.js --targets latest-macos-x64,latest-linux-x64 --out-path bin && yarn run move"
+		"bin": "yarn run build && pkg lib/autorestic.js --targets latest-macos-x64,latest-linux-x64 --out-path bin && yarn run move",
+		"docs:build": "codedoc build"
 	},
 	"devDependencies": {
+		"@codedoc/cli": "^0.1.4",
 		"@types/js-yaml": "^3.12.1",
 		"@types/minimist": "^1.2.0",
 		"@types/node": "^12.11.7",
