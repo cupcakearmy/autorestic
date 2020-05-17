@@ -30,7 +30,7 @@ export const execPlain = (command: string, opt: SpawnSyncOptions = {}) => {
 	const split = command.split(' ')
 	if (split.length < 1) throw new Error(`The command ${command} is not valid`.red)
 
-	return exec(split[0], split.slice(1), opt)
+	return exec(split[0], split.slice(1), { shell: true, ...opt })
 }
 
 export const checkIfResticIsAvailable = () =>
@@ -42,7 +42,7 @@ export const checkIfResticIsAvailable = () =>
 	)
 
 export const checkIfCommandIsAvailable = (cmd: string, errorMsg?: string) => {
-	if (spawnSync(cmd).error)
+	if (spawnSync(cmd, { shell: true }).error)
 		throw new Error(errorMsg ? errorMsg : `"${cmd}" is not installed`.red)
 }
 
