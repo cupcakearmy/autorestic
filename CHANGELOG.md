@@ -1,3 +1,4 @@
-## 0.16
+## 0.17
 
-- notify user if config file was overwritten and make a copy of it as backup
+- new docs
+- cron command
