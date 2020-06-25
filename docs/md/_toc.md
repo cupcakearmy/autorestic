@@ -7,7 +7,7 @@
 >
 > [Overview](/location/overview)
 > [Hooks](/location/hooks)
-> [Exluding Files](/location/exclude)
+> [Excluding Files](/location/exclude)
 > [Forget Policy](/location/forget)
 > [Cron](/location/cron)
 > [Docker Volumes](/location/docker)
