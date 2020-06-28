@@ -34,8 +34,8 @@ Then paste this at the bottom of the file and save it. Note that in this specifi
 # This is required, as it otherwise cannot find restic as a command.
 PATH="/usr/local/bin:/usr/bin:/bin"
 
-# Example running every monday at 4 in the morning
-0 4 * * 1 autorestic -c /srv/.autorestic.yml cron
+# Example running every 5 minutes
+*/5 * * * * autorestic -c /srv/.autorestic.yml cron
 ```
 
 Now you can add as many `cron` attributes as you wish ⏱
