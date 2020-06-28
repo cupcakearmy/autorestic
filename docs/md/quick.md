@@ -16,7 +16,8 @@ For a quick overview:
 
 - `locations` can be seen as the inputs and `backends` the output where the data is stored and backed up.
 - One `location` can have one or multiple `backends` for redudancy.
-- One `backend` can also be the target for multiple `locations`
+- One `backend` can also be the target for multiple `locations`.
+- **Backup the config file as it will contain the generated keys**. If you don't have a copy of that keys, the backups are useless as they are encrypted and data will be not recoverable.
 
 ```yaml | .autorestic.yml
 locations:
@@ -42,13 +43,15 @@ backends:
     path: /mnt/my_external_storage
 ```
 
-## Check [Optional]
+## Check
 
 ```bash
 autorestic check -a
 ```
 
 This checks if the config file has any issues. If this is the first time this can take longer as autorestic will setup the backends.
+
+Now is good time to **backup the config**. After you run autorestic at least once we will add the generated encryption keys to the config.
 
 ## Backup
 

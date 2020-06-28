@@ -16,7 +16,11 @@ Here is a awesome website with [some examples](https://crontab.guru/examples.htm
 
 ## Installing the cron
 
-To actually enable cron jobs you need something to call `autorestic cron` on a timed shedule. Note that the shedule has nothing to do with the `cron` attribute in each location. My advise would be to trigger the command every 5min, but if you have a cronjob that runs only once a week, it's probably enough to shedule it once a day.
+**This has to be done only once, regadless of now many cros you have in your config file.**
+
+To actually enable cron jobs you need something to call `autorestic cron` on a timed shedule.
+Note that the shedule has nothing to do with the `cron` attribute in each location.
+My advise would be to trigger the command every 5min, but if you have a cronjob that runs only once a week, it's probably enough to shedule it once a day.
 
 ### Crontab
 
