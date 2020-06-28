@@ -31,7 +31,11 @@ crontab -e
 Then paste this at the bottom of the file and save it. Note that in this specific example the `.autorestic.yml` is located in `/srv/`. You need to modify that part of course to fit your config file.
 
 ```bash
-0 * * * * /usr/local/bin/autorestic -c /srv/.autorestic.yml
+# This is required, as it otherwise cannot find restic as a command.
+PATH="/usr/local/bin:/usr/bin:/bin"
+
+# Example running every monday at 4 in the morning
+0 4 * * 1 autorestic -c /srv/.autorestic.yml cron
 ```
 
 Now you can add as many `cron` attributes as you wish ⏱
