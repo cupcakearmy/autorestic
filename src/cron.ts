@@ -17,7 +17,7 @@ const runCronForLocation = (name: string, location: Location) => {
     lock.crons[name] = { lastRun: Date.now() }
     writeLock(lock)
   } else {
-    console.log(`${name.yellow} ▶ Skipping. Sheduled for: ${parsed.next().toString().underline.blue}`)
+    console.log(`${name.yellow} ▶ Skipping. Scheduled for: ${parsed.next().toString().underline.blue}`)
   }
 }
 
