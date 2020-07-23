@@ -48,4 +48,15 @@ backends:
     path: my-host:/remote/path/on/the/server
 ```
 
+## Rest Server
+
+See [here](https://github.com/restic/rest-server) for how to install a rest server backend and [here](https://restic.readthedocs.io/en/latest/030_preparing_a_new_repo.html#rest-server) for further documentation.
+
+```yaml
+backends:
+  name-of-backend:
+    type: rest
+    path: http://localhost:8000/repo_name
+```
+
 > :ToCPrevNext
