@@ -1,4 +1,3 @@
-## 0.17
+## 0.20
 
-- new docs
-- cron command
+- enable rest endpoint
