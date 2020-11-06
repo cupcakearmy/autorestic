@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@codedoc/core": "^0.2.15"
+  }
+}

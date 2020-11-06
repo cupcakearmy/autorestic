@@ -1,11 +1,10 @@
 import CronParser from 'cron-parser'
 
-import { config } from './autorestic'
+import { config } from './'
 import { checkAndConfigureBackendsForLocations } from './backend'
 import { Location } from './types'
 import { backupLocation } from './backup'
 import { readLock, writeLock } from './lock'
-
 
 const runCronForLocation = (name: string, location: Location) => {
   const lock = readLock()
@@ -26,8 +25,7 @@ export const runCron = () => {
   checkAndConfigureBackendsForLocations(Object.fromEntries(locationsWithCron))
 
   console.log('\nRunning cron jobs'.underline.gray)
-  for (const [name, location] of locationsWithCron)
-    runCronForLocation(name, location)
+  for (const [name, location] of locationsWithCron) runCronForLocation(name, location)
 
   console.log('\nFinished!'.underline + ' 🎉')
 }

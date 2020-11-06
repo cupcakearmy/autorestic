@@ -2,7 +2,7 @@
   <br>
   <br>
   <br>
-  <img align="center" src="https://github.com/cupcakearmy/autorestic/raw/master/docs/assets/logo.png" height="50" alt="autorestic logo">
+  <img align="center" src="https://github.com/cupcakearmy/autorestic/raw/master/.github/logo.png" height="50" alt="autorestic logo">
   <br>
   <br>
   

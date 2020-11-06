@@ -1,13 +1,15 @@
-import axios from 'axios'
 import { spawnSync, SpawnSyncOptions } from 'child_process'
 import { createHash, randomBytes } from 'crypto'
 import { createWriteStream, renameSync, unlinkSync } from 'fs'
 import { homedir, tmpdir } from 'os'
 import { dirname, isAbsolute, join, resolve } from 'path'
+
+import axios from 'axios'
 import { Duration, Humanizer } from 'uhrwerk'
 
 import { CONFIG_FILE, LocationFromPrefixes } from './config'
-import { Location } from './types'
+import { Backends, Location, Locations } from './types'
+import { config } from '.'
 
 export const exec = (command: string, args: string[], { env, ...rest }: SpawnSyncOptions = {}) => {
   const { stdout, stderr, status } = spawnSync(command, args, {
@@ -104,6 +106,35 @@ export const getFlagsFromLocation = (location: Location, command?: string): stri
     }
 
   return flags
+}
+
+export function parseBackend(backends: string[] = [], all: boolean = false): Backends {
+  if (all) return config.backends
+  if (backends.length) {
+    for (const backend of backends) if (!config.backends[backend]) throw new Error('Invalid backend: '.red + backend)
+    return filterObjectByKey(config.backends, backends)
+  } else {
+    throw new Error(
+      'No backends specified.'.red + '\n-a, --all, -a\t\t\tSelect all.' + '\n-b, --backend <backends...>\t\tSpecify one or more backend'
+    )
+  }
+}
+
+export function checkIfValidLocation(location: string) {
+  if (!config.locations[location]) throw new Error('Invalid location: '.red + location)
+}
+
+export function parseLocations(locations: string[] = [], all: boolean = false): Locations {
+  if (all) {
+    return config.locations
+  }
+  if (locations.length) {
+    for (const location of locations) checkIfValidLocation(location)
+    return filterObjectByKey(config.locations, locations)
+  }
+  throw new Error(
+    'No locations specified.'.red + '\n-a, --all\t\t\tSelect all.' + '\n-l, --location <locations...>\t\t\tSpecify one or more location'
+  )
 }
 
 export const makeArrayIfIsNot = <T>(maybeArray: T | T[]): T[] => (Array.isArray(maybeArray) ? maybeArray : [maybeArray])
