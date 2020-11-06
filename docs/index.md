@@ -1,4 +1,4 @@
-# autorestic
+# `autorestic`
 
 High backup level CLI utility for [restic](https://restic.net/).
 
