@@ -1,5 +1,5 @@
-import { config } from './'
-import { fill, treeToString } from './utils'
+import { config } from '../'
+import { fill, treeToString } from '../utils'
 
 const showAll = () => {
   console.log('\n\n' + fill(32, '_') + 'LOCATIONS:'.underline)

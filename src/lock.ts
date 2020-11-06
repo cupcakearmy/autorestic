@@ -1,7 +1,7 @@
 import fs from 'fs'
 
-import { pathRelativeToConfigFile } from "./utils"
-import { Lockfile } from "./types"
+import { pathRelativeToConfigFile } from './utils'
+import { Lockfile } from './types'
 
 export const getLockFileName = () => {
   const LOCK_FILE = '.autorestic.lock'
@@ -12,11 +12,11 @@ export const readLock = (): Lockfile => {
   const name = getLockFileName()
   let lock = {
     running: false,
-    crons: {}
+    crons: {},
   }
   try {
     lock = JSON.parse(fs.readFileSync(name, { encoding: 'utf-8' }))
-  } catch { }
+  } catch {}
   return lock
 }
 export const writeLock = (lock: Lockfile) => {

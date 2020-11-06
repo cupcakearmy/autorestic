@@ -2,10 +2,9 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "build:watch": "tsc -w",
-    "dev": "tsnd --no-notify --respawn ./src/autorestic.ts",
-    "move": "mv bin/autorestic-linux bin/autorestic_linux_x64 && mv bin/autorestic-macos bin/autorestic_macos_x64",
-    "bin": "yarn run build && pkg lib/autorestic.js --targets latest-macos-x64,latest-linux-x64 --out-path bin && yarn run move",
+    "dev": "tsc -w",
+    "move": "mv bin/index-linux bin/autorestic_linux_x64 && mv bin/index-macos bin/autorestic_macos_x64",
+    "bin": "yarn run build && pkg lib/index.js --targets latest-macos-x64,latest-linux-x64 --out-path bin && yarn run move",
     "docs:build": "codedoc install && codedoc build",
     "docs:dev": "codedoc serve"
   },
@@ -25,7 +24,6 @@
     "commander": "^6.2.0",
     "cron-parser": "2.x.x",
     "js-yaml": "3.x.x",
-    "minimist": "1.x.x",
     "uhrwerk": "1.x.x"
   }
 }

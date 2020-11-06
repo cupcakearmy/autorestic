@@ -5,7 +5,6 @@ import { homedir } from 'os'
 import yaml from 'js-yaml'
 import CronParser from 'cron-parser'
 
-import { flags } from './autorestic'
 import { Backend, Config } from './types'
 import { makeArrayIfIsNot, makeObjectKeysLowercase, rand } from './utils'
 
@@ -56,9 +55,9 @@ export const normalizeAndCheckLocations = (config: Config) => {
   }
 }
 
-const findConfigFile = (): string => {
+const findConfigFile = (custom: string): string => {
   const config = '.autorestic.yml'
-  const paths = [resolve(flags.config || ''), resolve('./' + config), homedir() + '/' + config]
+  const paths = [resolve(custom || ''), resolve('./' + config), homedir() + '/' + config]
   for (const path of paths) {
     try {
       const file = statSync(path)
@@ -70,8 +69,8 @@ const findConfigFile = (): string => {
 
 export let CONFIG_FILE: string = ''
 
-export const init = (): Config => {
-  const file = findConfigFile()
+export const init = (custom: string): Config => {
+  const file = findConfigFile(custom)
   CONFIG_FILE = file
 
   const parsed = yaml.safeLoad(readFileSync(CONFIG_FILE).toString())
