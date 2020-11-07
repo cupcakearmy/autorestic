@@ -31,11 +31,17 @@ const enqueue = (fn: Function) => (cmd: any) => {
 }
 
 program.storeOptionsAsProperties()
-program.name('autorestic').version(VERSION)
+program.name('autorestic').description('Easy Restic CLI Utility').version(VERSION)
 
 program.option('-c, --config <path>', 'Config file').option('-v, --verbose', 'Verbosity', false)
 
 program.command('info').action(enqueue(info))
+
+program.on('--help', () => {
+  console.log('')
+  console.log(`${'Docs:'.yellow}\t\thttps://autorestic.vercel.app`)
+  console.log(`${'Examples:'.yellow}\thttps://autorestic.vercel.app/examples`)
+})
 
 program
   .command('check')
