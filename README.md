@@ -9,7 +9,7 @@
   <p align="center">
     Config driven, easy backup cli for <a href="https://restic.net/">restic</a>.
     <br>
-    <strong><a href="https://cupcakearmy.github.io/autorestic/">»»» Docs & Getting Started »»»</a></strong>
+    <strong><a href="https://autorestic.vercel.app/">»»» Docs & Getting Started »»»</a></strong>
   </p>
 </p>
 
