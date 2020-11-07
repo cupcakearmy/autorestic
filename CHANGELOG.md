@@ -1,3 +1,3 @@
-## 0.20
+## 0.21
 
-- enable rest endpoint
+- switched to commander
