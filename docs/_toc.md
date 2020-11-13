@@ -19,6 +19,7 @@
 
 > :Collapse label=CLI
 >
+> [General](/cli/general)
 > [Info](/cli/info)
 > [Check](/cli/check)
 > [Backup](/cli/backup)

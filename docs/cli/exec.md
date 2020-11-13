@@ -10,6 +10,6 @@ This is avery handy command which enables you to run any native restic command o
 autorestic exec -a -- snapshots
 ```
 
-With `exec` you can basically run every cli command that you would be able to run with the restic cli. It only prefillst path, key, etc.
+With `exec` you can basically run every cli command that you would be able to run with the restic cli. It only pre-fills path, key, etc.
 
 > :ToCPrevNext

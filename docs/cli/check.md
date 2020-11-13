@@ -1,4 +1,4 @@
-# check
+# Check
 
 ```bash
 autorestic check [-b, --backend]  [-a, --all]

@@ -39,9 +39,11 @@ Then paste this at the bottom of the file and save it. Note that in this specifi
 PATH="/usr/local/bin:/usr/bin:/bin"
 
 # Example running every 5 minutes
-*/5 * * * * autorestic -c /srv/.autorestic.yml cron
+*/5 * * * * autorestic -c /srv/.autorestic.yml --ci cron
 ```
 
-Now you can add as many `cron` attributes as you wish ⏱
+> The `--ci` option is not required, but recommended
+
+Now you can add as many `cron` attributes as you wish in the config file ⏱
 
 > :ToCPrevNext
