@@ -17,8 +17,9 @@ import install from './handlers/install'
 import { uninstall } from './handlers/uninstall'
 import { upgrade } from './handlers/upgrade'
 
-export const VERSION = '0.22'
+export const VERSION = '0.23'
 export const INSTALL_DIR = '/usr/local/bin'
+let requireConfig: boolean = true
 
 process.on('uncaughtException', (err) => {
   console.log(err.message)
@@ -90,12 +91,19 @@ program.command('install').description('Installs both restic and autorestic to /
 
 program.command('uninstall').description('Uninstalls autorestic from the system').action(enqueue(uninstall))
 
-program.command('upgrade').alias('update').description('Checks and installs new autorestic versions').action(enqueue(upgrade))
+program
+  .command('upgrade')
+  .alias('update')
+  .description('Checks and installs new autorestic versions')
+  .action(() => {
+    requireConfig = false
+    queue = upgrade
+  })
 
 const { verbose, config: configFile, ci } = program.parse(process.argv)
 
 export const VERBOSE = verbose
-export let config: Config = init(configFile)
+export let config: Config
 setCIMode(ci)
 
 try {
@@ -106,6 +114,8 @@ try {
     ...lock,
     running: true,
   })
+
+  if (requireConfig) config = init(configFile)
   queue()
 } catch (e) {
   console.error(e.message)
