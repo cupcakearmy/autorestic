@@ -1,3 +1,3 @@
-## 0.22
+## 0.23
 
-- New CI Flag for clean ci output
+- Don't require config for update command
