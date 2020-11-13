@@ -1,5 +1,6 @@
 import 'colors'
 import { program } from 'commander'
+import { setCIMode } from 'clitastic'
 
 import { unlock, readLock, writeLock } from './lock'
 import { Config } from './types'
@@ -16,7 +17,7 @@ import install from './handlers/install'
 import { uninstall } from './handlers/uninstall'
 import { upgrade } from './handlers/upgrade'
 
-export const VERSION = '0.21'
+export const VERSION = '0.22'
 export const INSTALL_DIR = '/usr/local/bin'
 
 process.on('uncaughtException', (err) => {
@@ -33,7 +34,9 @@ const enqueue = (fn: Function) => (cmd: any) => {
 program.storeOptionsAsProperties()
 program.name('autorestic').description('Easy Restic CLI Utility').version(VERSION)
 
-program.option('-c, --config <path>', 'Config file').option('-v, --verbose', 'Verbosity', false)
+program.option('-c, --config <path>', 'Config file')
+program.option('-v, --verbose', 'Verbosity', false)
+program.option('--ci', 'CI Mode. Removes interactivity from the shell', false)
 
 program.command('info').action(enqueue(info))
 
@@ -89,10 +92,11 @@ program.command('uninstall').description('Uninstalls autorestic from the system'
 
 program.command('upgrade').alias('update').description('Checks and installs new autorestic versions').action(enqueue(upgrade))
 
-const { verbose, config: configFile } = program.parse(process.argv)
+const { verbose, config: configFile, ci } = program.parse(process.argv)
 
 export const VERBOSE = verbose
 export let config: Config = init(configFile)
+setCIMode(ci)
 
 try {
   const lock = readLock()

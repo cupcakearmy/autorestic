@@ -1,3 +1,3 @@
-## 0.21
+## 0.22
 
-- switched to commander
+- New CI Flag for clean ci output
