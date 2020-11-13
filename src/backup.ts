@@ -1,7 +1,7 @@
 import { Writer } from 'clitastic'
 import { mkdirSync } from 'fs'
 
-import { config, VERBOSE } from './'
+import { config, hasError, VERBOSE } from './'
 import { getEnvFromBackend } from './backend'
 import { LocationFromPrefixes } from './config'
 import { Locations, Location, Backend } from './types'
@@ -68,6 +68,7 @@ export const backupSingle = (name: string, to: string, location: Location) => {
 
     writer.done(`${name}${to.blue} : ${'Done ✓'.green} (${delta.finished(true)})`)
   } catch (e) {
+    hasError()
     writer.done(`${name}${to.blue} : ${'Failed!'.red} (${delta.finished(true)}) ${e.message}`)
   }
 }

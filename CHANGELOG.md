@@ -1,3 +1,3 @@
-## 0.23
+## 0.24
 
-- Don't require config for update command
+- Exit code on failure

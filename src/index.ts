@@ -17,9 +17,16 @@ import install from './handlers/install'
 import { uninstall } from './handlers/uninstall'
 import { upgrade } from './handlers/upgrade'
 
-export const VERSION = '0.23'
+export const VERSION = '0.24'
 export const INSTALL_DIR = '/usr/local/bin'
+
 let requireConfig: boolean = true
+let error: boolean = false
+
+export function hasError() {
+  console.log('ERROR!')
+  error = true
+}
 
 process.on('uncaughtException', (err) => {
   console.log(err.message)
@@ -27,9 +34,9 @@ process.on('uncaughtException', (err) => {
   process.exit(1)
 })
 
-let queue: Function = () => {}
+let queue: () => Promise<void> = async () => {}
 const enqueue = (fn: Function) => (cmd: any) => {
-  queue = () => fn(cmd.opts())
+  queue = async () => fn(cmd.opts())
 }
 
 program.storeOptionsAsProperties()
@@ -54,7 +61,7 @@ program
   .option('-a, --all')
   .action(enqueue(check))
 
-program.command('backup').description('Performs a backup').option('-b, --backend <backends...>').option('-a, --all').action(enqueue(backup))
+program.command('backup').description('Performs a backup').option('-l, --location <locations...>').option('-a, --all').action(enqueue(backup))
 
 program
   .command('restore')
@@ -84,7 +91,7 @@ program
   .option('-b, --backend <backends...>')
   .option('-a, --all')
   .action(({ args, all, backend }) => {
-    queue = () => exec({ all, backend }, args)
+    queue = async () => exec({ all, backend }, args)
   })
 
 program.command('install').description('Installs both restic and autorestic to /usr/local/bin').action(enqueue(install))
@@ -105,20 +112,22 @@ const { verbose, config: configFile, ci } = program.parse(process.argv)
 export const VERBOSE = verbose
 export let config: Config
 setCIMode(ci)
+;(async () => {
+  try {
+    const lock = readLock()
+    if (lock.running) throw new Error('An instance of autorestic is already running for this config file'.red)
 
-try {
-  const lock = readLock()
-  if (lock.running) throw new Error('An instance of autorestic is already running for this config file'.red)
+    writeLock({
+      ...lock,
+      running: true,
+    })
 
-  writeLock({
-    ...lock,
-    running: true,
-  })
-
-  if (requireConfig) config = init(configFile)
-  queue()
-} catch (e) {
-  console.error(e.message)
-} finally {
-  unlock()
-}
+    if (requireConfig) config = init(configFile)
+    await queue()
+    if (error) process.exit(1)
+  } catch (e) {
+    console.error(e.message)
+  } finally {
+    unlock()
+  }
+})()
