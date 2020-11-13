@@ -24,7 +24,6 @@ let requireConfig: boolean = true
 let error: boolean = false
 
 export function hasError() {
-  console.log('ERROR!')
   error = true
 }
 
