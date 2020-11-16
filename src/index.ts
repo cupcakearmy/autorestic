@@ -1,4 +1,4 @@
-import 'colors'
+import colors from 'colors'
 import { program } from 'commander'
 import { setCIMode } from 'clitastic'
 
@@ -17,7 +17,7 @@ import install from './handlers/install'
 import { uninstall } from './handlers/uninstall'
 import { upgrade } from './handlers/upgrade'
 
-export const VERSION = '0.24'
+export const VERSION = '0.25'
 export const INSTALL_DIR = '/usr/local/bin'
 
 let requireConfig: boolean = true
@@ -111,7 +111,9 @@ const { verbose, config: configFile, ci } = program.parse(process.argv)
 export const VERBOSE = verbose
 export let config: Config
 setCIMode(ci)
-;(async () => {
+if (ci) colors.disable()
+
+async function main() {
   try {
     const lock = readLock()
     if (lock.running) throw new Error('An instance of autorestic is already running for this config file'.red)
@@ -129,4 +131,5 @@ setCIMode(ci)
   } finally {
     unlock()
   }
-})()
+}
+main()

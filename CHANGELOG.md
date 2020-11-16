@@ -1,3 +1,3 @@
-## 0.24
+## 0.25
 
-- Exit code on failure
+- disable color in CI mode
