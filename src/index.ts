@@ -115,21 +115,23 @@ if (ci) colors.disable()
 
 async function main() {
   try {
-    const lock = readLock()
-    if (lock.running) throw new Error('An instance of autorestic is already running for this config file'.red)
+    if (requireConfig) {
+      config = init(configFile)
+      const lock = readLock()
+      if (lock.running) throw new Error('An instance of autorestic is already running for this config file'.red)
 
-    writeLock({
-      ...lock,
-      running: true,
-    })
+      writeLock({
+        ...lock,
+        running: true,
+      })
+    }
 
-    if (requireConfig) config = init(configFile)
     await queue()
     if (error) process.exit(1)
   } catch (e) {
     console.error(e.message)
   } finally {
-    unlock()
+    if (requireConfig) unlock()
   }
 }
 main()
