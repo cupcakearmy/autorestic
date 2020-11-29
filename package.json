@@ -1,10 +1,11 @@
 {
   "private": true,
+  "version": "0.26",
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
     "move": "mv bin/index-linux bin/autorestic_linux_x64 && mv bin/index-macos bin/autorestic_macos_x64",
-    "bin": "yarn run build && pkg lib/index.js --targets latest-macos-x64,latest-linux-x64 --out-path bin && yarn run move",
+    "bin": "yarn run build && pkg dist/src/index.js --targets latest-macos-x64,latest-linux-x64 --out-path bin && yarn run move",
     "docs:build": "codedoc install && codedoc build",
     "docs:dev": "codedoc serve"
   },

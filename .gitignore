@@ -13,6 +13,7 @@ restore
 docker
 Dockerfile
 build
+dist
 
 # Config
 .autorestic.yml
