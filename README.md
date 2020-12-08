@@ -19,3 +19,7 @@
 ### Why / What?
 
 Autorestic is a wrapper around the amazing [restic](https://restic.net/). While being amazing the restic cli can be a bit overwhelming and difficult to manage if you have many different location that you want to backup to multiple locations. This utility is aimed at making this easier 🙂
+
+### Questions / Support
+
+Check the [discussions page](https://github.com/cupcakearmy/autorestic/discussions)
