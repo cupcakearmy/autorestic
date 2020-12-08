@@ -2,7 +2,7 @@ import colors from 'colors'
 import { program } from 'commander'
 import { setCIMode } from 'clitastic'
 
-import { unlock, readLock, writeLock } from './lock'
+import { unlock, readLock, writeLock, lock } from './lock'
 import { Config } from './types'
 import { init } from './config'
 import { version } from '../package.json'
@@ -118,21 +118,19 @@ async function main() {
   try {
     if (requireConfig) {
       config = init(configFile)
-      const lock = readLock()
-      if (lock.running) throw new Error('An instance of autorestic is already running for this config file'.red)
-
-      writeLock({
-        ...lock,
-        running: true,
-      })
+      const { running } = readLock()
+      if (running) {
+        console.log('An instance of autorestic is already running for this config file'.red)
+        process.exit(1)
+      }
+      lock()
     }
-
     await queue()
-    if (error) process.exit(1)
   } catch (e) {
     console.error(e.message)
   } finally {
     if (requireConfig) unlock()
   }
+  if (error) process.exit(1)
 }
 main()

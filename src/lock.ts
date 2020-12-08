@@ -30,3 +30,10 @@ export const unlock = () => {
     running: false,
   })
 }
+
+export const lock = () => {
+  writeLock({
+    ...readLock(),
+    running: true,
+  })
+}
