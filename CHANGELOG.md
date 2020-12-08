@@ -1,3 +1,3 @@
-## 0.25
+## 0.27
 
-- disable color in CI mode
+- fix locking issue
