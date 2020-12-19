@@ -5,7 +5,6 @@ import { setCIMode } from 'clitastic'
 import { unlock, readLock, writeLock, lock } from './lock'
 import { Config } from './types'
 import { init } from './config'
-import { version } from '../package.json'
 
 import info from './handlers/info'
 import check from './handlers/check'
@@ -18,7 +17,7 @@ import install from './handlers/install'
 import { uninstall } from './handlers/uninstall'
 import { upgrade } from './handlers/upgrade'
 
-export const VERSION = version
+export const VERSION = '0.27'
 export const INSTALL_DIR = '/usr/local/bin'
 
 let requireConfig: boolean = true

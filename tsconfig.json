@@ -9,5 +9,5 @@
     "alwaysStrict": true,
     "strictNullChecks": true
   },
-  "include": ["./src", "./package.json"]
+  "include": ["./src"]
 }
