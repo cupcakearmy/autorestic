@@ -17,7 +17,7 @@
     "typescript": "^3.9"
   },
   "dependencies": {
-    "axios": "^0.19",
+    "axios": "^0.21",
     "clitastic": "^0.1.2",
     "colors": "^1",
     "commander": "^6.2",
