@@ -2,20 +2,13 @@
 .idea
 .vscode
 
-# Node
-node_modules/
-
-# Build & Runtime
-bin
-lib
-data
-restore
-docker
-Dockerfile
-build
-dist
+# Docs
+node_modules
 
 # Config
-.autorestic.yml
-.autorestic.lock
-.docker.yml
+.autorestic*
+
+# Build & Dev
+test
+autorestic
+data
