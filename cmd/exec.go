@@ -25,7 +25,7 @@ import (
 // execCmd represents the exec command
 var execCmd = &cobra.Command{
 	Use:   "exec",
-	Short: "A brief description of your command",
+	Short: "Execute arbitrary native restic commands for given backends",
 	Run: func(cmd *cobra.Command, args []string) {
 		config := internal.GetConfig()
 		if err := config.CheckConfig(); err != nil {

@@ -26,7 +26,7 @@ import (
 // backupCmd represents the backup command
 var backupCmd = &cobra.Command{
 	Use:   "backup",
-	Short: "A brief description of your command",
+	Short: "Create backups for given locations",
 	Run: func(cmd *cobra.Command, args []string) {
 		config := internal.GetConfig()
 		{

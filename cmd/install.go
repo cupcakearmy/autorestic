@@ -22,7 +22,7 @@ import (
 
 var installCmd = &cobra.Command{
 	Use:   "install",
-	Short: "A brief description of your command",
+	Short: "Install restic if missing",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := bins.InstallRestic()
 		cobra.CheckErr(err)

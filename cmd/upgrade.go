@@ -22,7 +22,7 @@ import (
 
 var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
-	Short: "A brief description of your command",
+	Short: "Upgrade autorestic and restic",
 	Run: func(cmd *cobra.Command, args []string) {
 		noRestic, _ := cmd.Flags().GetBool("no-restic")
 		err := bins.Upgrade(!noRestic)
