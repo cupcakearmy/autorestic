@@ -83,3 +83,27 @@ func (l Location) Backup() error {
 	}
 	return nil
 }
+
+func (l Location) Forget(prune bool) error {
+	c := GetConfig()
+	from := GetPathRelativeToConfig(l.From)
+	for _, to := range l.To {
+		backend := c.Backends[to]
+		options := ExecuteOptions{
+			Envs: backend.getEnv(),
+			Dir:  from,
+		}
+		flags := l.getOptions("forget")
+		cmd := []string{"forget", "--path", from}
+		if prune {
+			cmd = append(cmd, "--prune")
+		}
+		cmd = append(cmd, flags...)
+		out, err := ExecuteResticCommand(options, cmd...)
+		fmt.Println(out)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

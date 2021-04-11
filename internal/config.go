@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const VERSION = "1.0.0"
+
 type Config struct {
 	Locations map[string]Location `mapstructure:"locations"`
 	Backends  map[string]Backend  `mapstructure:"backends"`
@@ -60,7 +62,7 @@ func (c Config) CheckConfig() error {
 	return nil
 }
 
-func GetAllOrLocation(cmd *cobra.Command, backends bool) []string {
+func GetAllOrSelected(cmd *cobra.Command, backends bool) ([]string, error) {
 	var list []string
 	if backends {
 		for key := range config.Backends {
@@ -73,7 +75,7 @@ func GetAllOrLocation(cmd *cobra.Command, backends bool) []string {
 	}
 	all, _ := cmd.Flags().GetBool("all")
 	if all {
-		return list
+		return list, nil
 	} else {
 		var selected []string
 		if backends {
@@ -92,9 +94,22 @@ func GetAllOrLocation(cmd *cobra.Command, backends bool) []string {
 				}
 			}
 			if !found {
-				panic("invalid key")
+				if backends {
+					return nil, fmt.Errorf("invalid backend \"%s\"", s)
+				} else {
+					return nil, fmt.Errorf("invalid location \"%s\"", s)
+				}
 			}
 		}
-		return selected
+		return selected, nil
+	}
+}
+
+func AddFlagsToCommand(cmd *cobra.Command, backend bool) {
+	cmd.PersistentFlags().BoolP("all", "a", false, "Backup all locations")
+	if backend {
+		cmd.PersistentFlags().StringSliceP("backend", "b", []string{}, "backends")
+	} else {
+		cmd.PersistentFlags().StringSliceP("location", "l", []string{}, "Locations")
 	}
 }

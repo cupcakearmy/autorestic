@@ -12,3 +12,4 @@ node_modules
 test
 autorestic
 data
+dist

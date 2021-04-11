@@ -16,34 +16,34 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/spf13/cobra"
 )
 
-// execCmd represents the exec command
-var execCmd = &cobra.Command{
-	Use:   "exec",
-	Short: "A brief description of your command",
+// forgetCmd represents the forget command
+var forgetCmd = &cobra.Command{
+	Use:   "forget",
+	Short: "Forget and optionally prune snapshots according the specified policies",
 	Run: func(cmd *cobra.Command, args []string) {
 		config := internal.GetConfig()
 		if err := config.CheckConfig(); err != nil {
 			panic(err)
 		}
 		{
-			selected, err := internal.GetAllOrSelected(cmd, true)
+			selected, err := internal.GetAllOrSelected(cmd, false)
 			cobra.CheckErr(err)
+			prune, _ := cmd.Flags().GetBool("prune")
 			for _, name := range selected {
-				fmt.Println(name)
-				backend := config.Backends[name]
-				backend.Exec(args)
+				location := config.Locations[name]
+				err := location.Forget(prune)
+				cobra.CheckErr(err)
 			}
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(execCmd)
-	internal.AddFlagsToCommand(execCmd, true)
+	rootCmd.AddCommand(forgetCmd)
+	internal.AddFlagsToCommand(forgetCmd, false)
+	forgetCmd.Flags().Bool("prune", false, "Also prune repository")
 }

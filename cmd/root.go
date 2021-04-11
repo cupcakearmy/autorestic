@@ -30,8 +30,9 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "autorestic",
-	Short: "CLI Wrapper for restic",
+	Version: internal.VERSION,
+	Use:     "autorestic",
+	Short:   "CLI Wrapper for restic",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

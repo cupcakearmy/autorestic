@@ -16,34 +16,19 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/bins"
 	"github.com/spf13/cobra"
 )
 
-// execCmd represents the exec command
-var execCmd = &cobra.Command{
-	Use:   "exec",
+var installCmd = &cobra.Command{
+	Use:   "install",
 	Short: "A brief description of your command",
 	Run: func(cmd *cobra.Command, args []string) {
-		config := internal.GetConfig()
-		if err := config.CheckConfig(); err != nil {
-			panic(err)
-		}
-		{
-			selected, err := internal.GetAllOrSelected(cmd, true)
-			cobra.CheckErr(err)
-			for _, name := range selected {
-				fmt.Println(name)
-				backend := config.Backends[name]
-				backend.Exec(args)
-			}
-		}
+		err := bins.InstallRestic()
+		cobra.CheckErr(err)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(execCmd)
-	internal.AddFlagsToCommand(execCmd, true)
+	rootCmd.AddCommand(installCmd)
 }

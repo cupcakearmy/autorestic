@@ -39,25 +39,18 @@ var backupCmd = &cobra.Command{
 		}
 		defer lock.Unlock()
 		{
-			backup(internal.GetAllOrLocation(cmd, false), config)
+			selected, err := internal.GetAllOrSelected(cmd, false)
+			cobra.CheckErr(err)
+			for _, name := range selected {
+				location := config.Locations[name]
+				fmt.Printf("Backing up: `%s`", name)
+				location.Backup()
+			}
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(backupCmd)
-	backupCmd.PersistentFlags().StringSliceP("location", "l", []string{}, "Locations")
-	backupCmd.PersistentFlags().BoolP("all", "a", false, "Backup all locations")
-}
-
-func backup(locations []string, config *internal.Config) {
-	for _, name := range locations {
-		location, ok := config.Locations[name]
-		if !ok {
-			fmt.Println(fmt.Errorf("location `%s` does not exist", name))
-		} else {
-			fmt.Printf("Backing up: `%s`", name)
-			location.Backup()
-		}
-	}
+	internal.AddFlagsToCommand(backupCmd, false)
 }
