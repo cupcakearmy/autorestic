@@ -28,7 +28,7 @@ func getLock() *viper.Viper {
 	return lock
 }
 
-func set(locked bool) error {
+func setLock(locked bool) error {
 	lock := getLock()
 	if locked {
 		running := lock.GetBool("running")
@@ -43,10 +43,20 @@ func set(locked bool) error {
 	return nil
 }
 
+func GetCron(location string) int64 {
+	lock := getLock()
+	return lock.GetInt64("cron." + location)
+}
+
+func SetCron(location string, value int64) {
+	lock.Set("cron."+location, value)
+	lock.WriteConfigAs(file)
+}
+
 func Lock() error {
-	return set(true)
+	return setLock(true)
 }
 
 func Unlock() error {
-	return set(false)
+	return setLock(false)
 }

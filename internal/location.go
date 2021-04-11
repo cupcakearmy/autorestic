@@ -5,6 +5,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
+
+	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/robfig/cron"
 )
 
 type HookArray = []string
@@ -160,6 +164,29 @@ func (l Location) Restore(to, from string, force bool) error {
 	err = backend.Exec([]string{"restore", "--target", to, "--path", GetPathRelativeToConfig(l.From), "latest"})
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (l Location) RunCron() error {
+	if l.Cron == "" {
+		return nil
+	}
+
+	schedule, err := cron.ParseStandard(l.Cron)
+	if err != nil {
+		return err
+	}
+	last := lock.GetCron("test")
+	fmt.Println(last)
+	next := schedule.Next(time.Unix(last, 0))
+	fmt.Println(next)
+	now := time.Now()
+	if now.After(next) {
+		fmt.Println("Running")
+		lock.SetCron("test", now.Unix())
+	} else {
+		fmt.Println("Not due yet")
 	}
 	return nil
 }
