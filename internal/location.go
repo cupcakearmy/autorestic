@@ -70,47 +70,56 @@ func ExecuteHooks(commands []string, options ExecuteOptions) error {
 	return nil
 }
 
-func (l Location) Backup() error {
-	from := GetPathRelativeToConfig(l.From)
+func (l Location) forEachBackend(fn func(ExecuteOptions) error) error {
+	from, err := GetPathRelativeToConfig(l.From)
+	if err != nil {
+		return err
+	}
 	for _, to := range l.To {
 		backend, _ := GetBackend(to)
+		env, err := backend.getEnv()
+		if err != nil {
+			return nil
+		}
 		options := ExecuteOptions{
 			Command: "bash",
-			Envs:    backend.getEnv(),
+			Envs:    env,
 			Dir:     from,
 		}
-
-		if err := ExecuteHooks(l.Hooks.Before, options); err != nil {
-			return nil
-		}
-		{
-			flags := l.getOptions("backup")
-			cmd := []string{"backup"}
-			cmd = append(cmd, flags...)
-			cmd = append(cmd, ".")
-			out, err := ExecuteResticCommand(options, cmd...)
-			fmt.Println(out)
-			if err != nil {
-				return err
-			}
-		}
-		if err := ExecuteHooks(l.Hooks.After, options); err != nil {
-			return nil
+		if err := fn(options); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (l Location) Forget(prune bool, dry bool) error {
-	from := GetPathRelativeToConfig(l.From)
-	for _, to := range l.To {
-		backend, _ := GetBackend(to)
-		options := ExecuteOptions{
-			Envs: backend.getEnv(),
-			Dir:  from,
+func (l Location) Backup() error {
+	return l.forEachBackend(func(options ExecuteOptions) error {
+		if err := ExecuteHooks(l.Hooks.Before, options); err != nil {
+			return nil
 		}
+
+		flags := l.getOptions("backup")
+		cmd := []string{"backup"}
+		cmd = append(cmd, flags...)
+		cmd = append(cmd, ".")
+		out, err := ExecuteResticCommand(options, cmd...)
+		fmt.Println(out)
+		if err != nil {
+			return err
+		}
+
+		if err := ExecuteHooks(l.Hooks.After, options); err != nil {
+			return nil
+		}
+		return nil
+	})
+}
+
+func (l Location) Forget(prune bool, dry bool) error {
+	return l.forEachBackend(func(options ExecuteOptions) error {
 		flags := l.getOptions("forget")
-		cmd := []string{"forget", "--path", from}
+		cmd := []string{"forget", "--path", options.Dir}
 		if prune {
 			cmd = append(cmd, "--prune")
 		}
@@ -123,8 +132,8 @@ func (l Location) Forget(prune bool, dry bool) error {
 		if err != nil {
 			return err
 		}
-	}
-	return nil
+		return nil
+	})
 }
 
 func (l Location) hasBackend(backend string) bool {
@@ -169,7 +178,11 @@ func (l Location) Restore(to, from string, force bool) error {
 	}
 
 	backend, _ := GetBackend(from)
-	err = backend.Exec([]string{"restore", "--target", to, "--path", GetPathRelativeToConfig(l.From), "latest"})
+	resolved, err := GetPathRelativeToConfig(l.From)
+	if err != nil {
+		return nil
+	}
+	err = backend.Exec([]string{"restore", "--target", to, "--path", resolved, "latest"})
 	if err != nil {
 		return err
 	}

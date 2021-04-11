@@ -34,29 +34,26 @@ func GetConfig() *Config {
 	return config
 }
 
-func GetPathRelativeToConfig(p string) string {
+func GetPathRelativeToConfig(p string) (string, error) {
 	if path.IsAbs(p) {
-		return p
+		return p, nil
 	} else if strings.HasPrefix(p, "~") {
 		home, err := homedir.Dir()
-		if err != nil {
-			panic(err)
-		}
-		return path.Join(home, strings.TrimPrefix(p, "~"))
+		return path.Join(home, strings.TrimPrefix(p, "~")), err
 	} else {
-		return path.Join(path.Dir(viper.ConfigFileUsed()), p)
+		return path.Join(path.Dir(viper.ConfigFileUsed()), p), nil
 	}
 }
 
 func (c Config) CheckConfig() error {
-	for name, backend := range c.Backends {
+	for _, backend := range c.Backends {
 		if err := backend.validate(); err != nil {
-			return fmt.Errorf("backend \"%s\": %s", name, err)
+			return fmt.Errorf("backend \"%s\": %s", backend.Name, err)
 		}
 	}
-	for name, location := range c.Locations {
+	for _, location := range c.Locations {
 		if err := location.validate(c); err != nil {
-			return fmt.Errorf("location \"%s\": %s", name, err)
+			return fmt.Errorf("location \"%s\": %s", location.Name, err)
 		}
 	}
 	return nil

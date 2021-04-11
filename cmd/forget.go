@@ -31,19 +31,16 @@ var forgetCmd = &cobra.Command{
 		defer lock.Unlock()
 
 		config := internal.GetConfig()
-		if err := config.CheckConfig(); err != nil {
-			panic(err)
-		}
-		{
-			selected, err := internal.GetAllOrSelected(cmd, false)
+		CheckErr(config.CheckConfig())
+
+		selected, err := internal.GetAllOrSelected(cmd, false)
+		CheckErr(err)
+		prune, _ := cmd.Flags().GetBool("prune")
+		dry, _ := cmd.Flags().GetBool("dry-run")
+		for _, name := range selected {
+			location, _ := internal.GetLocation(name)
+			err := location.Forget(prune, dry)
 			CheckErr(err)
-			prune, _ := cmd.Flags().GetBool("prune")
-			dry, _ := cmd.Flags().GetBool("dry-run")
-			for _, name := range selected {
-				location, _ := internal.GetLocation(name)
-				err := location.Forget(prune, dry)
-				CheckErr(err)
-			}
 		}
 	},
 }

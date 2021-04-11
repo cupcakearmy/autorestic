@@ -33,17 +33,15 @@ var execCmd = &cobra.Command{
 		defer lock.Unlock()
 
 		config := internal.GetConfig()
-		if err := config.CheckConfig(); err != nil {
-			panic(err)
-		}
-		{
-			selected, err := internal.GetAllOrSelected(cmd, true)
-			CheckErr(err)
-			for _, name := range selected {
-				fmt.Println(name)
-				backend, _ := internal.GetBackend(name)
-				backend.Exec(args)
-			}
+		err = config.CheckConfig()
+		CheckErr(err)
+
+		selected, err := internal.GetAllOrSelected(cmd, true)
+		CheckErr(err)
+		for _, name := range selected {
+			fmt.Println(name)
+			backend, _ := internal.GetBackend(name)
+			backend.Exec(args)
 		}
 	},
 }
