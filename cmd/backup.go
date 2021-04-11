@@ -28,24 +28,20 @@ var backupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Create backups for given locations",
 	Run: func(cmd *cobra.Command, args []string) {
-		config := internal.GetConfig()
-		{
-			err := config.CheckConfig()
-			cobra.CheckErr(err)
-		}
-		{
-			err := lock.Lock()
-			cobra.CheckErr(err)
-		}
+		err := lock.Lock()
+		CheckErr(err)
 		defer lock.Unlock()
-		{
-			selected, err := internal.GetAllOrSelected(cmd, false)
-			cobra.CheckErr(err)
-			for _, name := range selected {
-				location := config.Locations[name]
-				fmt.Printf("Backing up: `%s`", name)
-				location.Backup()
-			}
+
+		config := internal.GetConfig()
+		err = config.CheckConfig()
+		CheckErr(err)
+
+		selected, err := internal.GetAllOrSelected(cmd, false)
+		CheckErr(err)
+		for _, name := range selected {
+			location, _ := internal.GetLocation(name)
+			fmt.Printf("Backing up: `%s`", name)
+			location.Backup()
 		}
 	},
 }

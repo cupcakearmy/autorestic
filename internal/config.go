@@ -15,8 +15,8 @@ import (
 const VERSION = "1.0.0"
 
 type Config struct {
-	Locations map[string]Location `mapstructure:"locations"`
-	Backends  map[string]Backend  `mapstructure:"backends"`
+	Locations []Location `mapstructure:"locations"`
+	Backends  []Backend  `mapstructure:"backends"`
 }
 
 var once sync.Once
@@ -65,12 +65,12 @@ func (c Config) CheckConfig() error {
 func GetAllOrSelected(cmd *cobra.Command, backends bool) ([]string, error) {
 	var list []string
 	if backends {
-		for key := range config.Backends {
-			list = append(list, key)
+		for _, b := range config.Backends {
+			list = append(list, b.Name)
 		}
 	} else {
-		for key := range config.Locations {
-			list = append(list, key)
+		for _, l := range config.Locations {
+			list = append(list, l.Name)
 		}
 	}
 	all, _ := cmd.Flags().GetBool("all")

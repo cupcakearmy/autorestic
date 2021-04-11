@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 )
 
@@ -29,11 +30,16 @@ var checkCmd = &cobra.Command{
 	Short: "Check if everything is setup",
 	Run: func(cmd *cobra.Command, args []string) {
 		if !internal.CheckIfResticIsCallable() {
-			cobra.CheckErr(errors.New("restic is not callable. Install: https://restic.readthedocs.io/en/stable/020_installation.html"))
+			CheckErr(errors.New("restic is not callable. Install: https://restic.readthedocs.io/en/stable/020_installation.html"))
 		}
+
+		err := lock.Lock()
+		CheckErr(err)
+		defer lock.Unlock()
+
 		config := internal.GetConfig()
-		err := config.CheckConfig()
-		cobra.CheckErr(err)
+		err = config.CheckConfig()
+		CheckErr(err)
 		fmt.Println("Everyting is fine.")
 	},
 }

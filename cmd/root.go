@@ -20,11 +20,20 @@ import (
 	"os"
 
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
+
+func CheckErr(err error) {
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		lock.Unlock()
+		os.Exit(1)
+	}
+}
 
 var cfgFile string
 
@@ -38,7 +47,7 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
+	CheckErr(rootCmd.Execute())
 }
 
 func init() {
@@ -63,7 +72,7 @@ func initConfig() {
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
-		cobra.CheckErr(err)
+		CheckErr(err)
 
 		viper.AddConfigPath(".")
 		viper.AddConfigPath(home)

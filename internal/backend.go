@@ -5,10 +5,21 @@ import (
 )
 
 type Backend struct {
+	Name string            `mapstructure:"name"`
 	Type string            `mapstructure:"type"`
 	Path string            `mapstructure:"path"`
 	Key  string            `mapstructure:"key"`
 	Env  map[string]string `mapstructure:"env"`
+}
+
+func GetBackend(name string) (Backend, bool) {
+	c := GetConfig()
+	for _, b := range c.Backends {
+		if b.Name == name {
+			return b, true
+		}
+	}
+	return Backend{}, false
 }
 
 func (b Backend) generateRepo() (string, error) {

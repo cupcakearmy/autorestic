@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 )
 
@@ -25,19 +26,23 @@ var forgetCmd = &cobra.Command{
 	Use:   "forget",
 	Short: "Forget and optionally prune snapshots according the specified policies",
 	Run: func(cmd *cobra.Command, args []string) {
+		err := lock.Lock()
+		CheckErr(err)
+		defer lock.Unlock()
+
 		config := internal.GetConfig()
 		if err := config.CheckConfig(); err != nil {
 			panic(err)
 		}
 		{
 			selected, err := internal.GetAllOrSelected(cmd, false)
-			cobra.CheckErr(err)
+			CheckErr(err)
 			prune, _ := cmd.Flags().GetBool("prune")
 			dry, _ := cmd.Flags().GetBool("dry-run")
 			for _, name := range selected {
-				location := config.Locations[name]
+				location, _ := internal.GetLocation(name)
 				err := location.Forget(prune, dry)
-				cobra.CheckErr(err)
+				CheckErr(err)
 			}
 		}
 	},

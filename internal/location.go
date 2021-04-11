@@ -21,6 +21,7 @@ type Hooks struct {
 type Options map[string]map[string][]string
 
 type Location struct {
+	Name    string   `mapstructure:"name"`
 	From    string   `mapstructure:"from"`
 	To      []string `mapstructure:"to"`
 	Hooks   Hooks    `mapstructure:"hooks"`
@@ -28,10 +29,20 @@ type Location struct {
 	Options Options  `mapstructure:"options"`
 }
 
+func GetLocation(name string) (Location, bool) {
+	c := GetConfig()
+	for _, b := range c.Locations {
+		if b.Name == name {
+			return b, true
+		}
+	}
+	return Location{}, false
+}
+
 func (l Location) validate(c Config) error {
 	// Check if backends are all valid
 	for _, to := range l.To {
-		_, ok := c.Backends[to]
+		_, ok := GetBackend(to)
 		if !ok {
 			return fmt.Errorf("invalid backend `%s`", to)
 		}
@@ -60,10 +71,9 @@ func ExecuteHooks(commands []string, options ExecuteOptions) error {
 }
 
 func (l Location) Backup() error {
-	c := GetConfig()
 	from := GetPathRelativeToConfig(l.From)
 	for _, to := range l.To {
-		backend := c.Backends[to]
+		backend, _ := GetBackend(to)
 		options := ExecuteOptions{
 			Command: "bash",
 			Envs:    backend.getEnv(),
@@ -92,10 +102,9 @@ func (l Location) Backup() error {
 }
 
 func (l Location) Forget(prune bool, dry bool) error {
-	c := GetConfig()
 	from := GetPathRelativeToConfig(l.From)
 	for _, to := range l.To {
-		backend := c.Backends[to]
+		backend, _ := GetBackend(to)
 		options := ExecuteOptions{
 			Envs: backend.getEnv(),
 			Dir:  from,
@@ -159,8 +168,7 @@ func (l Location) Restore(to, from string, force bool) error {
 		}
 	}
 
-	c := GetConfig()
-	backend := c.Backends[from]
+	backend, _ := GetBackend(from)
 	err = backend.Exec([]string{"restore", "--target", to, "--path", GetPathRelativeToConfig(l.From), "latest"})
 	if err != nil {
 		return err

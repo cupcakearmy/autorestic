@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 )
 
@@ -27,16 +28,20 @@ var execCmd = &cobra.Command{
 	Use:   "exec",
 	Short: "Execute arbitrary native restic commands for given backends",
 	Run: func(cmd *cobra.Command, args []string) {
+		err := lock.Lock()
+		CheckErr(err)
+		defer lock.Unlock()
+
 		config := internal.GetConfig()
 		if err := config.CheckConfig(); err != nil {
 			panic(err)
 		}
 		{
 			selected, err := internal.GetAllOrSelected(cmd, true)
-			cobra.CheckErr(err)
+			CheckErr(err)
 			for _, name := range selected {
 				fmt.Println(name)
-				backend := config.Backends[name]
+				backend, _ := internal.GetBackend(name)
 				backend.Exec(args)
 			}
 		}

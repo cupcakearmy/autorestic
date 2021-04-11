@@ -26,7 +26,7 @@ var upgradeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		noRestic, _ := cmd.Flags().GetBool("no-restic")
 		err := bins.Upgrade(!noRestic)
-		cobra.CheckErr(err)
+		CheckErr(err)
 	},
 }
 

@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 )
 
@@ -27,17 +28,20 @@ var restoreCmd = &cobra.Command{
 	Use:   "restore",
 	Short: "Restore backup for location",
 	Run: func(cmd *cobra.Command, args []string) {
-		config := internal.GetConfig()
+		err := lock.Lock()
+		CheckErr(err)
+		defer lock.Unlock()
+
 		location, _ := cmd.Flags().GetString("location")
-		l, ok := config.Locations[location]
+		l, ok := internal.GetLocation(location)
 		if !ok {
-			cobra.CheckErr(fmt.Errorf("invalid location \"%s\"", location))
+			CheckErr(fmt.Errorf("invalid location \"%s\"", location))
 		}
 		target, _ := cmd.Flags().GetString("to")
 		from, _ := cmd.Flags().GetString("from")
 		force, _ := cmd.Flags().GetBool("force")
-		err := l.Restore(target, from, force)
-		cobra.CheckErr(err)
+		err = l.Restore(target, from, force)
+		CheckErr(err)
 	},
 }
 

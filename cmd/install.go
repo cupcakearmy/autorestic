@@ -25,7 +25,7 @@ var installCmd = &cobra.Command{
 	Short: "Install restic if missing",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := bins.InstallRestic()
-		cobra.CheckErr(err)
+		CheckErr(err)
 	},
 }
 
