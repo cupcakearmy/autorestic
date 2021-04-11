@@ -2,7 +2,9 @@
 
 ## Todo
 
-- implement commands
+- cron
+- check & enforce config
+- auto create key
 
 ## Packages
 

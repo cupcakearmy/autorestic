@@ -3,6 +3,7 @@ package internal
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 )
@@ -45,4 +46,23 @@ func ExecuteCommand(options ExecuteOptions, args ...string) (string, error) {
 func ExecuteResticCommand(options ExecuteOptions, args ...string) (string, error) {
 	options.Command = "restic"
 	return ExecuteCommand(options, args...)
+}
+
+func CopyFile(from, to string) error {
+	original, err := os.Open("original.txt")
+	if err != nil {
+		return nil
+	}
+	defer original.Close()
+
+	new, err := os.Create("new.txt")
+	if err != nil {
+		return nil
+	}
+	defer new.Close()
+
+	if _, err := io.Copy(new, original); err != nil {
+		return err
+	}
+	return nil
 }

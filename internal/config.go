@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"log"
 	"path"
 	"strings"
 	"sync"
@@ -27,7 +26,7 @@ func GetConfig() *Config {
 		once.Do(func() {
 			config = &Config{}
 			if err := viper.UnmarshalExact(config); err != nil {
-				log.Fatal("Nope ", err)
+				panic(err)
 			}
 		})
 	}
@@ -45,15 +44,27 @@ func GetPathRelativeToConfig(p string) (string, error) {
 	}
 }
 
-func (c Config) CheckConfig() error {
+func (c *Config) CheckConfig() error {
+	found := map[string]bool{}
 	for _, backend := range c.Backends {
 		if err := backend.validate(); err != nil {
-			return fmt.Errorf("backend \"%s\": %s", backend.Name, err)
+			return err
+		}
+		if _, ok := found[backend.Name]; ok {
+			return fmt.Errorf(`duplicate name for backends "%s"`, backend.Name)
+		} else {
+			found[backend.Name] = true
 		}
 	}
+	found = map[string]bool{}
 	for _, location := range c.Locations {
 		if err := location.validate(c); err != nil {
-			return fmt.Errorf("location \"%s\": %s", location.Name, err)
+			return err
+		}
+		if _, ok := found[location.Name]; ok {
+			return fmt.Errorf(`duplicate name for locations "%s"`, location.Name)
+		} else {
+			found[location.Name] = true
 		}
 	}
 	return nil

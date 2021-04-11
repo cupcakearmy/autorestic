@@ -39,7 +39,16 @@ func GetLocation(name string) (Location, bool) {
 	return Location{}, false
 }
 
-func (l Location) validate(c Config) error {
+func (l Location) validate(c *Config) error {
+	if l.Name == "" {
+		return fmt.Errorf(`Location is missing name`)
+	}
+	if l.From == "" {
+		return fmt.Errorf(`Location "%s" is missing "from" key`, l.Name)
+	}
+	if len(l.To) == 0 {
+		return fmt.Errorf(`Location "%s" has no "to" targets`, l.Name)
+	}
 	// Check if backends are all valid
 	for _, to := range l.To {
 		_, ok := GetBackend(to)

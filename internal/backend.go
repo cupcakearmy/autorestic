@@ -1,7 +1,12 @@
 package internal
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
+	"strings"
+
+	"github.com/spf13/viper"
 )
 
 type Backend struct {
@@ -41,7 +46,44 @@ func (b Backend) getEnv() (map[string]string, error) {
 	return env, err
 }
 
+func generateRandomKey() string {
+	b := make([]byte, 64)
+	rand.Read(b)
+	key := base64.StdEncoding.EncodeToString(b)
+	key = strings.ReplaceAll(key, "=", "")
+	key = strings.ReplaceAll(key, "+", "")
+	key = strings.ReplaceAll(key, "/", "")
+	return key
+}
+
 func (b Backend) validate() error {
+	if b.Name == "" {
+		return fmt.Errorf(`Backend has no "name"`)
+	}
+	if b.Type == "" {
+		return fmt.Errorf(`Backend "%s" has no "type"`, b.Name)
+	}
+	if b.Path == "" {
+		return fmt.Errorf(`Backend "%s" has no "path"`, b.Name)
+	}
+	if b.Key == "" {
+		key := generateRandomKey()
+		b.Key = key
+		c := GetConfig()
+		for i, backend := range c.Backends {
+			if backend.Name == b.Name {
+				c.Backends[i].Key = key
+				break
+			}
+		}
+		file := viper.ConfigFileUsed()
+		if err := CopyFile(file, file+".old"); err != nil {
+			return err
+		}
+		fmt.Println("Saved a backup copy of your file next the the original.")
+		viper.Set("backends", c.Backends)
+		viper.WriteConfig()
+	}
 	env, err := b.getEnv()
 	if err != nil {
 		return err
