@@ -87,7 +87,7 @@ func (l Location) Backup() error {
 	return nil
 }
 
-func (l Location) Forget(prune bool) error {
+func (l Location) Forget(prune bool, dry bool) error {
 	c := GetConfig()
 	from := GetPathRelativeToConfig(l.From)
 	for _, to := range l.To {
@@ -100,6 +100,9 @@ func (l Location) Forget(prune bool) error {
 		cmd := []string{"forget", "--path", from}
 		if prune {
 			cmd = append(cmd, "--prune")
+		}
+		if dry {
+			cmd = append(cmd, "--dry-run")
 		}
 		cmd = append(cmd, flags...)
 		out, err := ExecuteResticCommand(options, cmd...)

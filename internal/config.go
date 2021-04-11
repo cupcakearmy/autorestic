@@ -101,6 +101,9 @@ func GetAllOrSelected(cmd *cobra.Command, backends bool) ([]string, error) {
 				}
 			}
 		}
+		if len(selected) == 0 {
+			return selected, fmt.Errorf("nothing selected, aborting")
+		}
 		return selected, nil
 	}
 }

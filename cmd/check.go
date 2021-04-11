@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/spf13/cobra"
@@ -33,6 +34,7 @@ var checkCmd = &cobra.Command{
 		config := internal.GetConfig()
 		err := config.CheckConfig()
 		cobra.CheckErr(err)
+		fmt.Println("Everyting is fine.")
 	},
 }
 
