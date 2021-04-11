@@ -207,16 +207,14 @@ func (l Location) RunCron() error {
 	if err != nil {
 		return err
 	}
-	last := lock.GetCron("test")
-	fmt.Println(last)
-	next := schedule.Next(time.Unix(last, 0))
-	fmt.Println(next)
+	last := time.Unix(lock.GetCron(l.Name), 0)
+	next := schedule.Next(last)
 	now := time.Now()
 	if now.After(next) {
-		fmt.Println("Running")
-		lock.SetCron("test", now.Unix())
+		lock.SetCron(l.Name, now.Unix())
+		l.Backup()
 	} else {
-		fmt.Println("Not due yet")
+		fmt.Printf("Skipping \"%s\", not due yet.\n", l.Name)
 	}
 	return nil
 }
