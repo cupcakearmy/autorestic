@@ -2,6 +2,9 @@ package internal
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 type HookArray = []string
@@ -104,6 +107,56 @@ func (l Location) Forget(prune bool) error {
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (l Location) hasBackend(backend string) bool {
+	for _, b := range l.To {
+		if b == backend {
+			return true
+		}
+	}
+	return false
+}
+
+func (l Location) Restore(to, from string, force bool) error {
+	if from == "" {
+		from = l.To[0]
+	} else if !l.hasBackend(from) {
+		return fmt.Errorf("invalid backend: \"%s\"", from)
+	}
+
+	to, err := filepath.Abs(to)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Restoring location to %s using %s.\n", to, from)
+
+	// Check if target is empty
+	if !force {
+		notEmptyError := fmt.Errorf("target %s is not empty", to)
+		_, err = os.Stat(to)
+		if err == nil {
+			files, err := ioutil.ReadDir(to)
+			if err != nil {
+				return err
+			}
+			if len(files) > 0 {
+				return notEmptyError
+			}
+		} else {
+			if !os.IsNotExist(err) {
+				return err
+			}
+		}
+	}
+
+	c := GetConfig()
+	backend := c.Backends[from]
+	err = backend.Exec([]string{"restore", "--target", to, "--path", GetPathRelativeToConfig(l.From), "latest"})
+	if err != nil {
+		return err
 	}
 	return nil
 }
