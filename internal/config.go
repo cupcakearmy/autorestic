@@ -45,6 +45,9 @@ func GetPathRelativeToConfig(p string) (string, error) {
 }
 
 func (c *Config) CheckConfig() error {
+	if !CheckIfResticIsCallable() {
+		return fmt.Errorf(`restic was not found. Install either with "autorestic install" or manually`)
+	}
 	found := map[string]bool{}
 	for _, backend := range c.Backends {
 		if err := backend.validate(); err != nil {

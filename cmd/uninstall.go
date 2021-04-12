@@ -16,29 +16,21 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/cupcakearmy/autorestic/internal"
-	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/cupcakearmy/autorestic/internal/bins"
 	"github.com/spf13/cobra"
 )
 
-// checkCmd represents the check command
-var checkCmd = &cobra.Command{
-	Use:   "check",
-	Short: "Check if everything is setup",
+// uninstallCmd represents the uninstall command
+var uninstallCmd = &cobra.Command{
+	Use:   "uninstall",
+	Short: "Uninstall restic and autorestic",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := lock.Lock()
-		CheckErr(err)
-		defer lock.Unlock()
-
-		config := internal.GetConfig()
-		err = config.CheckConfig()
-		CheckErr(err)
-		fmt.Println("Everyting is fine.")
+		noRestic, _ := cmd.Flags().GetBool("no-restic")
+		bins.Uninstall(!noRestic)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(checkCmd)
+	rootCmd.AddCommand(uninstallCmd)
+	uninstallCmd.Flags().Bool("no-restic", false, "Do not uninstall restic.")
 }

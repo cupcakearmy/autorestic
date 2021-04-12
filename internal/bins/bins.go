@@ -44,6 +44,18 @@ func dlJSON(url string) (GithubRelease, error) {
 	return parsed, nil
 }
 
+func Uninstall(restic bool) error {
+	if err := os.Remove(path.Join(INSTALL_PATH, "autorestic")); err != nil {
+		fmt.Println(err)
+	}
+	if restic {
+		if err := os.Remove(path.Join(INSTALL_PATH, "restic")); err != nil {
+			fmt.Println(err)
+		}
+	}
+	return nil
+}
+
 func InstallRestic() error {
 	installed := internal.CheckIfCommandIsCallable("restic")
 	if installed {

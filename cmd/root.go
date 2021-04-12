@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 
@@ -83,7 +84,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		colors.Faint.Println("Using config file:", viper.ConfigFileUsed())
 	}
 
 	internal.GetConfig()

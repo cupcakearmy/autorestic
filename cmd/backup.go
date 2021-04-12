@@ -16,8 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
@@ -40,7 +38,6 @@ var backupCmd = &cobra.Command{
 		CheckErr(err)
 		for _, name := range selected {
 			location, _ := internal.GetLocation(name)
-			fmt.Printf("Backing up: `%s`", name)
 			location.Backup()
 		}
 	},

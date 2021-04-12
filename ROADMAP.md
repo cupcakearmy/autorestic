@@ -2,9 +2,7 @@
 
 ## Todo
 
-- cron
-- check & enforce config
-- auto create key
+- output formatting
 
 ## Packages
 
