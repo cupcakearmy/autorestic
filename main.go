@@ -15,8 +15,28 @@ limitations under the License.
 */
 package main
 
-import "github.com/cupcakearmy/autorestic/cmd"
+import (
+	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/cupcakearmy/autorestic/cmd"
+	"github.com/cupcakearmy/autorestic/internal/lock"
+)
+
+func handleCtrlC() {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		sig := <-c
+		fmt.Println("Signal:", sig)
+		lock.Unlock()
+		os.Exit(0)
+	}()
+}
 
 func main() {
+	handleCtrlC()
 	cmd.Execute()
 }

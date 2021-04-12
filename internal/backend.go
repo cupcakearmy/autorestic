@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/spf13/viper"
 )
 
@@ -80,7 +81,7 @@ func (b Backend) validate() error {
 		if err := CopyFile(file, file+".old"); err != nil {
 			return err
 		}
-		fmt.Println("Saved a backup copy of your file next the the original.")
+		colors.Secondary.Println("Saved a backup copy of your file next the the original.")
 		viper.Set("backends", c.Backends)
 		viper.WriteConfig()
 	}
@@ -96,7 +97,7 @@ func (b Backend) validate() error {
 	} else {
 		// If not initialize
 		out, err := ExecuteResticCommand(options, "init")
-		fmt.Println(out)
+		colors.Faint.Println(out)
 		return err
 	}
 }
@@ -108,6 +109,8 @@ func (b Backend) Exec(args []string) error {
 	}
 	options := ExecuteOptions{Envs: env}
 	out, err := ExecuteResticCommand(options, args...)
-	fmt.Println(out)
+	if VERBOSE {
+		colors.Faint.Println(out)
+	}
 	return err
 }

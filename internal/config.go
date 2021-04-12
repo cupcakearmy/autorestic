@@ -6,12 +6,16 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 const VERSION = "1.0.0"
+
+var CI bool = false
+var VERBOSE bool = false
 
 type Config struct {
 	Locations []Location `mapstructure:"locations"`
@@ -24,6 +28,13 @@ var config *Config
 func GetConfig() *Config {
 	if config == nil {
 		once.Do(func() {
+			if err := viper.ReadInConfig(); err == nil {
+				colors.Faint.Println("Using config file:", viper.ConfigFileUsed())
+			} else {
+
+				return
+			}
+
 			config = &Config{}
 			if err := viper.UnmarshalExact(config); err != nil {
 				panic(err)
@@ -45,6 +56,9 @@ func GetPathRelativeToConfig(p string) (string, error) {
 }
 
 func (c *Config) CheckConfig() error {
+	if c == nil {
+		return fmt.Errorf("config could not be loaded/found")
+	}
 	if !CheckIfResticIsCallable() {
 		return fmt.Errorf(`restic was not found. Install either with "autorestic install" or manually`)
 	}

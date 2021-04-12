@@ -16,9 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 )
@@ -39,7 +38,7 @@ var execCmd = &cobra.Command{
 		selected, err := internal.GetAllOrSelected(cmd, true)
 		CheckErr(err)
 		for _, name := range selected {
-			fmt.Println(name)
+			colors.PrimaryPrint("  Executing on \"%s\"  ", name)
 			backend, _ := internal.GetBackend(name)
 			backend.Exec(args)
 		}

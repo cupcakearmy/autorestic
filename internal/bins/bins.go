@@ -15,6 +15,7 @@ import (
 
 	"github.com/blang/semver/v4"
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/colors"
 )
 
 const INSTALL_PATH = "/usr/local/bin"
@@ -46,11 +47,11 @@ func dlJSON(url string) (GithubRelease, error) {
 
 func Uninstall(restic bool) error {
 	if err := os.Remove(path.Join(INSTALL_PATH, "autorestic")); err != nil {
-		fmt.Println(err)
+		colors.Error.Println(err)
 	}
 	if restic {
 		if err := os.Remove(path.Join(INSTALL_PATH, "restic")); err != nil {
-			fmt.Println(err)
+			colors.Error.Println(err)
 		}
 	}
 	return nil
@@ -59,7 +60,7 @@ func Uninstall(restic bool) error {
 func InstallRestic() error {
 	installed := internal.CheckIfCommandIsCallable("restic")
 	if installed {
-		fmt.Println("restic already installed")
+		colors.Body.Println("restic already installed")
 		return nil
 	} else {
 		body, err := dlJSON("https://api.github.com/repos/restic/restic/releases/latest")
@@ -69,10 +70,8 @@ func InstallRestic() error {
 		ending := fmt.Sprintf("_%s_%s.bz2", runtime.GOOS, runtime.GOARCH)
 		for _, asset := range body.Assets {
 			if strings.HasSuffix(asset.Name, ending) {
-				// Found
-				fmt.Println(asset.Link)
-
 				// Download archive
+				colors.Faint.Println("Downloading:", asset.Link)
 				resp, err := http.Get(asset.Link)
 				if err != nil {
 					return err
@@ -91,7 +90,7 @@ func InstallRestic() error {
 				defer file.Close()
 				io.Copy(file, bz)
 
-				fmt.Printf("Successfully installed restic under %s\n", INSTALL_PATH)
+				colors.Success.Printf("Successfully installed restic under %s\n", INSTALL_PATH)
 				return nil
 			}
 		}
@@ -103,7 +102,7 @@ func upgradeRestic() error {
 	out, err := internal.ExecuteCommand(internal.ExecuteOptions{
 		Command: "restic",
 	}, "self-update")
-	fmt.Println(out)
+	colors.Faint.Println(out)
 	return err
 }
 
@@ -119,8 +118,6 @@ func Upgrade(restic bool) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(current)
-
 	body, err := dlJSON("https://api.github.com/repos/cupcakearmy/autorestic/releases/latest")
 	if err != nil {
 		return err
@@ -130,10 +127,10 @@ func Upgrade(restic bool) error {
 		return err
 	}
 	if current.GT(latest) {
-
-		fmt.Println("Updated autorestic")
+		// TODO: Actually download and install
+		colors.Success.Println("Updated autorestic")
 	} else {
-		fmt.Println("Already up to date")
+		colors.Body.Println("Already up to date")
 	}
 	return nil
 }

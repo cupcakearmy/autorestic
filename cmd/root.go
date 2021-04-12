@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/cupcakearmy/autorestic/internal"
@@ -30,7 +29,7 @@ import (
 
 func CheckErr(err error) {
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error:", err)
+		colors.Error.Fprintln(os.Stderr, "Error:", err)
 		lock.Unlock()
 		os.Exit(1)
 	}
@@ -38,40 +37,33 @@ func CheckErr(err error) {
 
 var cfgFile string
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Version: internal.VERSION,
 	Use:     "autorestic",
 	Short:   "CLI Wrapper for restic",
+	Long:    "Documentation: https://autorestic.vercel.app",
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	CheckErr(rootCmd.Execute())
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.autorestic.yml or ./.autorestic.yml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().BoolVar(&internal.CI, "ci", false, "CI mode disabled interactive mode and colors and enables verbosity")
+	rootCmd.PersistentFlags().BoolVar(&internal.VERBOSE, "verbose", false, "verbose mode")
+	cobra.OnInitialize(initConfig)
 }
 
-// initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if ci, _ := rootCmd.Flags().GetBool("ci"); ci {
+		colors.DisableColors(true)
+		internal.VERBOSE = true
+	}
+
 	if cfgFile != "" {
-		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
 		home, err := homedir.Dir()
 		CheckErr(err)
 
@@ -79,13 +71,6 @@ func initConfig() {
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".autorestic")
 	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		colors.Faint.Println("Using config file:", viper.ConfigFileUsed())
-	}
-
+	viper.AutomaticEnv()
 	internal.GetConfig()
 }

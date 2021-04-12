@@ -16,9 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 )
@@ -35,7 +34,7 @@ var checkCmd = &cobra.Command{
 		config := internal.GetConfig()
 		err = config.CheckConfig()
 		CheckErr(err)
-		fmt.Println("Everyting is fine.")
+		colors.Success.Println("Everyting is fine.")
 	},
 }
 

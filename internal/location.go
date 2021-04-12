@@ -75,44 +75,23 @@ func ExecuteHooks(commands []string, options ExecuteOptions) error {
 	if len(commands) == 0 {
 		return nil
 	}
-	colors.Secondary.Println("🪝  Running hooks")
+	colors.Secondary.Println("\nRunning hooks")
 	for _, command := range commands {
-		colors.Body.Println(command)
+		colors.Body.Println("> " + command)
 		out, err := ExecuteCommand(options, "-c", command)
-		colors.Faint.Print(out)
-		return err
-	}
-	fmt.Println("")
-	return nil
-}
-
-func (l Location) forEachBackend(fn func(ExecuteOptions) error) error {
-	from, err := GetPathRelativeToConfig(l.From)
-	if err != nil {
-		return err
-	}
-	for _, to := range l.To {
-		backend, _ := GetBackend(to)
-		env, err := backend.getEnv()
+		if VERBOSE {
+			colors.Faint.Println(out)
+		}
 		if err != nil {
-			return nil
-		}
-		options := ExecuteOptions{
-			Command: "bash",
-			Envs:    env,
-			Dir:     from,
-		}
-		if err := fn(options); err != nil {
 			return err
 		}
 	}
+	colors.Body.Println("")
 	return nil
 }
 
 func (l Location) Backup() error {
-	fmt.Printf("\n\n")
-	colors.Primary.Printf("💽 Backing up location \"%s\"", l.Name)
-	fmt.Printf("\n")
+	colors.PrimaryPrint("  Backing up location \"%s\"  ", l.Name)
 	from, err := GetPathRelativeToConfig(l.From)
 	if err != nil {
 		return err
@@ -141,7 +120,9 @@ func (l Location) Backup() error {
 		cmd = append(cmd, flags...)
 		cmd = append(cmd, ".")
 		out, err := ExecuteResticCommand(options, cmd...)
-		colors.Faint.Print(out)
+		if VERBOSE {
+			colors.Faint.Println(out)
+		}
 		if err != nil {
 			return err
 		}
@@ -149,12 +130,29 @@ func (l Location) Backup() error {
 	if err := ExecuteHooks(l.Hooks.After, options); err != nil {
 		return nil
 	}
-	colors.Success.Println("✅ Done")
+	colors.Success.Println("Done")
 	return err
 }
 
 func (l Location) Forget(prune bool, dry bool) error {
-	return l.forEachBackend(func(options ExecuteOptions) error {
+	colors.PrimaryPrint("Forgetting for location \"%s\"", l.Name)
+
+	from, err := GetPathRelativeToConfig(l.From)
+	if err != nil {
+		return err
+	}
+	for _, to := range l.To {
+		backend, _ := GetBackend(to)
+		colors.Secondary.Printf("For backend \"%s\"\n", backend.Name)
+		env, err := backend.getEnv()
+		if err != nil {
+			return nil
+		}
+		options := ExecuteOptions{
+			Command: "bash",
+			Envs:    env,
+			Dir:     from,
+		}
 		flags := l.getOptions("forget")
 		cmd := []string{"forget", "--path", options.Dir}
 		if prune {
@@ -165,12 +163,15 @@ func (l Location) Forget(prune bool, dry bool) error {
 		}
 		cmd = append(cmd, flags...)
 		out, err := ExecuteResticCommand(options, cmd...)
-		fmt.Println(out)
+		if VERBOSE {
+			colors.Faint.Println(out)
+		}
 		if err != nil {
 			return err
 		}
-		return nil
-	})
+	}
+	colors.Success.Println("Done")
+	return nil
 }
 
 func (l Location) hasBackend(backend string) bool {
@@ -193,7 +194,9 @@ func (l Location) Restore(to, from string, force bool) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Restoring location to %s using %s.\n", to, from)
+	colors.PrimaryPrint("Restoring location \"%s\"", l.Name)
+	colors.Secondary.Println("Restoring lastest snapshot")
+	colors.Body.Printf("%s → %s.\n", from, to)
 
 	// Check if target is empty
 	if !force {
@@ -223,6 +226,7 @@ func (l Location) Restore(to, from string, force bool) error {
 	if err != nil {
 		return err
 	}
+	colors.Success.Println("Done")
 	return nil
 }
 
@@ -242,7 +246,7 @@ func (l Location) RunCron() error {
 		lock.SetCron(l.Name, now.Unix())
 		l.Backup()
 	} else {
-		fmt.Printf("Skipping \"%s\", not due yet.\n", l.Name)
+		colors.Body.Printf("Skipping \"%s\", not due yet.\n", l.Name)
 	}
 	return nil
 }
