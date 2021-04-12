@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "codedoc install && codedoc build",
+    "dev": "codedoc serve"
+  },
+  "dependencies": {
+    "@codedoc/cli": "^0.2.8"
+  }
+}

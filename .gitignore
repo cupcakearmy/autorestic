@@ -2,9 +2,6 @@
 .idea
 .vscode
 
-# Docs
-node_modules
-
 # Config
 .autorestic*
 

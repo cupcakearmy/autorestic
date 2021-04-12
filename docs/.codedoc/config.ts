@@ -2,7 +2,7 @@ import { configuration } from '@codedoc/core'
 
 export const config = configuration({
   src: {
-    base: 'docs',
+    base: 'markdown',
   },
   dest: {
     html: './build',
