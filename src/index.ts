@@ -17,7 +17,7 @@ import install from './handlers/install'
 import { uninstall } from './handlers/uninstall'
 import { upgrade } from './handlers/upgrade'
 
-export const VERSION = '0.27'
+export const VERSION = '0.28'
 export const INSTALL_DIR = '/usr/local/bin'
 
 let requireConfig: boolean = true

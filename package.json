@@ -17,12 +17,14 @@
     "typescript": "^3.9"
   },
   "dependencies": {
+    "@types/semver": "^7.3.4",
     "axios": "^0.19",
     "clitastic": "^0.1.2",
     "colors": "^1",
     "commander": "^6.2",
     "cron-parser": "2.x.x",
     "js-yaml": "3.x.x",
+    "semver": "^7.3.5",
     "uhrwerk": "1.x.x"
   }
 }
