@@ -22,9 +22,9 @@ export async function upgrade() {
   const latest = semver.coerce(json.tag_name)
   const current = semver.coerce(VERSION)
   if (!latest || !current) throw new Error('Could not parse versions numbers.')
-  if (semver.gt(latest, current) && semver.major(latest) === semver.major(current)) {
-    // Update to compatible
-    if (json.tag_name != VERSION) {
+  if (semver.gt(latest, current)) {
+    if (semver.major(latest) === semver.major(current)) {
+      // Update to compatible
       const platformMap: { [key: string]: string } = {
         darwin: 'macos',
       }
@@ -37,6 +37,8 @@ export async function upgrade() {
       await downloadFile(dl.browser_download_url, to)
 
       chmodSync(to, 0o755)
+    } else {
+      w.appendLn('Newer major version available, will not install automatically.')
     }
   }
 
