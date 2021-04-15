@@ -122,7 +122,7 @@ func (l Location) getPath() (string, error) {
 	case TypeVolume:
 		return "/volume/" + l.Name + "/" + l.getVolumeName(), nil
 	}
-	return "", fmt.Errorf("Could not get path for location \"%s\"", l.Name)
+	return "", fmt.Errorf("could not get path for location \"%s\"", l.Name)
 }
 
 func (l Location) Backup() error {
