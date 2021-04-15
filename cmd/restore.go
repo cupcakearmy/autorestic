@@ -50,7 +50,7 @@ func init() {
 	restoreCmd.Flags().BoolP("force", "f", false, "Force, target folder will be overwritten")
 	restoreCmd.Flags().String("from", "", "Which backend to use")
 	restoreCmd.Flags().String("to", "", "Where to restore the data")
-	restoreCmd.MarkFlagRequired("to")
+	// restoreCmd.MarkFlagRequired("to")
 	restoreCmd.Flags().StringP("location", "l", "", "Location to be restored")
 	restoreCmd.MarkFlagRequired("location")
 }

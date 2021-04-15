@@ -5,11 +5,20 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/robfig/cron"
+)
+
+type LocationType string
+
+const (
+	TypeLocal    LocationType = "local"
+	TypeVolume   LocationType = "volume"
+	VolumePrefix string       = "volume:"
 )
 
 type HookArray = []string
@@ -90,19 +99,50 @@ func ExecuteHooks(commands []string, options ExecuteOptions) error {
 	return nil
 }
 
+func (l Location) getType() LocationType {
+	if strings.HasPrefix(l.From, VolumePrefix) {
+		return TypeVolume
+	}
+	return TypeLocal
+}
+
+func (l Location) getVolumeName() string {
+	return strings.TrimPrefix(l.From, VolumePrefix)
+}
+
+func (l Location) getPath() (string, error) {
+	t := l.getType()
+	switch t {
+	case TypeLocal:
+		if path, err := GetPathRelativeToConfig(l.From); err != nil {
+			return "", err
+		} else {
+			return path, nil
+		}
+	case TypeVolume:
+		return "/volume/" + l.Name + "/" + l.getVolumeName(), nil
+	}
+	return "", fmt.Errorf("Could not get path for location \"%s\"", l.Name)
+}
+
 func (l Location) Backup() error {
 	colors.PrimaryPrint("  Backing up location \"%s\"  ", l.Name)
-	from, err := GetPathRelativeToConfig(l.From)
-	if err != nil {
-		return err
-	}
+	t := l.getType()
 	options := ExecuteOptions{
 		Command: "bash",
-		Dir:     from,
 	}
+
+	if t == TypeLocal {
+		dir, _ := GetPathRelativeToConfig(l.From)
+		options.Dir = dir
+	}
+
+	// Hooks
 	if err := ExecuteHooks(l.Hooks.Before, options); err != nil {
-		return nil
+		return err
 	}
+
+	// Backup
 	for _, to := range l.To {
 		backend, _ := GetBackend(to)
 		colors.Secondary.Printf("Backend: %s\n", backend.Name)
@@ -110,37 +150,49 @@ func (l Location) Backup() error {
 		if err != nil {
 			return nil
 		}
-		options := ExecuteOptions{
-			Command: "restic",
-			Dir:     from,
-			Envs:    env,
-		}
+
 		flags := l.getOptions("backup")
 		cmd := []string{"backup"}
 		cmd = append(cmd, flags...)
 		cmd = append(cmd, ".")
-		out, err := ExecuteResticCommand(options, cmd...)
-		if VERBOSE {
-			colors.Faint.Println(out)
+		backupOptions := ExecuteOptions{
+			Dir:  options.Dir,
+			Envs: env,
 		}
+
+		var out string
+
+		switch t {
+		case TypeLocal:
+			out, err = ExecuteResticCommand(backupOptions, cmd...)
+			if VERBOSE {
+				colors.Faint.Println(out)
+			}
+		case TypeVolume:
+			err = backend.ExecDocker(l, cmd)
+		}
+
 		if err != nil {
 			return err
 		}
 	}
+
+	// After hooks
 	if err := ExecuteHooks(l.Hooks.After, options); err != nil {
-		return nil
+		return err
 	}
 	colors.Success.Println("Done")
-	return err
+	return nil
 }
 
 func (l Location) Forget(prune bool, dry bool) error {
 	colors.PrimaryPrint("Forgetting for location \"%s\"", l.Name)
 
-	from, err := GetPathRelativeToConfig(l.From)
+	path, err := l.getPath()
 	if err != nil {
 		return err
 	}
+
 	for _, to := range l.To {
 		backend, _ := GetBackend(to)
 		colors.Secondary.Printf("For backend \"%s\"\n", backend.Name)
@@ -149,12 +201,10 @@ func (l Location) Forget(prune bool, dry bool) error {
 			return nil
 		}
 		options := ExecuteOptions{
-			Command: "bash",
-			Envs:    env,
-			Dir:     from,
+			Envs: env,
 		}
 		flags := l.getOptions("forget")
-		cmd := []string{"forget", "--path", options.Dir}
+		cmd := []string{"forget", "--path", path}
 		if prune {
 			cmd = append(cmd, "--prune")
 		}
@@ -195,34 +245,38 @@ func (l Location) Restore(to, from string, force bool) error {
 		return err
 	}
 	colors.PrimaryPrint("Restoring location \"%s\"", l.Name)
-	colors.Secondary.Println("Restoring lastest snapshot")
-	colors.Body.Printf("%s → %s.\n", from, to)
-
-	// Check if target is empty
-	if !force {
-		notEmptyError := fmt.Errorf("target %s is not empty", to)
-		_, err = os.Stat(to)
-		if err == nil {
-			files, err := ioutil.ReadDir(to)
-			if err != nil {
-				return err
-			}
-			if len(files) > 0 {
-				return notEmptyError
-			}
-		} else {
-			if !os.IsNotExist(err) {
-				return err
-			}
-		}
-	}
 
 	backend, _ := GetBackend(from)
-	resolved, err := GetPathRelativeToConfig(l.From)
+	path, err := l.getPath()
 	if err != nil {
 		return nil
 	}
-	err = backend.Exec([]string{"restore", "--target", to, "--path", resolved, "latest"})
+	colors.Secondary.Println("Restoring lastest snapshot")
+	colors.Body.Printf("%s → %s.\n", from, path)
+	switch l.getType() {
+	case TypeLocal:
+		// Check if target is empty
+		if !force {
+			notEmptyError := fmt.Errorf("target %s is not empty", to)
+			_, err = os.Stat(to)
+			if err == nil {
+				files, err := ioutil.ReadDir(to)
+				if err != nil {
+					return err
+				}
+				if len(files) > 0 {
+					return notEmptyError
+				}
+			} else {
+				if !os.IsNotExist(err) {
+					return err
+				}
+			}
+		}
+		err = backend.Exec([]string{"restore", "--target", to, "--path", path, "latest"})
+	case TypeVolume:
+		err = backend.ExecDocker(l, []string{"restore", "--target", ".", "--path", path, "latest"})
+	}
 	if err != nil {
 		return err
 	}

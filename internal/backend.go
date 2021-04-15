@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
@@ -109,6 +110,42 @@ func (b Backend) Exec(args []string) error {
 	}
 	options := ExecuteOptions{Envs: env}
 	out, err := ExecuteResticCommand(options, args...)
+	if VERBOSE {
+		colors.Faint.Println(out)
+	}
+	return err
+}
+
+func (b Backend) ExecDocker(l Location, args []string) error {
+	env, err := b.getEnv()
+	if err != nil {
+		return err
+	}
+	volume := l.getVolumeName()
+	path, _ := l.getPath()
+	options := ExecuteOptions{
+		Command: "docker",
+		Envs:    env,
+	}
+	docker := []string{
+		"run", "--rm",
+		"--entrypoint", "ash",
+		"--workdir", path,
+		"--volume", volume + ":" + path,
+	}
+	if hostname, err := os.Hostname(); err == nil {
+		docker = append(docker, "--hostname", hostname)
+	}
+	if b.Type == "local" {
+		actual := env["RESTIC_REPOSITORY"]
+		docker = append(docker, "--volume", actual+":"+"/repo")
+		env["RESTIC_REPOSITORY"] = "/repo"
+	}
+	for key, value := range env {
+		docker = append(docker, "--env", key+"="+value)
+	}
+	docker = append(docker, "restic/restic", "-c", "restic "+strings.Join(args, " "))
+	out, err := ExecuteCommand(options, docker...)
 	if VERBOSE {
 		colors.Faint.Println(out)
 	}
