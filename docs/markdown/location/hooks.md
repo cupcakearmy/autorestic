@@ -1,6 +1,8 @@
 # Hooks
 
-Sometimes you might want to stop an app/db before backing up data and start the service again after the backup has completed. This is what the hooks are made for. Simply add them to your location config. You can have as many commands as you wish.
+If you want to perform some commands before and/or after a backup, you can use hooks.
+
+They consist of a list of `before`/`after` commands that will be executed in the same directory as the target `from`.
 
 ```yml | .autorestic.yml
 locations:

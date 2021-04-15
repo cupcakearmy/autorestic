@@ -1,14 +1,6 @@
 # General
 
-## `--version`
-
-Prints the current version
-
-```bash
-autorestic --version
-```
-
-## `--c, --config`
+## `-c, --config`
 
 Specify the config file to be used.
 If omitted `autorestic` will search for for a `.autorestic.yml` in the current directory and your home directory.
@@ -19,11 +11,18 @@ autorestic -c /path/to/my/config.yml
 
 ## `--ci`
 
-> Available since version 0.22
+Run the CLI in CI Mode, which means there will be no interactivity, no colors and automatically sets the `--verbose` flag.
 
-Run the CLI in CI Mode, which means there will be no interactivity.
 This can be useful when you want to run cron e.g. as all the output will be saved.
 
 ```bash
-autorestic --ci
+autorestic --ci backup -a
+```
+
+## `--verbose`
+
+Verbose mode will show the output of the native restic commands that are otherwise not printed out. Useful for debugging or logging in automated tasks.
+
+```bash
+autorestic --verbose backup -a
 ```

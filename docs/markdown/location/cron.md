@@ -2,8 +2,6 @@
 
 Often it is usefull to trigger backups autmatically. For this we can specify a `cron` attribute to each location.
 
-> Available since version 0.18
-
 ```yaml | .autorestic.yml
 locations:
   my-location:

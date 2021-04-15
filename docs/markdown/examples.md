@@ -1,18 +1,14 @@
 # 🐣 Examples
 
-## Exec
-
-### List all the snapshots for all the backends
+## List all the snapshots for all the backends
 
 ```bash
 autorestic exec -a -- snapshots
 ```
 
-### Unlock a locked repository
+## Unlock a locked repository
 
-If you accidentally cancelled a running operation this could be useful.
-
-Only do this if you know what you are doing.
+This can come in handy if a backup process crashed or if it was accidentally cancelled. Then the repository would still be locked without an actual process using it. Only do this if you know what you are sure no other process is actually reading/writing to the repository of course.
 
 ```bash
 autorestic exec -b my-backend -- unlock

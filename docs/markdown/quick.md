@@ -17,30 +17,35 @@ For a quick overview:
 - `locations` can be seen as the inputs and `backends` the output where the data is stored and backed up.
 - One `location` can have one or multiple `backends` for redudancy.
 - One `backend` can also be the target for multiple `locations`.
-- **Backup the config file as it will contain the generated keys**. If you don't have a copy of that keys, the backups are useless as they are encrypted and data will be not recoverable.
+
+> **⚠️ WARNING ⚠️**
+>
+> Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. **You should keep a copy of the keys or config file somewhere in case your server dies**. Otherwise DATA IS LOST!
 
 ```yaml | .autorestic.yml
 locations:
-  home:
+  - name: home
     from: /home/me
     to: remote
 
-  important:
+  - name: important
     from: /path/to/important/stuff
     to:
       - remote
       - hdd
 
 backends:
-  remote:
+  - name: remote
     type: s3
     path: 's3.amazonaws.com/bucket_name'
+    key: some-random-password-198rc79r8y1029c8yfewj8f1u0ef87yh198uoieufy
     AWS_ACCESS_KEY_ID: account_id
     AWS_SECRET_ACCESS_KEY: account_key
 
-  hdd:
+  - name: hdd
     type: local
     path: /mnt/my_external_storage
+    key: 'if not key is set it will be generated for you'
 ```
 
 ## Check
