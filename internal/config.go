@@ -18,8 +18,8 @@ var CI bool = false
 var VERBOSE bool = false
 
 type Config struct {
-	Locations []Location `mapstructure:"locations"`
-	Backends  []Backend  `mapstructure:"backends"`
+	Locations map[string]Location `mapstructure:"locations"`
+	Backends  map[string]Backend  `mapstructure:"backends"`
 }
 
 var once sync.Once
@@ -31,7 +31,6 @@ func GetConfig() *Config {
 			if err := viper.ReadInConfig(); err == nil {
 				colors.Faint.Println("Using config file:", viper.ConfigFileUsed())
 			} else {
-
 				return
 			}
 
@@ -55,33 +54,24 @@ func GetPathRelativeToConfig(p string) (string, error) {
 	}
 }
 
-func (c *Config) CheckConfig() error {
+func CheckConfig() error {
+	c := GetConfig()
 	if c == nil {
 		return fmt.Errorf("config could not be loaded/found")
 	}
 	if !CheckIfResticIsCallable() {
 		return fmt.Errorf(`restic was not found. Install either with "autorestic install" or manually`)
 	}
-	found := map[string]bool{}
-	for _, backend := range c.Backends {
+	for name, backend := range c.Backends {
+		backend.name = name
 		if err := backend.validate(); err != nil {
 			return err
 		}
-		if _, ok := found[backend.Name]; ok {
-			return fmt.Errorf(`duplicate name for backends "%s"`, backend.Name)
-		} else {
-			found[backend.Name] = true
-		}
 	}
-	found = map[string]bool{}
-	for _, location := range c.Locations {
+	for name, location := range c.Locations {
+		location.name = name
 		if err := location.validate(c); err != nil {
 			return err
-		}
-		if _, ok := found[location.Name]; ok {
-			return fmt.Errorf(`duplicate name for locations "%s"`, location.Name)
-		} else {
-			found[location.Name] = true
 		}
 	}
 	return nil
@@ -90,47 +80,47 @@ func (c *Config) CheckConfig() error {
 func GetAllOrSelected(cmd *cobra.Command, backends bool) ([]string, error) {
 	var list []string
 	if backends {
-		for _, b := range config.Backends {
-			list = append(list, b.Name)
+		for name := range config.Backends {
+			list = append(list, name)
 		}
 	} else {
-		for _, l := range config.Locations {
-			list = append(list, l.Name)
+		for name := range config.Locations {
+			list = append(list, name)
 		}
 	}
+
 	all, _ := cmd.Flags().GetBool("all")
 	if all {
 		return list, nil
-	} else {
-		var selected []string
-		if backends {
-			tmp, _ := cmd.Flags().GetStringSlice("backend")
-			selected = tmp
-		} else {
-			tmp, _ := cmd.Flags().GetStringSlice("location")
-			selected = tmp
-		}
-		for _, s := range selected {
-			found := false
-			for _, l := range list {
-				if l == s {
-					found = true
-					break
-				}
-			}
-			if !found {
-				if backends {
-					return nil, fmt.Errorf("invalid backend \"%s\"", s)
-				} else {
-					return nil, fmt.Errorf("invalid location \"%s\"", s)
-				}
-			}
-		}
-		if len(selected) == 0 {
-			return selected, fmt.Errorf("nothing selected, aborting")
-		}
-		return selected, nil
 	}
+
+	var selected []string
+	if backends {
+		selected, _ = cmd.Flags().GetStringSlice("backend")
+	} else {
+		selected, _ = cmd.Flags().GetStringSlice("location")
+	}
+	for _, s := range selected {
+		found := false
+		for _, l := range list {
+			if l == s {
+				found = true
+				break
+			}
+		}
+		if !found {
+			if backends {
+				return nil, fmt.Errorf("invalid backend \"%s\"", s)
+			} else {
+				return nil, fmt.Errorf("invalid location \"%s\"", s)
+			}
+		}
+	}
+
+	if len(selected) == 0 {
+		return selected, fmt.Errorf("nothing selected, aborting")
+	}
+	return selected, nil
 }
 
 func AddFlagsToCommand(cmd *cobra.Command, backend bool) {

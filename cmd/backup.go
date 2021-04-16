@@ -30,9 +30,7 @@ var backupCmd = &cobra.Command{
 		CheckErr(err)
 		defer lock.Unlock()
 
-		config := internal.GetConfig()
-		err = config.CheckConfig()
-		CheckErr(err)
+		CheckErr(internal.CheckConfig())
 
 		selected, err := internal.GetAllOrSelected(cmd, false)
 		CheckErr(err)

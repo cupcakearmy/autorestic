@@ -12,21 +12,17 @@ import (
 )
 
 type Backend struct {
-	Name string            `mapstructure:"name"`
-	Type string            `mapstructure:"type"`
-	Path string            `mapstructure:"path"`
-	Key  string            `mapstructure:"key"`
-	Env  map[string]string `mapstructure:"env"`
+	name string
+	Type string            `mapstructure:"type,omitempty"`
+	Path string            `mapstructure:"path,omitempty"`
+	Key  string            `mapstructure:"key,omitempty"`
+	Env  map[string]string `mapstructure:"env,omitempty"`
 }
 
 func GetBackend(name string) (Backend, bool) {
-	c := GetConfig()
-	for _, b := range c.Backends {
-		if b.Name == name {
-			return b, true
-		}
-	}
-	return Backend{}, false
+	b, ok := GetConfig().Backends[name]
+	b.name = name
+	return b, ok
 }
 
 func (b Backend) generateRepo() (string, error) {
@@ -59,25 +55,20 @@ func generateRandomKey() string {
 }
 
 func (b Backend) validate() error {
-	if b.Name == "" {
-		return fmt.Errorf(`Backend has no "name"`)
-	}
 	if b.Type == "" {
-		return fmt.Errorf(`Backend "%s" has no "type"`, b.Name)
+		return fmt.Errorf(`Backend "%s" has no "type"`, b.name)
 	}
 	if b.Path == "" {
-		return fmt.Errorf(`Backend "%s" has no "path"`, b.Name)
+		return fmt.Errorf(`Backend "%s" has no "path"`, b.name)
 	}
 	if b.Key == "" {
 		key := generateRandomKey()
 		b.Key = key
 		c := GetConfig()
-		for i, backend := range c.Backends {
-			if backend.Name == b.Name {
-				c.Backends[i].Key = key
-				break
-			}
-		}
+		tmp := c.Backends[b.name]
+		tmp.Key = key
+		tmp.name = ""
+		c.Backends[b.name] = tmp
 		file := viper.ConfigFileUsed()
 		if err := CopyFile(file, file+".old"); err != nil {
 			return err

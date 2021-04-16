@@ -31,33 +31,26 @@ type Hooks struct {
 type Options map[string]map[string][]string
 
 type Location struct {
-	Name    string   `mapstructure:"name"`
-	From    string   `mapstructure:"from"`
-	To      []string `mapstructure:"to"`
-	Hooks   Hooks    `mapstructure:"hooks"`
-	Cron    string   `mapstructure:"cron"`
-	Options Options  `mapstructure:"options"`
+	name    string   `mapstructure:",omitempty"`
+	From    string   `mapstructure:"from,omitempty"`
+	To      []string `mapstructure:"to,omitempty"`
+	Hooks   Hooks    `mapstructure:"hooks,omitempty"`
+	Cron    string   `mapstructure:"cron,omitempty"`
+	Options Options  `mapstructure:"options,omitempty"`
 }
 
 func GetLocation(name string) (Location, bool) {
-	c := GetConfig()
-	for _, b := range c.Locations {
-		if b.Name == name {
-			return b, true
-		}
-	}
-	return Location{}, false
+	l, ok := GetConfig().Locations[name]
+	l.name = name
+	return l, ok
 }
 
 func (l Location) validate(c *Config) error {
-	if l.Name == "" {
-		return fmt.Errorf(`Location is missing name`)
-	}
 	if l.From == "" {
-		return fmt.Errorf(`Location "%s" is missing "from" key`, l.Name)
+		return fmt.Errorf(`Location "%s" is missing "from" key`, l.name)
 	}
 	if len(l.To) == 0 {
-		return fmt.Errorf(`Location "%s" has no "to" targets`, l.Name)
+		return fmt.Errorf(`Location "%s" has no "to" targets`, l.name)
 	}
 	// Check if backends are all valid
 	for _, to := range l.To {
@@ -120,13 +113,13 @@ func (l Location) getPath() (string, error) {
 			return path, nil
 		}
 	case TypeVolume:
-		return "/volume/" + l.Name + "/" + l.getVolumeName(), nil
+		return "/volume/" + l.name + "/" + l.getVolumeName(), nil
 	}
-	return "", fmt.Errorf("could not get path for location \"%s\"", l.Name)
+	return "", fmt.Errorf("could not get path for location \"%s\"", l.name)
 }
 
 func (l Location) Backup() error {
-	colors.PrimaryPrint("  Backing up location \"%s\"  ", l.Name)
+	colors.PrimaryPrint("  Backing up location \"%s\"  ", l.name)
 	t := l.getType()
 	options := ExecuteOptions{
 		Command: "bash",
@@ -145,7 +138,7 @@ func (l Location) Backup() error {
 	// Backup
 	for _, to := range l.To {
 		backend, _ := GetBackend(to)
-		colors.Secondary.Printf("Backend: %s\n", backend.Name)
+		colors.Secondary.Printf("Backend: %s\n", backend.name)
 		env, err := backend.getEnv()
 		if err != nil {
 			return nil
@@ -186,7 +179,7 @@ func (l Location) Backup() error {
 }
 
 func (l Location) Forget(prune bool, dry bool) error {
-	colors.PrimaryPrint("Forgetting for location \"%s\"", l.Name)
+	colors.PrimaryPrint("Forgetting for location \"%s\"", l.name)
 
 	path, err := l.getPath()
 	if err != nil {
@@ -195,7 +188,7 @@ func (l Location) Forget(prune bool, dry bool) error {
 
 	for _, to := range l.To {
 		backend, _ := GetBackend(to)
-		colors.Secondary.Printf("For backend \"%s\"\n", backend.Name)
+		colors.Secondary.Printf("For backend \"%s\"\n", backend.name)
 		env, err := backend.getEnv()
 		if err != nil {
 			return nil
@@ -244,7 +237,7 @@ func (l Location) Restore(to, from string, force bool) error {
 	if err != nil {
 		return err
 	}
-	colors.PrimaryPrint("Restoring location \"%s\"", l.Name)
+	colors.PrimaryPrint("Restoring location \"%s\"", l.name)
 
 	backend, _ := GetBackend(from)
 	path, err := l.getPath()
@@ -293,14 +286,14 @@ func (l Location) RunCron() error {
 	if err != nil {
 		return err
 	}
-	last := time.Unix(lock.GetCron(l.Name), 0)
+	last := time.Unix(lock.GetCron(l.name), 0)
 	next := schedule.Next(last)
 	now := time.Now()
 	if now.After(next) {
-		lock.SetCron(l.Name, now.Unix())
+		lock.SetCron(l.name, now.Unix())
 		l.Backup()
 	} else {
-		colors.Body.Printf("Skipping \"%s\", not due yet.\n", l.Name)
+		colors.Body.Printf("Skipping \"%s\", not due yet.\n", l.name)
 	}
 	return nil
 }
