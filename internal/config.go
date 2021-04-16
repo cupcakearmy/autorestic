@@ -54,6 +54,60 @@ func GetPathRelativeToConfig(p string) (string, error) {
 	}
 }
 
+func PrintDescription(left string, right string) {
+	colors.Body.Printf("%s\t%s\n", colors.Secondary.Sprint(left), strings.TrimPrefix(right, "\t"))
+}
+
+func (c *Config) Describe() {
+	for name, l := range c.Locations {
+		var tmp string
+		colors.PrimaryPrint(`Location: "%s"`, name)
+
+		PrintDescription("From", l.From)
+
+		tmp = ""
+		for _, to := range l.To {
+			tmp += fmt.Sprintf("\t→ %s\n", to)
+		}
+		PrintDescription("To", tmp)
+
+		if l.Cron != "" {
+			PrintDescription("Cron", l.Cron)
+		}
+
+		after, before := len(l.Hooks.After), len(l.Hooks.Before)
+		if after+before > 0 {
+			tmp = ""
+			if before > 0 {
+				tmp += "\tBefore\n"
+				for _, cmd := range l.Hooks.Before {
+					tmp += colors.Faint.Sprintf("\t  ▶ %s\n", cmd)
+				}
+			}
+			if after > 0 {
+				tmp += "\tAfter\n"
+				for _, cmd := range l.Hooks.After {
+					tmp += colors.Faint.Sprintf("\t  ▶ %s\n", cmd)
+				}
+			}
+			PrintDescription("Hooks", tmp)
+		}
+
+		if len(l.Options) > 0 {
+			tmp = ""
+			for t, options := range l.Options {
+				tmp += "\t" + t + "\n"
+				for option, values := range options {
+					for _, value := range values {
+						tmp += colors.Faint.Sprintf("\t✧ --%s=%s\n", option, value)
+					}
+				}
+			}
+			PrintDescription("Options", tmp)
+		}
+	}
+}
+
 func CheckConfig() error {
 	c := GetConfig()
 	if c == nil {
