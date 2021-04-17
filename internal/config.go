@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.0.1"
+const VERSION = "1.0.2"
 
 var CI bool = false
 var VERBOSE bool = false
