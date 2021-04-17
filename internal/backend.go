@@ -1,0 +1,150 @@
+package internal
+
+import (
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/spf13/viper"
+)
+
+type Backend struct {
+	name string
+	Type string            `mapstructure:"type,omitempty"`
+	Path string            `mapstructure:"path,omitempty"`
+	Key  string            `mapstructure:"key,omitempty"`
+	Env  map[string]string `mapstructure:"env,omitempty"`
+}
+
+func GetBackend(name string) (Backend, bool) {
+	b, ok := GetConfig().Backends[name]
+	b.name = name
+	return b, ok
+}
+
+func (b Backend) generateRepo() (string, error) {
+	switch b.Type {
+	case "local":
+		return GetPathRelativeToConfig(b.Path)
+	case "b2", "azure", "gs", "s3", "sftp", "rest":
+		return fmt.Sprintf("%s:%s", b.Type, b.Path), nil
+	default:
+		return "", fmt.Errorf("backend type \"%s\" is invalid", b.Type)
+	}
+}
+
+func (b Backend) getEnv() (map[string]string, error) {
+	env := make(map[string]string)
+	env["RESTIC_PASSWORD"] = b.Key
+	repo, err := b.generateRepo()
+	env["RESTIC_REPOSITORY"] = repo
+	for key, value := range b.Env {
+		env[strings.ToUpper(key)] = value
+	}
+	return env, err
+}
+
+func generateRandomKey() string {
+	b := make([]byte, 64)
+	rand.Read(b)
+	key := base64.StdEncoding.EncodeToString(b)
+	key = strings.ReplaceAll(key, "=", "")
+	key = strings.ReplaceAll(key, "+", "")
+	key = strings.ReplaceAll(key, "/", "")
+	return key
+}
+
+func (b Backend) validate() error {
+	if b.Type == "" {
+		return fmt.Errorf(`Backend "%s" has no "type"`, b.name)
+	}
+	if b.Path == "" {
+		return fmt.Errorf(`Backend "%s" has no "path"`, b.name)
+	}
+	if b.Key == "" {
+		key := generateRandomKey()
+		b.Key = key
+		c := GetConfig()
+		tmp := c.Backends[b.name]
+		tmp.Key = key
+		tmp.name = ""
+		c.Backends[b.name] = tmp
+		file := viper.ConfigFileUsed()
+		if err := CopyFile(file, file+".old"); err != nil {
+			return err
+		}
+		colors.Secondary.Println("Saved a backup copy of your file next the the original.")
+		viper.Set("backends", c.Backends)
+		viper.WriteConfig()
+	}
+	env, err := b.getEnv()
+	if err != nil {
+		return err
+	}
+	options := ExecuteOptions{Envs: env}
+	// Check if already initialized
+	_, err = ExecuteResticCommand(options, "snapshots")
+	if err == nil {
+		return nil
+	} else {
+		// If not initialize
+		colors.Body.Printf("Initializing backend \"%s\"...\n", b.name)
+		out, err := ExecuteResticCommand(options, "init")
+		if VERBOSE {
+			colors.Faint.Println(out)
+		}
+		return err
+	}
+}
+
+func (b Backend) Exec(args []string) error {
+	env, err := b.getEnv()
+	if err != nil {
+		return err
+	}
+	options := ExecuteOptions{Envs: env}
+	out, err := ExecuteResticCommand(options, args...)
+	if VERBOSE {
+		colors.Faint.Println(out)
+	}
+	return err
+}
+
+func (b Backend) ExecDocker(l Location, args []string) error {
+	env, err := b.getEnv()
+	if err != nil {
+		return err
+	}
+	volume := l.getVolumeName()
+	path, _ := l.getPath()
+	options := ExecuteOptions{
+		Command: "docker",
+		Envs:    env,
+	}
+	docker := []string{
+		"run", "--rm",
+		"--entrypoint", "ash",
+		"--workdir", path,
+		"--volume", volume + ":" + path,
+	}
+	if hostname, err := os.Hostname(); err == nil {
+		docker = append(docker, "--hostname", hostname)
+	}
+	if b.Type == "local" {
+		actual := env["RESTIC_REPOSITORY"]
+		docker = append(docker, "--volume", actual+":"+"/repo")
+		env["RESTIC_REPOSITORY"] = "/repo"
+	}
+	for key, value := range env {
+		docker = append(docker, "--env", key+"="+value)
+	}
+	docker = append(docker, "restic/restic", "-c", "restic "+strings.Join(args, " "))
+	out, err := ExecuteCommand(options, docker...)
+	if VERBOSE {
+		colors.Faint.Println(out)
+	}
+	return err
+}
