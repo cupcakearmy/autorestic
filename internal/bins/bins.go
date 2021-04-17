@@ -130,7 +130,7 @@ func Upgrade(restic bool) error {
 	if err != nil {
 		return err
 	}
-	if current.GT(latest) {
+	if current.LT(latest) {
 		downloadAndInstallAsset(body, "autorestic")
 		colors.Success.Println("Updated autorestic")
 	} else {
