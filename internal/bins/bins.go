@@ -57,44 +57,48 @@ func Uninstall(restic bool) error {
 	return nil
 }
 
+func downloadAndInstallAsset(body GithubRelease, name string) error {
+	ending := fmt.Sprintf("_%s_%s.bz2", runtime.GOOS, runtime.GOARCH)
+	for _, asset := range body.Assets {
+		if strings.HasSuffix(asset.Name, ending) {
+			// Download archive
+			colors.Faint.Println("Downloading:", asset.Link)
+			resp, err := http.Get(asset.Link)
+			if err != nil {
+				return err
+			}
+			defer resp.Body.Close()
+
+			// Uncompress
+			bz := bzip2.NewReader(resp.Body)
+
+			// Save binary
+			file, err := os.Create(path.Join(INSTALL_PATH, name))
+			if err != nil {
+				return err
+			}
+			file.Chmod(0755)
+			defer file.Close()
+			io.Copy(file, bz)
+
+			colors.Success.Printf("Successfully installed '%s' under %s\n", name, INSTALL_PATH)
+			return nil
+		}
+	}
+	return errors.New("could not find right binary for your system, please install restic manually. https://bit.ly/2Y1Rzai")
+}
+
 func InstallRestic() error {
 	installed := internal.CheckIfCommandIsCallable("restic")
 	if installed {
 		colors.Body.Println("restic already installed")
 		return nil
 	} else {
-		body, err := dlJSON("https://api.github.com/repos/restic/restic/releases/latest")
-		if err != nil {
+		if body, err := dlJSON("https://api.github.com/repos/restic/restic/releases/latest"); err != nil {
 			return err
+		} else {
+			return downloadAndInstallAsset(body, "restic")
 		}
-		ending := fmt.Sprintf("_%s_%s.bz2", runtime.GOOS, runtime.GOARCH)
-		for _, asset := range body.Assets {
-			if strings.HasSuffix(asset.Name, ending) {
-				// Download archive
-				colors.Faint.Println("Downloading:", asset.Link)
-				resp, err := http.Get(asset.Link)
-				if err != nil {
-					return err
-				}
-				defer resp.Body.Close()
-
-				// Uncompress
-				bz := bzip2.NewReader(resp.Body)
-
-				// Save binary
-				file, err := os.Create(path.Join(INSTALL_PATH, "restic"))
-				if err != nil {
-					return err
-				}
-				file.Chmod(0755)
-				defer file.Close()
-				io.Copy(file, bz)
-
-				colors.Success.Printf("Successfully installed restic under %s\n", INSTALL_PATH)
-				return nil
-			}
-		}
-		return errors.New("could not find right binary for your system, please install restic manually. https://bit.ly/2Y1Rzai")
 	}
 }
 
@@ -127,7 +131,7 @@ func Upgrade(restic bool) error {
 		return err
 	}
 	if current.GT(latest) {
-		// TODO: Actually download and install
+		downloadAndInstallAsset(body, "autorestic")
 		colors.Success.Println("Updated autorestic")
 	} else {
 		colors.Body.Println("Already up to date")
