@@ -44,4 +44,6 @@ PATH="/usr/local/bin:/usr/bin:/bin"
 
 Now you can add as many `cron` attributes as you wish in the config file ⏱
 
+> Also note that manually triggered backups with `autorestic backup` will not influence the cron timeline, they are willingly not linked.
+
 > :ToCPrevNext

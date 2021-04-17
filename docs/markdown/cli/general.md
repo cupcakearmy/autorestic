@@ -19,7 +19,7 @@ This can be useful when you want to run cron e.g. as all the output will be save
 autorestic --ci backup -a
 ```
 
-## `--verbose`
+## `-v, --verbose`
 
 Verbose mode will show the output of the native restic commands that are otherwise not printed out. Useful for debugging or logging in automated tasks.
 
