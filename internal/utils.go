@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
+
+	"github.com/cupcakearmy/autorestic/internal/colors"
 )
 
 func CheckIfCommandIsCallable(cmd string) bool {
@@ -31,6 +33,10 @@ func ExecuteCommand(options ExecuteOptions, args ...string) (string, error) {
 	}
 	cmd.Env = env
 	cmd.Dir = options.Dir
+
+	if VERBOSE {
+		colors.Faint.Printf("> Executing: %s\n", cmd)
+	}
 
 	var out bytes.Buffer
 	var error bytes.Buffer

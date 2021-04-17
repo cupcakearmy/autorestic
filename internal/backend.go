@@ -41,6 +41,9 @@ func (b Backend) getEnv() (map[string]string, error) {
 	env["RESTIC_PASSWORD"] = b.Key
 	repo, err := b.generateRepo()
 	env["RESTIC_REPOSITORY"] = repo
+	for key, value := range b.Env {
+		env[strings.ToUpper(key)] = value
+	}
 	return env, err
 }
 
@@ -88,8 +91,11 @@ func (b Backend) validate() error {
 		return nil
 	} else {
 		// If not initialize
+		colors.Body.Printf("Initializing backend \"%s\"...\n", b.name)
 		out, err := ExecuteResticCommand(options, "init")
-		colors.Faint.Println(out)
+		if VERBOSE {
+			colors.Faint.Println(out)
+		}
 		return err
 	}
 }

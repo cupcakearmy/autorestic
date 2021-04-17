@@ -113,7 +113,7 @@ func (c *Config) Describe() {
 		if len(b.Env) > 0 {
 			tmp := ""
 			for option, value := range b.Env {
-				tmp += fmt.Sprintf("\n\t%s %s %s", colors.Success.Sprint("✧"), option, colors.Faint.Sprint(value))
+				tmp += fmt.Sprintf("\n\t%s %s %s", colors.Success.Sprint("✧"), strings.ToUpper(option), colors.Faint.Sprint(value))
 			}
 			colors.PrintDescription("Env", tmp)
 		}
