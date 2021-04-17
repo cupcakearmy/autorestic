@@ -23,4 +23,6 @@ remote:
       B2_ACCOUNT_KEY: key
 ```
 
+Other than the config file there is a new `-v, --verbose` flag which shows the output of native commands, which are now hidden by default.
+
 > :ToCPrevNext
