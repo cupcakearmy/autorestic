@@ -1,10 +1,11 @@
 package lock
 
 import (
-	"errors"
+	"os"
 	"path"
 	"sync"
 
+	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/spf13/viper"
 )
 
@@ -33,7 +34,8 @@ func setLock(locked bool) error {
 	if locked {
 		running := lock.GetBool("running")
 		if running {
-			panic(errors.New("an instance is already running"))
+			colors.Error.Println("an instance is already running. exiting")
+			os.Exit(1)
 		}
 	}
 	lock.Set("running", locked)
