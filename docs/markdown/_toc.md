@@ -1,7 +1,7 @@
 [Home](/)
 [Quick Start](/quick)
-<!-- [Installation](/installation) -->
 [Configuration](/config)
+[Upgrade](/upgrade)
 
 > :Collapse label=Locations
 >
