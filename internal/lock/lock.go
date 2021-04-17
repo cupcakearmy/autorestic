@@ -33,7 +33,7 @@ func setLock(locked bool) error {
 	if locked {
 		running := lock.GetBool("running")
 		if running {
-			return errors.New("an instance is already running")
+			panic(errors.New("an instance is already running"))
 		}
 	}
 	lock.Set("running", locked)
