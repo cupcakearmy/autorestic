@@ -1,3 +1,3 @@
-## 0.27
+## 0.30
 
-- fix locking issue
+- prepare for new updates

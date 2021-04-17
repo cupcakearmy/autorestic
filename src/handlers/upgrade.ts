@@ -38,9 +38,9 @@ export async function upgrade() {
 
       chmodSync(to, 0o755)
     } else {
-      w.appendLn('Newer major version available, will not install automatically.')
+      w.done('Newer major version available, will not install automatically.\nDownload: https://github.com/cupcakearmy/autorestic')
+      return
     }
   }
-
   w.done('All up to date! 🚀')
 }
