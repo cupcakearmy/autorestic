@@ -24,8 +24,6 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Show info about the config",
 	Run: func(cmd *cobra.Command, args []string) {
-		CheckErr(internal.CheckConfig())
-
 		internal.GetConfig().Describe()
 	},
 }

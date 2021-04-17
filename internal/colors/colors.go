@@ -2,6 +2,7 @@ package colors
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -19,4 +20,10 @@ func PrimaryPrint(msg string, args ...interface{}) {
 
 func DisableColors(state bool) {
 	color.NoColor = state
+}
+
+func PrintDescription(left string, right string) {
+	right = strings.Trim(right, "\n")
+	right = strings.Trim(right, "\t")
+	Body.Printf("%s\t%s\n", Secondary.Sprint(left), right)
 }

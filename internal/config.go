@@ -54,56 +54,68 @@ func GetPathRelativeToConfig(p string) (string, error) {
 	}
 }
 
-func PrintDescription(left string, right string) {
-	colors.Body.Printf("%s\t%s\n", colors.Secondary.Sprint(left), strings.TrimPrefix(right, "\t"))
-}
-
 func (c *Config) Describe() {
+	// Locations
 	for name, l := range c.Locations {
 		var tmp string
 		colors.PrimaryPrint(`Location: "%s"`, name)
 
-		PrintDescription("From", l.From)
+		colors.PrintDescription("From", l.From)
 
 		tmp = ""
 		for _, to := range l.To {
-			tmp += fmt.Sprintf("\t→ %s\n", to)
+			tmp += fmt.Sprintf("\t%s %s\n", colors.Success.Sprint("→"), to)
 		}
-		PrintDescription("To", tmp)
+		colors.PrintDescription("To", tmp)
 
 		if l.Cron != "" {
-			PrintDescription("Cron", l.Cron)
+			colors.PrintDescription("Cron", l.Cron)
 		}
 
 		after, before := len(l.Hooks.After), len(l.Hooks.Before)
 		if after+before > 0 {
 			tmp = ""
 			if before > 0 {
-				tmp += "\tBefore\n"
+				tmp += "\tBefore"
 				for _, cmd := range l.Hooks.Before {
-					tmp += colors.Faint.Sprintf("\t  ▶ %s\n", cmd)
+					tmp += colors.Faint.Sprintf("\n\t  ▶ %s", cmd)
 				}
 			}
 			if after > 0 {
-				tmp += "\tAfter\n"
+				tmp += "\n\tAfter"
 				for _, cmd := range l.Hooks.After {
-					tmp += colors.Faint.Sprintf("\t  ▶ %s\n", cmd)
+					tmp += colors.Faint.Sprintf("\n\t  ▶ %s", cmd)
 				}
 			}
-			PrintDescription("Hooks", tmp)
+			colors.PrintDescription("Hooks", tmp)
 		}
 
 		if len(l.Options) > 0 {
 			tmp = ""
 			for t, options := range l.Options {
-				tmp += "\t" + t + "\n"
+				tmp += "\n\t" + t
 				for option, values := range options {
 					for _, value := range values {
-						tmp += colors.Faint.Sprintf("\t✧ --%s=%s\n", option, value)
+						tmp += colors.Faint.Sprintf("\n\t  ✧ --%s=%s", option, value)
 					}
 				}
 			}
-			PrintDescription("Options", tmp)
+			colors.PrintDescription("Options", tmp)
+		}
+	}
+
+	// Backends
+	for name, b := range c.Backends {
+		colors.PrimaryPrint("Backend: \"%s\"", name)
+		colors.PrintDescription("Type", b.Type)
+		colors.PrintDescription("Path", b.Path)
+
+		if len(b.Env) > 0 {
+			tmp := ""
+			for option, value := range b.Env {
+				tmp += fmt.Sprintf("\n\t%s %s %s", colors.Success.Sprint("✧"), option, colors.Faint.Sprint(value))
+			}
+			colors.PrintDescription("Env", tmp)
 		}
 	}
 }
