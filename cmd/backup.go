@@ -20,7 +20,7 @@ var backupCmd = &cobra.Command{
 		CheckErr(err)
 		for _, name := range selected {
 			location, _ := internal.GetLocation(name)
-			location.Backup()
+			location.Backup(false)
 		}
 	},
 }

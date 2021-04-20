@@ -118,7 +118,7 @@ func (l Location) getPath() (string, error) {
 	return "", fmt.Errorf("could not get path for location \"%s\"", l.name)
 }
 
-func (l Location) Backup() error {
+func (l Location) Backup(cron bool) error {
 	colors.PrimaryPrint("  Backing up location \"%s\"  ", l.name)
 	t := l.getType()
 	options := ExecuteOptions{
@@ -147,6 +147,9 @@ func (l Location) Backup() error {
 		flags := l.getOptions("backup")
 		cmd := []string{"backup"}
 		cmd = append(cmd, flags...)
+		if cron {
+			cmd = append(cmd, "--tag", "cron")
+		}
 		cmd = append(cmd, ".")
 		backupOptions := ExecuteOptions{
 			Dir:  options.Dir,
@@ -291,7 +294,7 @@ func (l Location) RunCron() error {
 	now := time.Now()
 	if now.After(next) {
 		lock.SetCron(l.name, now.Unix())
-		l.Backup()
+		l.Backup(true)
 	} else {
 		colors.Body.Printf("Skipping \"%s\", not due yet.\n", l.name)
 	}
