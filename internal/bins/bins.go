@@ -72,14 +72,21 @@ func downloadAndInstallAsset(body GithubRelease, name string) error {
 			// Uncompress
 			bz := bzip2.NewReader(resp.Body)
 
-			// Save binary
-			file, err := os.Create(path.Join(INSTALL_PATH, name))
+			// Save to tmp
+			// Linux does not support overwriting the file that is currently being overwritten, but it can be deleted and a new one moved in its place.
+			tmp, err := ioutil.TempFile(os.TempDir(), "autorestic-")
 			if err != nil {
 				return err
 			}
-			file.Chmod(0755)
-			defer file.Close()
-			io.Copy(file, bz)
+			defer tmp.Close()
+			tmp.Chmod(0755)
+			io.Copy(tmp, bz)
+
+			to := path.Join(INSTALL_PATH, name)
+			os.Remove(to) // Delete if current, ignore error if file does not exits.
+			if err := os.Rename(tmp.Name(), to); err != nil {
+				return nil
+			}
 
 			colors.Success.Printf("Successfully installed '%s' under %s\n", name, INSTALL_PATH)
 			return nil
