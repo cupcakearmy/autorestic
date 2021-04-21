@@ -36,4 +36,4 @@ bzip2 -fd "${OUT_FILE}.bz2"
 chmod +x ${OUT_FILE}
 
 autorestic install
-echo "Succefsully installed autorestic"
+echo "Successfully installed autorestic"
