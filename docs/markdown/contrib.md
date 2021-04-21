@@ -2,7 +2,10 @@
 
 This amazing people helped the project!
 
-- @ChanceM [Docs]
-- @EliotBerriot [Docs, Pruning, S3]
+- @agateblue - Docs, Pruning, S3
+- @jin-park-dev - Typos
+- @sumnerboy12 - Typos
+- @FuzzyMistborn - Typos
+- @ChanceM - Typos
 
 > :ToCPrevNext
