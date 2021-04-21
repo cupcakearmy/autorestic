@@ -24,11 +24,11 @@ For a quick overview:
 
 ```yaml | .autorestic.yml
 locations:
-  - name: home
+  home:
     from: /home/me
     to: remote
 
-  - name: important
+  important:
     from: /path/to/important/stuff
     to:
       - remote
@@ -39,8 +39,9 @@ backends:
     type: s3
     path: 's3.amazonaws.com/bucket_name'
     key: some-random-password-198rc79r8y1029c8yfewj8f1u0ef87yh198uoieufy
-    AWS_ACCESS_KEY_ID: account_id
-    AWS_SECRET_ACCESS_KEY: account_key
+    env:
+      AWS_ACCESS_KEY_ID: account_id
+      AWS_SECRET_ACCESS_KEY: account_key
 
   - name: hdd
     type: local
