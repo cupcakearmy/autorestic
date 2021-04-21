@@ -26,3 +26,5 @@ Verbose mode will show the output of the native restic commands that are otherwi
 ```bash
 autorestic --verbose backup -a
 ```
+
+> :ToCPrevNext

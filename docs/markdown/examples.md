@@ -3,7 +3,7 @@
 ## List all the snapshots for all the backends
 
 ```bash
-autorestic exec -a -- snapshots
+autorestic exec -av -- snapshots
 ```
 
 ## Unlock a locked repository
