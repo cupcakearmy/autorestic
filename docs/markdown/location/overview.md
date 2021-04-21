@@ -22,6 +22,6 @@ Paths can be absolute or relative. If relative they are resolved relative to the
 
 ## `to`
 
-This is einther a single backend or an array of backends. The backends have to be configured in the same config file.
+This is either a single backend or an array of backends. The backends have to be configured in the same config file.
 
 > :ToCPrevNext

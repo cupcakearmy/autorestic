@@ -14,11 +14,11 @@ locations:
     options:
       forget:
         keep-last: 5 # always keep at least 5 snapshots
-        keep-hourly: 3 # keep 3 last hourly shapshots
-        keep-daily: 4 # keep 4 last daily shapshots
-        keep-weekly: 1 # keep 1 last weekly shapshots
-        keep-monthly: 12 # keep 12 last monthly shapshots
-        keep-yearly: 7 # keep 7 last yearly shapshots
+        keep-hourly: 3 # keep 3 last hourly snapshots
+        keep-daily: 4 # keep 4 last daily snapshots
+        keep-weekly: 1 # keep 1 last weekly snapshots
+        keep-monthly: 12 # keep 12 last monthly snapshots
+        keep-yearly: 7 # keep 7 last yearly snapshots
         keep-within: '2w' # keep snapshots from the last 2 weeks
 ```
 

@@ -1,6 +1,6 @@
 # 💽 Backends
 
-Backends are the ouputs of the backup process. Each location needs at least one.
+Backends are the outputs of the backup process. Each location needs at least one.
 
 ```yaml | .autorestic.yml
 backends:

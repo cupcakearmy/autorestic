@@ -15,7 +15,7 @@ vim .autorestic.yml
 For a quick overview:
 
 - `locations` can be seen as the inputs and `backends` the output where the data is stored and backed up.
-- One `location` can have one or multiple `backends` for redudancy.
+- One `location` can have one or multiple `backends` for redundancy.
 - One `backend` can also be the target for multiple `locations`.
 
 > **⚠️ WARNING ⚠️**
