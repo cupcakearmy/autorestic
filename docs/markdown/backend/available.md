@@ -20,8 +20,9 @@ backends:
   name-of-backend:
     type: b2
     path: 'myAccount:myBucket/my/path'
-    B2_ACCOUNT_ID: backblaze_account_id
-    B2_ACCOUNT_KEY: backblaze_account_key
+    env:
+      B2_ACCOUNT_ID: backblaze_account_id
+      B2_ACCOUNT_KEY: backblaze_account_key
 ```
 
 ## S3 / Minio
@@ -33,8 +34,9 @@ backends:
     path: s3.amazonaws.com/bucket_name
     # Minio
     # path: http://localhost:9000/bucket_name
-    AWS_ACCESS_KEY_ID: my_key
-    AWS_SECRET_ACCESS_KEY: my_secret
+    env:
+      AWS_ACCESS_KEY_ID: my_key
+      AWS_SECRET_ACCESS_KEY: my_secret
 ```
 
 ## SFTP
