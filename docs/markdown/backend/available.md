@@ -25,6 +25,11 @@ backends:
       B2_ACCOUNT_KEY: backblaze_account_key
 ```
 
+#### API Keys gotcha
+
+When creating API make sure you check _Allow List All Bucket Names_ if you allow access to a single bucket only.
+Also make sure that the _File name prefix_ (if used) does not includes a leading slash.
+
 ## S3 / Minio
 
 ```yaml
@@ -59,6 +64,21 @@ backends:
   name-of-backend:
     type: rest
     path: http://localhost:8000/repo_name
+    # Or authenticated
+    path: https://user:pass@host:6969/path
+```
+
+Optionally you can set user and password separately
+
+```yaml
+backends:
+  rest:
+    type: rest
+    path: http://localhost:6969/path
+    key: ...
+    rest:
+      user: user
+      password: pass
 ```
 
 > :ToCPrevNext
