@@ -36,3 +36,8 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 ### ❓ Questions / Support
 
 Check the [discussions page](https://github.com/cupcakearmy/autorestic/discussions)
+
+## Contributing / Developing
+
+PRs, feature requests, etc. are welcomed :)
+Have a look at [the dev docs](./DEVELOPMENT.md)
