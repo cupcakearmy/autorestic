@@ -24,19 +24,19 @@ const (
 type HookArray = []string
 
 type Hooks struct {
-	Before HookArray `mapstructure:"before"`
-	After  HookArray `mapstructure:"after"`
+	Before HookArray `yaml:"before"`
+	After  HookArray `yaml:"after"`
 }
 
 type Options map[string]map[string][]string
 
 type Location struct {
-	name    string   `mapstructure:",omitempty"`
-	From    string   `mapstructure:"from,omitempty"`
-	To      []string `mapstructure:"to,omitempty"`
-	Hooks   Hooks    `mapstructure:"hooks,omitempty"`
-	Cron    string   `mapstructure:"cron,omitempty"`
-	Options Options  `mapstructure:"options,omitempty"`
+	name    string   `yaml:",omitempty"`
+	From    string   `yaml:"from,omitempty"`
+	To      []string `yaml:"to,omitempty"`
+	Hooks   Hooks    `yaml:"hooks,omitempty"`
+	Cron    string   `yaml:"cron,omitempty"`
+	Options Options  `yaml:"options,omitempty"`
 }
 
 func GetLocation(name string) (Location, bool) {

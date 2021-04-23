@@ -4,19 +4,25 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
-	"github.com/spf13/viper"
 )
+
+type BackendRest struct {
+	User     string `yaml:"user,omitempty"`
+	Password string `yaml:"password,omitempty"`
+}
 
 type Backend struct {
 	name string
-	Type string            `mapstructure:"type,omitempty"`
-	Path string            `mapstructure:"path,omitempty"`
-	Key  string            `mapstructure:"key,omitempty"`
-	Env  map[string]string `mapstructure:"env,omitempty"`
+	Type string            `yaml:"type,omitempty"`
+	Path string            `yaml:"path,omitempty"`
+	Key  string            `yaml:"key,omitempty"`
+	Env  map[string]string `yaml:"env,omitempty"`
+	Rest BackendRest       `yaml:"rest,omitempty"`
 }
 
 func GetBackend(name string) (Backend, bool) {
@@ -29,7 +35,20 @@ func (b Backend) generateRepo() (string, error) {
 	switch b.Type {
 	case "local":
 		return GetPathRelativeToConfig(b.Path)
-	case "b2", "azure", "gs", "s3", "sftp", "rest":
+	case "rest":
+		parsed, err := url.Parse(b.Path)
+		if err != nil {
+			return "", err
+		}
+		if b.Rest.User != "" {
+			if b.Rest.Password == "" {
+				parsed.User = url.User(b.Rest.User)
+			} else {
+				parsed.User = url.UserPassword(b.Rest.User, b.Rest.Password)
+			}
+		}
+		return fmt.Sprintf("%s:%s", b.Type, parsed.String()), nil
+	case "b2", "azure", "gs", "s3", "sftp":
 		return fmt.Sprintf("%s:%s", b.Type, b.Path), nil
 	default:
 		return "", fmt.Errorf("backend type \"%s\" is invalid", b.Type)
@@ -70,15 +89,10 @@ func (b Backend) validate() error {
 		c := GetConfig()
 		tmp := c.Backends[b.name]
 		tmp.Key = key
-		tmp.name = ""
 		c.Backends[b.name] = tmp
-		file := viper.ConfigFileUsed()
-		if err := CopyFile(file, file+".old"); err != nil {
+		if err := c.SaveConfig(); err != nil {
 			return err
 		}
-		colors.Secondary.Println("Saved a backup copy of your file next the the original.")
-		viper.Set("backends", c.Backends)
-		viper.WriteConfig()
 	}
 	env, err := b.getEnv()
 	if err != nil {

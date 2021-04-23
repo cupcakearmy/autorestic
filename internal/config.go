@@ -12,14 +12,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.0.3"
+const VERSION = "1.0.4"
 
 var CI bool = false
 var VERBOSE bool = false
 
 type Config struct {
-	Locations map[string]Location `mapstructure:"locations"`
-	Backends  map[string]Backend  `mapstructure:"backends"`
+	Locations map[string]Location `yaml:"locations"`
+	Backends  map[string]Backend  `yaml:"backends"`
 }
 
 var once sync.Once
@@ -196,4 +196,17 @@ func AddFlagsToCommand(cmd *cobra.Command, backend bool) {
 	} else {
 		cmd.PersistentFlags().StringSliceP("location", "l", []string{}, "Locations")
 	}
+}
+
+func (c *Config) SaveConfig() error {
+	file := viper.ConfigFileUsed()
+	if err := CopyFile(file, file+".old"); err != nil {
+		return err
+	}
+	colors.Secondary.Println("Saved a backup copy of your file next the the original.")
+
+	viper.Set("backends", c.Backends)
+	viper.Set("locations", c.Locations)
+
+	return viper.WriteConfig()
 }
