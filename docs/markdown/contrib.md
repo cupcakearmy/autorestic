@@ -7,5 +7,6 @@ This amazing people helped the project!
 - @sumnerboy12 - Typos
 - @FuzzyMistborn - Typos
 - @ChanceM - Typos
+- @TheForcer - Typos
 
 > :ToCPrevNext
