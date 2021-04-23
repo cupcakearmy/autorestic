@@ -161,15 +161,15 @@ func (l Location) Backup(cron bool) error {
 		switch t {
 		case TypeLocal:
 			out, err = ExecuteResticCommand(backupOptions, cmd...)
-			if VERBOSE {
-				colors.Faint.Println(out)
-			}
 		case TypeVolume:
-			err = backend.ExecDocker(l, cmd)
+			out, err = backend.ExecDocker(l, cmd)
 		}
-
 		if err != nil {
+			colors.Error.Println(out)
 			return err
+		}
+		if VERBOSE {
+			colors.Faint.Println(out)
 		}
 	}
 
@@ -271,7 +271,7 @@ func (l Location) Restore(to, from string, force bool) error {
 		}
 		err = backend.Exec([]string{"restore", "--target", to, "--path", path, "latest"})
 	case TypeVolume:
-		err = backend.ExecDocker(l, []string{"restore", "--target", ".", "--path", path, "latest"})
+		_, err = backend.ExecDocker(l, []string{"restore", "--target", ".", "--path", path, "latest"})
 	}
 	if err != nil {
 		return err

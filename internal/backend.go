@@ -121,16 +121,20 @@ func (b Backend) Exec(args []string) error {
 	}
 	options := ExecuteOptions{Envs: env}
 	out, err := ExecuteResticCommand(options, args...)
+	if err != nil {
+		colors.Error.Println(out)
+		return err
+	}
 	if VERBOSE {
 		colors.Faint.Println(out)
 	}
-	return err
+	return nil
 }
 
-func (b Backend) ExecDocker(l Location, args []string) error {
+func (b Backend) ExecDocker(l Location, args []string) (string, error) {
 	env, err := b.getEnv()
 	if err != nil {
-		return err
+		return "", err
 	}
 	volume := l.getVolumeName()
 	path, _ := l.getPath()
@@ -157,8 +161,5 @@ func (b Backend) ExecDocker(l Location, args []string) error {
 	}
 	docker = append(docker, "restic/restic", "-c", "restic "+strings.Join(args, " "))
 	out, err := ExecuteCommand(options, docker...)
-	if VERBOSE {
-		colors.Faint.Println(out)
-	}
-	return err
+	return out, err
 }

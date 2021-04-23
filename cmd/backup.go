@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 )
@@ -18,9 +21,17 @@ var backupCmd = &cobra.Command{
 
 		selected, err := internal.GetAllOrSelected(cmd, false)
 		CheckErr(err)
+		errors := 0
 		for _, name := range selected {
 			location, _ := internal.GetLocation(name)
-			location.Backup(false)
+			err := location.Backup(false)
+			if err != nil {
+				colors.Error.Println(err)
+				errors++
+			}
+		}
+		if errors > 0 {
+			CheckErr(fmt.Errorf("%d errors were found", errors))
 		}
 	},
 }
