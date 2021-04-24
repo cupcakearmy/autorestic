@@ -49,6 +49,18 @@ func (l Location) validate(c *Config) error {
 	if l.From == "" {
 		return fmt.Errorf(`Location "%s" is missing "from" key`, l.name)
 	}
+	if from, err := GetPathRelativeToConfig(l.From); err != nil {
+		return err
+	} else {
+		if stat, err := os.Stat(from); err != nil {
+			return err
+		} else {
+			if !stat.IsDir() {
+				return fmt.Errorf("\"%s\" is not valid directory for location \"%s\"", from, l.name)
+			}
+		}
+	}
+
 	if len(l.To) == 0 {
 		return fmt.Errorf(`Location "%s" has no "to" targets`, l.name)
 	}
@@ -81,11 +93,12 @@ func ExecuteHooks(commands []string, options ExecuteOptions) error {
 	for _, command := range commands {
 		colors.Body.Println("> " + command)
 		out, err := ExecuteCommand(options, "-c", command)
+		if err != nil {
+			colors.Error.Println(out)
+			return err
+		}
 		if VERBOSE {
 			colors.Faint.Println(out)
-		}
-		if err != nil {
-			return err
 		}
 	}
 	colors.Body.Println("")
