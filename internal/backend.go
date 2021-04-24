@@ -48,7 +48,7 @@ func (b Backend) generateRepo() (string, error) {
 			}
 		}
 		return fmt.Sprintf("%s:%s", b.Type, parsed.String()), nil
-	case "b2", "azure", "gs", "s3", "sftp":
+	case "b2", "azure", "gs", "s3", "sftp", "rclone":
 		return fmt.Sprintf("%s:%s", b.Type, b.Path), nil
 	default:
 		return "", fmt.Errorf("backend type \"%s\" is invalid", b.Type)
