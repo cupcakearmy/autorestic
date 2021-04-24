@@ -17,7 +17,7 @@ var checkCmd = &cobra.Command{
 
 		CheckErr(internal.CheckConfig())
 
-		colors.Success.Println("Everyting is fine.")
+		colors.Success.Println("Everything is fine.")
 	},
 }
 
