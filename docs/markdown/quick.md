@@ -52,7 +52,7 @@ backends:
 ## Check
 
 ```bash
-autorestic check -a
+autorestic check
 ```
 
 This checks if the config file has any issues. If this is the first time this can take longer as autorestic will setup the backends.
