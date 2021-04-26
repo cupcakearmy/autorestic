@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"sync"
 
 	"github.com/cupcakearmy/autorestic/internal"
 )
@@ -27,7 +28,7 @@ type buildOptions struct {
 	Target, Arch, Version string
 }
 
-func build(options buildOptions) error {
+func build(options buildOptions, wg *sync.WaitGroup) {
 	fmt.Printf("Building %s %s\n", options.Target, options.Arch)
 	out := fmt.Sprintf("autorestic_%s_%s_%s", options.Version, options.Target, options.Arch)
 	out = path.Join(DIR, out)
@@ -46,7 +47,7 @@ func build(options buildOptions) error {
 		)
 		err := c.Run()
 		if err != nil {
-			return err
+			panic(err)
 		}
 	}
 
@@ -58,26 +59,25 @@ func build(options buildOptions) error {
 		c.Stderr = os.Stderr
 		err := c.Run()
 		if err != nil {
-			return err
+			panic(err)
 		}
 	}
-
-	return nil
+	wg.Done()
 }
 
 func main() {
 	os.RemoveAll(DIR)
 	v := internal.VERSION
+	var wg sync.WaitGroup
 	for target, archs := range targets {
 		for _, arch := range archs {
-			err := build(buildOptions{
+			wg.Add(1)
+			build(buildOptions{
 				Target:  target,
 				Arch:    arch,
 				Version: v,
-			})
-			if err != nil {
-				panic(err)
-			}
+			}, &wg)
 		}
 	}
+	wg.Wait()
 }
