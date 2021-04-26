@@ -16,7 +16,7 @@ import (
 var DIR, _ = filepath.Abs("./dist")
 
 var targets = map[string][]string{
-	"darwin":  {"amd64"},
+	"darwin":  {"amd64", "arm64"},
 	"freebsd": {"386", "amd64", "arm"},
 	"linux":   {"386", "amd64", "arm", "arm64"},
 	"netbsd":  {"386", "amd64"},

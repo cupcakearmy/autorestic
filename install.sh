@@ -16,9 +16,11 @@ else
 fi
 echo $OS
 
-NATIVE_ARCH=$(uname -m)
+NATIVE_ARCH=$(uname -m | tr '[:upper:]' '[:lower:]')
 if [[ $NATIVE_ARCH == *"x86_64"* ]]; then
     ARCH=amd64
+elif [[ $NATIVE_ARCH == *"arm64"* || $NATIVE_ARCH == *"aarch64"* ]]; then
+    ARCH=arm64
 elif [[ $NATIVE_ARCH == *"x86"* ]]; then
     ARCH=386
 else

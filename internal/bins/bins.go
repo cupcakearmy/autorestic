@@ -120,7 +120,9 @@ func upgradeRestic() error {
 func Upgrade(restic bool) error {
 	// Upgrade restic
 	if restic {
-		InstallRestic()
+		if err := InstallRestic(); err != nil {
+			colors.Error.Println(err)
+		}
 		upgradeRestic()
 	}
 
