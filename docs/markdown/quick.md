@@ -35,7 +35,7 @@ locations:
       - hdd
 
 backends:
-  - name: remote
+  remote:
     type: s3
     path: 's3.amazonaws.com/bucket_name'
     key: some-random-password-198rc79r8y1029c8yfewj8f1u0ef87yh198uoieufy
@@ -43,7 +43,7 @@ backends:
       AWS_ACCESS_KEY_ID: account_id
       AWS_SECRET_ACCESS_KEY: account_key
 
-  - name: hdd
+  hdd:
     type: local
     path: /mnt/my_external_storage
     key: 'if not key is set it will be generated for you'
