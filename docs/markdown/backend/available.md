@@ -20,6 +20,8 @@ backends:
   name-of-backend:
     type: b2
     path: 'backblaze_bucketID'
+    # Or With a path
+    # path: 'backblaze_bucketID:/some/path'
     env:
       B2_ACCOUNT_ID: 'backblaze_keyID'
       B2_ACCOUNT_KEY: 'backblaze_applicationKey'
