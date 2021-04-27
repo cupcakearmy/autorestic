@@ -9,7 +9,7 @@ curl -s https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/install.
 ## Write a simple config file
 
 ```bash
-vim .autorestic.yml
+vim ~/.autorestic.yml
 ```
 
 For a quick overview:

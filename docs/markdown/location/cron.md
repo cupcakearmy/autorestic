@@ -30,14 +30,14 @@ First, open your crontab in edit mode
 crontab -e
 ```
 
-Then paste this at the bottom of the file and save it. Note that in this specific example the `.autorestic.yml` is located in `/srv/`. You need to modify that part of course to fit your config file.
+Then paste this at the bottom of the file and save it. Note that in this specific example the config file is located at one of the default locations (e.g. `~/.autorestic.yml`). If your config is somewhere else you'll need to specify it using the `-c` option.
 
 ```bash
 # This is required, as it otherwise cannot find restic as a command.
 PATH="/usr/local/bin:/usr/bin:/bin"
 
 # Example running every 5 minutes
-*/5 * * * * autorestic -c /srv/.autorestic.yml --ci cron
+*/5 * * * * autorestic --ci cron
 ```
 
 > The `--ci` option is not required, but recommended
