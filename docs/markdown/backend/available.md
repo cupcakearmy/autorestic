@@ -19,16 +19,15 @@ backends:
 backends:
   name-of-backend:
     type: b2
-    path: 'myAccount:myBucket/my/path'
+    path: 'backblaze_bucketID'
     env:
-      B2_ACCOUNT_ID: backblaze_account_id
-      B2_ACCOUNT_KEY: backblaze_account_key
+      B2_ACCOUNT_ID: 'backblaze_keyID'
+      B2_ACCOUNT_KEY: 'backblaze_applicationKey'
 ```
 
 #### API Keys gotcha
 
-When creating API make sure you check _Allow List All Bucket Names_ if you allow access to a single bucket only.
-Also make sure that the _File name prefix_ (if used) does not includes a leading slash.
+If you use a _File name prefix_ when making the application key, do not include a leading slash. Make sure to include this prefix in the path (e.g. `path: 'backblaze_bucketID:my/path'`).
 
 ## S3 / Minio
 
