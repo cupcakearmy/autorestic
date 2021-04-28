@@ -16,5 +16,5 @@ var uninstallCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(uninstallCmd)
-	uninstallCmd.Flags().Bool("no-restic", false, "Do not uninstall restic.")
+	uninstallCmd.Flags().Bool("no-restic", false, "do not uninstall restic.")
 }

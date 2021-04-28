@@ -31,6 +31,6 @@ var forgetCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(forgetCmd)
 	internal.AddFlagsToCommand(forgetCmd, false)
-	forgetCmd.Flags().Bool("prune", false, "Also prune repository")
-	forgetCmd.Flags().Bool("dry-run", false, "Do not write changes, show what would be affected")
+	forgetCmd.Flags().Bool("prune", false, "also prune repository")
+	forgetCmd.Flags().Bool("dry-run", false, "do not write changes, show what would be affected")
 }

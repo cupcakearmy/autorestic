@@ -17,5 +17,5 @@ var upgradeCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(upgradeCmd)
-	upgradeCmd.Flags().Bool("no-restic", false, "Also update restic. Default: true")
+	upgradeCmd.Flags().Bool("no-restic", false, "also update restic")
 }

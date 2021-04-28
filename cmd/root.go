@@ -57,5 +57,4 @@ func initConfig() {
 		viper.SetConfigName(".autorestic")
 	}
 	viper.AutomaticEnv()
-	internal.GetConfig()
 }
