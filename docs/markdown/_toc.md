@@ -1,5 +1,6 @@
 [Home](/)
 [Quick Start](/quick)
+[Installation](/installatio)
 [Configuration](/config)
 [Upgrade](/upgrade)
 

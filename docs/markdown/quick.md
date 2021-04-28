@@ -6,6 +6,8 @@
 curl -s https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/install.sh | bash
 ```
 
+See [installation](/installation) for alternative options.
+
 ## Write a simple config file
 
 ```bash
