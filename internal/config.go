@@ -12,10 +12,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.0.7"
+const VERSION = "1.0.8"
 
 var CI bool = false
 var VERBOSE bool = false
+var CRON_LEAN bool = false
 
 type Config struct {
 	Locations map[string]Location `yaml:"locations"`
@@ -29,7 +30,9 @@ func GetConfig() *Config {
 	if config == nil {
 		once.Do(func() {
 			if err := viper.ReadInConfig(); err == nil {
-				colors.Faint.Println("Using config file:", viper.ConfigFileUsed())
+				if !CRON_LEAN {
+					colors.Faint.Println("Using config file:", viper.ConfigFileUsed())
+				}
 			} else {
 				return
 			}
@@ -190,11 +193,17 @@ func GetAllOrSelected(cmd *cobra.Command, backends bool) ([]string, error) {
 }
 
 func AddFlagsToCommand(cmd *cobra.Command, backend bool) {
-	cmd.PersistentFlags().BoolP("all", "a", false, "Backup all locations")
+	var usage string
 	if backend {
-		cmd.PersistentFlags().StringSliceP("backend", "b", []string{}, "backends")
+		usage = "all backends"
 	} else {
-		cmd.PersistentFlags().StringSliceP("location", "l", []string{}, "Locations")
+		usage = "all locations"
+	}
+	cmd.PersistentFlags().BoolP("all", "a", false, usage)
+	if backend {
+		cmd.PersistentFlags().StringSliceP("backend", "b", []string{}, "select backends")
+	} else {
+		cmd.PersistentFlags().StringSliceP("location", "l", []string{}, "select locations")
 	}
 }
 

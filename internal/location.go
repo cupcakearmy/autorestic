@@ -309,7 +309,9 @@ func (l Location) RunCron() error {
 		lock.SetCron(l.name, now.Unix())
 		l.Backup(true)
 	} else {
-		colors.Body.Printf("Skipping \"%s\", not due yet.\n", l.name)
+		if !CRON_LEAN {
+			colors.Body.Printf("Skipping \"%s\", not due yet.\n", l.name)
+		}
 	}
 	return nil
 }
