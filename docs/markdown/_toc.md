@@ -22,6 +22,7 @@
 > [General](/cli/general)
 > [Info](/cli/info)
 > [Check](/cli/check)
+> [Completion](/cli/completion)
 > [Backup](/cli/backup)
 > [Restore](/cli/restore)
 > [Forget](/cli/forget)
