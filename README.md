@@ -39,7 +39,7 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 
 ### ❓ Questions / Support
 
-Check the [discussions page](https://github.com/cupcakearmy/autorestic/discussions)
+Check the [discussions page](https://github.com/cupcakearmy/autorestic/discussions) or [join on discord](https://discord.gg/wS7RpYTYd2)
 
 ## Contributing / Developing
 
