@@ -22,6 +22,7 @@ var targets = map[string][]string{
 	"linux":   {"386", "amd64", "arm", "arm64"},
 	"netbsd":  {"386", "amd64"},
 	"openbsd": {"386", "amd64"},
+	"windows": {"386", "amd64"},
 }
 
 type buildOptions struct {
