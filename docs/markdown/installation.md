@@ -16,7 +16,7 @@ You can download the right binary from the release page and simply copy it to `/
 
 ### Brew
 
-In the pipeline, see the [issue](https://github.com/cupcakearmy/autorestic/issues/58) for status.
+If you are on macOS you can install through brew: `brew install autorestic`.
 
 ### AUR
 
