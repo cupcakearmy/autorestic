@@ -10,7 +10,7 @@ import (
 	"path"
 	"path/filepath"
 	"sync"
-
+	"strings"
 	"github.com/cupcakearmy/autorestic/internal"
 )
 
@@ -32,6 +32,12 @@ type buildOptions struct {
 func build(options buildOptions, wg *sync.WaitGroup) {
 	fmt.Printf("Building %s %s\n", options.Target, options.Arch)
 	out := fmt.Sprintf("autorestic_%s_%s_%s", options.Version, options.Target, options.Arch)
+
+	// append .exe for Windows
+	if (options.Target == "windows") {
+		out += ".exe"
+	}
+
 	out = path.Join(DIR, out)
 	out, _ = filepath.Abs(out)
 	fmt.Println(out)
@@ -54,7 +60,17 @@ func build(options buildOptions, wg *sync.WaitGroup) {
 
 	// Compress
 	{
-		c := exec.Command("bzip2", out)
+		var c *exec.Cmd
+		switch options.Target {
+		// use zip for Windows
+		case "windows":
+			zipFile := strings.TrimSuffix(out, ".exe") + ".zip"
+			c = exec.Command("zip", "-q", "-X", zipFile, out)
+		// use bzip2 for everything else
+		default:
+			c = exec.Command("bzip2", out)
+		}
+
 		c.Dir = DIR
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
