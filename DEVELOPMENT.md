@@ -21,3 +21,9 @@ Releases are automatically built by the github workflow and uploaded to the rele
 3. Commit to master
 4. Create a new release with the `v1.2.3` tag and mark as draft.
 5. The Github action will build the binaries, upload and mark the release as ready when done.
+
+### Brew
+
+1. Check the checksum with `shasum -a 256 autorestic-1.2.3.tar.gz`
+2. Update `url` and `sha256` in the brew repo.
+3. Submit PR
