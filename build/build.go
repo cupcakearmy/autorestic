@@ -65,7 +65,7 @@ func build(options buildOptions, wg *sync.WaitGroup) {
 		// use zip for Windows
 		case "windows":
 			zipFile := strings.TrimSuffix(out, ".exe") + ".zip"
-			c = exec.Command("zip", "-q", "-X", zipFile, out)
+			c = exec.Command("zip", "-j", "-q", "-X", zipFile, out)
 		// use bzip2 for everything else
 		default:
 			c = exec.Command("bzip2", out)
