@@ -8,8 +8,13 @@
 >
 > [Overview](/location/overview)
 > [Hooks](/location/hooks)
-> [Excluding Files](/location/exclude)
-> [Forget Policy](/location/forget)
+>
+> > :Collapse label=Options
+> > 
+> > [Overview](/location/options)
+> > [Excluding Files](/location/exclude)
+> > [Forget Policy](/location/forget)
+>
 > [Cron](/location/cron)
 > [Docker Volumes](/location/docker)
 
