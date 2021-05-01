@@ -4,7 +4,7 @@
 autorestic exec [-b, --backend]  [-a, --all] <command> -- [native options]
 ```
 
-This is avery handy command which enables you to run any native restic command on desired backends. Generally will want to include the verbose flag `-v, --verbose` to see the output. An example would be listing all the snapshots of all your backends:
+This is a very handy command which enables you to run any native restic command on desired backends. Generally you will want to include the verbose flag `-v, --verbose` to see the output. An example would be listing all the snapshots of all your backends:
 
 ```bash
 autorestic exec -av -- snapshots
