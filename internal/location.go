@@ -49,14 +49,16 @@ func (l Location) validate(c *Config) error {
 	if l.From == "" {
 		return fmt.Errorf(`Location "%s" is missing "from" key`, l.name)
 	}
-	if from, err := GetPathRelativeToConfig(l.From); err != nil {
-		return err
-	} else {
-		if stat, err := os.Stat(from); err != nil {
+	if l.getType() == TypeLocal {
+		if from, err := GetPathRelativeToConfig(l.From); err != nil {
 			return err
 		} else {
-			if !stat.IsDir() {
-				return fmt.Errorf("\"%s\" is not valid directory for location \"%s\"", from, l.name)
+			if stat, err := os.Stat(from); err != nil {
+				return err
+			} else {
+				if !stat.IsDir() {
+					return fmt.Errorf("\"%s\" is not valid directory for location \"%s\"", from, l.name)
+				}
 			}
 		}
 	}
