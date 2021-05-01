@@ -11,5 +11,6 @@ This amazing people helped the project!
 - @FuzzyMistborn - Typos
 - @ChanceM - Typos
 - @TheForcer - Typos
+- @themorlan - Typos
 
 > :ToCPrevNext
