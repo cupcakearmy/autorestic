@@ -1,6 +1,6 @@
 # Uninstall
 
-Installs both restic and autorestic from `/usr/local/bin`.
+Uninstalls both restic and autorestic from `/usr/local/bin`.
 
 ```bash
 autorestic uninstall
