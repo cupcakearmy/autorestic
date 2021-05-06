@@ -24,6 +24,7 @@ Releases are automatically built by the github workflow and uploaded to the rele
 
 ### Brew
 
-1. Check the checksum with `shasum -a 256 autorestic-1.2.3.tar.gz`
-2. Update `url` and `sha256` in the brew repo.
-3. Submit PR
+1. Download the latest release.
+2. Check the checksum with `shasum -a 256 autorestic-1.2.3.tar.gz`
+3. Update `url` and `sha256` in the brew repo.
+4. Submit PR
