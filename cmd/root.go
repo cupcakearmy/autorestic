@@ -37,6 +37,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.autorestic.yml or ./.autorestic.yml)")
 	rootCmd.PersistentFlags().BoolVar(&internal.CI, "ci", false, "CI mode disabled interactive mode and colors and enables verbosity")
 	rootCmd.PersistentFlags().BoolVarP(&internal.VERBOSE, "verbose", "v", false, "verbose mode")
+	rootCmd.PersistentFlags().StringVar(&internal.RESTIC_BIN, "restic-bin", "restic", "specify custom restic binary")
 	cobra.OnInitialize(initConfig)
 }
 

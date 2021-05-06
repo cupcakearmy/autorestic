@@ -27,4 +27,12 @@ Verbose mode will show the output of the native restic commands that are otherwi
 autorestic --verbose backup -a
 ```
 
+## `--restic-bin`
+
+With `--restic-bin` you can specify to run a specific restic binary. This can be useful if you want to [create a custom binary with root access that can be executed by any user](https://restic.readthedocs.io/en/stable/080_examples.html#full-backup-without-root).
+
+```bash
+autorestic --restic-bin /some/path/to/my/custom/restic/binary
+```
+
 > :ToCPrevNext

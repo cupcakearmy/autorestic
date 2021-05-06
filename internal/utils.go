@@ -10,13 +10,15 @@ import (
 	"github.com/cupcakearmy/autorestic/internal/colors"
 )
 
+var RESTIC_BIN string
+
 func CheckIfCommandIsCallable(cmd string) bool {
 	_, err := exec.LookPath(cmd)
 	return err == nil
 }
 
 func CheckIfResticIsCallable() bool {
-	return CheckIfCommandIsCallable("restic")
+	return CheckIfCommandIsCallable(RESTIC_BIN)
 }
 
 type ExecuteOptions struct {
@@ -50,7 +52,7 @@ func ExecuteCommand(options ExecuteOptions, args ...string) (string, error) {
 }
 
 func ExecuteResticCommand(options ExecuteOptions, args ...string) (string, error) {
-	options.Command = "restic"
+	options.Command = RESTIC_BIN
 	return ExecuteCommand(options, args...)
 }
 

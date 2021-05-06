@@ -129,7 +129,7 @@ func CheckConfig() error {
 		return fmt.Errorf("config could not be loaded/found")
 	}
 	if !CheckIfResticIsCallable() {
-		return fmt.Errorf(`restic was not found. Install either with "autorestic install" or manually`)
+		return fmt.Errorf(`%s was not found. Install either with "autorestic install" or manually`, RESTIC_BIN)
 	}
 	for name, backend := range c.Backends {
 		backend.name = name
