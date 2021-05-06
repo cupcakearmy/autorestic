@@ -13,6 +13,9 @@
   <br><br>
   <a target="_blank" href="https://discord.gg/wS7RpYTYd2">
     <img src="https://img.shields.io/discord/252403122348097536" alt="discord badge" />
+    <img src="https://img.shields.io/github/contributors/cupcakearmy/autorestic" alt="contributor badge" />
+    <img src="https://img.shields.io/github/downloads/cupcakearmy/autorestic/total" alt="downloads badge" />
+    <img src="https://img.shields.io/github/v/release/cupcakearmy/autorestic" alt="version badge" />
   </a>
   </p>
 </p>
