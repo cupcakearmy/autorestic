@@ -24,8 +24,10 @@ const (
 type HookArray = []string
 
 type Hooks struct {
-	Before HookArray `yaml:"before"`
-	After  HookArray `yaml:"after"`
+	Before  HookArray `yaml:"before,omitempty"`
+	After   HookArray `yaml:"after,omitempty"`
+	Success HookArray `yaml:"success,omitempty"`
+	Failure HookArray `yaml:"failure,omitempty"`
 }
 
 type Options map[string]map[string][]string
@@ -133,7 +135,8 @@ func (l Location) getPath() (string, error) {
 	return "", fmt.Errorf("could not get path for location \"%s\"", l.name)
 }
 
-func (l Location) Backup(cron bool) error {
+func (l Location) Backup(cron bool) []error {
+	var errors []error
 	colors.PrimaryPrint("  Backing up location \"%s\"  ", l.name)
 	t := l.getType()
 	options := ExecuteOptions{
@@ -147,7 +150,8 @@ func (l Location) Backup(cron bool) error {
 
 	// Hooks
 	if err := ExecuteHooks(l.Hooks.Before, options); err != nil {
-		return err
+		errors = append(errors, err)
+		goto after
 	}
 
 	// Backup
@@ -156,7 +160,8 @@ func (l Location) Backup(cron bool) error {
 		colors.Secondary.Printf("Backend: %s\n", backend.name)
 		env, err := backend.getEnv()
 		if err != nil {
-			return nil
+			errors = append(errors, err)
+			continue
 		}
 
 		flags := l.getOptions("backup")
@@ -181,7 +186,8 @@ func (l Location) Backup(cron bool) error {
 		}
 		if err != nil {
 			colors.Error.Println(out)
-			return err
+			errors = append(errors, err)
+			continue
 		}
 		if VERBOSE {
 			colors.Faint.Println(out)
@@ -190,10 +196,22 @@ func (l Location) Backup(cron bool) error {
 
 	// After hooks
 	if err := ExecuteHooks(l.Hooks.After, options); err != nil {
-		return err
+		errors = append(errors, err)
 	}
+
+after:
+	var commands []string
+	if len(errors) > 0 {
+		commands = l.Hooks.Failure
+	} else {
+		commands = l.Hooks.Success
+	}
+	if err := ExecuteHooks(commands, options); err != nil {
+		errors = append(errors, err)
+	}
+
 	colors.Success.Println("Done")
-	return nil
+	return errors
 }
 
 func (l Location) Forget(prune bool, dry bool) error {

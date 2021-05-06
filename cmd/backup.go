@@ -17,15 +17,15 @@ var backupCmd = &cobra.Command{
 		CheckErr(err)
 		defer lock.Unlock()
 
-		CheckErr(internal.CheckConfig())
+		internal.GetConfig()
 
 		selected, err := internal.GetAllOrSelected(cmd, false)
 		CheckErr(err)
 		errors := 0
 		for _, name := range selected {
 			location, _ := internal.GetLocation(name)
-			err := location.Backup(false)
-			if err != nil {
+			errs := location.Backup(false)
+			for err := range errs {
 				colors.Error.Println(err)
 				errors++
 			}
