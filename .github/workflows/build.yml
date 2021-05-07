@@ -54,5 +54,6 @@ jobs:
           files: |
             dist/*.bz2
             dist/*.zip
+            dist/SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
