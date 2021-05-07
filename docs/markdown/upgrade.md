@@ -1,4 +1,4 @@
-# Update
+# Upgrade
 
 ## From `0.x` to `1.0`
 
