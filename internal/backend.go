@@ -17,12 +17,13 @@ type BackendRest struct {
 }
 
 type Backend struct {
-	name string
-	Type string            `yaml:"type,omitempty"`
-	Path string            `yaml:"path,omitempty"`
-	Key  string            `yaml:"key,omitempty"`
-	Env  map[string]string `yaml:"env,omitempty"`
-	Rest BackendRest       `yaml:"rest,omitempty"`
+	name    string
+	Type    string            `yaml:"type,omitempty"`
+	Path    string            `yaml:"path,omitempty"`
+	Key     string            `yaml:"key,omitempty"`
+	Env     map[string]string `yaml:"env,omitempty"`
+	Rest    BackendRest       `yaml:"rest,omitempty"`
+	Options Options           `yaml:"options,omitempty"`
 }
 
 func GetBackend(name string) (Backend, bool) {

@@ -78,17 +78,6 @@ func (l Location) validate(c *Config) error {
 	return nil
 }
 
-func (l Location) getOptions(key string) []string {
-	var options []string
-	saved := l.Options[key]
-	for k, values := range saved {
-		for _, value := range values {
-			options = append(options, fmt.Sprintf("--%s", k), value)
-		}
-	}
-	return options
-}
-
 func ExecuteHooks(commands []string, options ExecuteOptions) error {
 	if len(commands) == 0 {
 		return nil
@@ -164,9 +153,11 @@ func (l Location) Backup(cron bool) []error {
 			continue
 		}
 
-		flags := l.getOptions("backup")
+		lFlags := getOptions(l.Options, "backup")
+		bFlags := getOptions(backend.Options, "backup")
 		cmd := []string{"backup"}
-		cmd = append(cmd, flags...)
+		cmd = append(cmd, lFlags...)
+		cmd = append(cmd, bFlags...)
 		if cron {
 			cmd = append(cmd, "--tag", "cron")
 		}
@@ -232,7 +223,8 @@ func (l Location) Forget(prune bool, dry bool) error {
 		options := ExecuteOptions{
 			Envs: env,
 		}
-		flags := l.getOptions("forget")
+		lFlags := getOptions(l.Options, "forget")
+		bFlags := getOptions(backend.Options, "forget")
 		cmd := []string{"forget", "--path", path}
 		if prune {
 			cmd = append(cmd, "--prune")
@@ -240,7 +232,8 @@ func (l Location) Forget(prune bool, dry bool) error {
 		if dry {
 			cmd = append(cmd, "--dry-run")
 		}
-		cmd = append(cmd, flags...)
+		cmd = append(cmd, lFlags...)
+		cmd = append(cmd, bFlags...)
 		out, err := ExecuteResticCommand(options, cmd...)
 		if VERBOSE {
 			colors.Faint.Println(out)

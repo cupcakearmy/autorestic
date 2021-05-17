@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.1.0"
+const VERSION = "1.1.1"
 
 var CI bool = false
 var VERBOSE bool = false
@@ -219,4 +219,14 @@ func (c *Config) SaveConfig() error {
 	viper.Set("locations", c.Locations)
 
 	return viper.WriteConfig()
+}
+
+func getOptions(options Options, key string) []string {
+	var selected []string
+	for k, values := range options[key] {
+		for _, value := range values {
+			selected = append(selected, fmt.Sprintf("--%s", k), value)
+		}
+	}
+	return selected
 }
