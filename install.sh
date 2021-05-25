@@ -23,6 +23,8 @@ elif [[ $NATIVE_ARCH == *"arm64"* || $NATIVE_ARCH == *"aarch64"* ]]; then
     ARCH=arm64
 elif [[ $NATIVE_ARCH == *"x86"* ]]; then
     ARCH=386
+elif [[ $NATIVE_ARCH == *"armv7"* ]]; then
+    ARCH=arm
 else
     echo "Could not determine Architecure automatically, please check the release page manually: https://github.com/cupcakearmy/autorestic/releases"
     exit 1
