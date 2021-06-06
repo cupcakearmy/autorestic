@@ -31,8 +31,9 @@ backends:
   remote:
     type: b2
     path: 'myBucket:backup/home'
-    B2_ACCOUNT_ID: account_id
-    B2_ACCOUNT_KEY: account_key
+    env:
+      B2_ACCOUNT_ID: account_id
+      B2_ACCOUNT_KEY: account_key
 
   hdd:
     type: local
