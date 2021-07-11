@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.1.1"
+const VERSION = "1.1.2"
 
 var CI bool = false
 var VERBOSE bool = false
@@ -140,7 +140,7 @@ func CheckConfig() error {
 	}
 	for name, location := range c.Locations {
 		location.name = name
-		if err := location.validate(c); err != nil {
+		if err := location.validate(); err != nil {
 			return err
 		}
 	}

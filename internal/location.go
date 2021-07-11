@@ -47,7 +47,7 @@ func GetLocation(name string) (Location, bool) {
 	return l, ok
 }
 
-func (l Location) validate(c *Config) error {
+func (l Location) validate() error {
 	if l.From == "" {
 		return fmt.Errorf(`Location "%s" is missing "from" key`, l.name)
 	}

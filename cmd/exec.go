@@ -15,7 +15,7 @@ var execCmd = &cobra.Command{
 		CheckErr(err)
 		defer lock.Unlock()
 
-		CheckErr(internal.CheckConfig())
+		internal.GetConfig()
 
 		selected, err := internal.GetAllOrSelected(cmd, true)
 		CheckErr(err)

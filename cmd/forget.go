@@ -14,7 +14,7 @@ var forgetCmd = &cobra.Command{
 		CheckErr(err)
 		defer lock.Unlock()
 
-		CheckErr(internal.CheckConfig())
+		internal.GetConfig()
 
 		selected, err := internal.GetAllOrSelected(cmd, false)
 		CheckErr(err)
