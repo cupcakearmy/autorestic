@@ -132,8 +132,15 @@ func (l Location) Backup(cron bool) []error {
 		Command: "bash",
 	}
 
+	if err := l.validate(); err != nil {
+		errors = append(errors, err)
+		colors.Error.Print(err)
+		goto after
+	}
+
 	if t == TypeLocal {
 		dir, _ := GetPathRelativeToConfig(l.From)
+		colors.Faint.Printf("Executing under: \"%s\"\n", dir)
 		options.Dir = dir
 	}
 
