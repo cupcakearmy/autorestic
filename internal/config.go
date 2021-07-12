@@ -19,6 +19,7 @@ var VERBOSE bool = false
 var CRON_LEAN bool = false
 
 type Config struct {
+	Extras    interface{}         `yaml:"extras"`
 	Locations map[string]Location `yaml:"locations"`
 	Backends  map[string]Backend  `yaml:"backends"`
 }

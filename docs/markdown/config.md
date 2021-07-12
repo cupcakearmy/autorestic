@@ -40,4 +40,44 @@ backends:
     path: /mnt/my_external_storage
 ```
 
+## Aliases
+
+A handy tool for more advanced configurations is to use yaml aliases.
+These must be specified under the global `extras` key in the `.autorestic.yml` config file.
+Aliases allow to reuse snippets of config throughout the same file.
+
+The following example shows how the locations `a` and `b` share the same hooks and forget policies.
+
+```yaml | .autorestic.yml
+extras:
+  hooks: &foo
+    before:
+      - echo "Hello"
+    after:
+      - echo "kthxbye"
+  policies: &bar
+    keep-daily: 14
+    keep-weekly: 52
+
+backends:
+  # ...
+locations:
+  a:
+    from: /data/a
+    to: some
+    hooks:
+      <<: *foo
+    options:
+      forget:
+        <<: *bar
+  b:
+    from: data/b
+    to: some
+    hooks:
+      <<: *foo
+    options:
+      forget:
+        <<: *bar
+```
+
 > :ToCPrevNext
