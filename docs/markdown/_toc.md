@@ -40,7 +40,7 @@
 > [Upgrade](/cli/upgrade)
 
 [Examples](/examples)
-
 [QA](/qa)
-
+[Community](/community)
 [Contributors](/contrib)
+
