@@ -2,17 +2,20 @@ package internal
 
 import (
 	"fmt"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.1.2"
+const VERSION = "1.2"
 
 var CI bool = false
 var VERBOSE bool = false
@@ -32,7 +35,8 @@ func GetConfig() *Config {
 		once.Do(func() {
 			if err := viper.ReadInConfig(); err == nil {
 				if !CRON_LEAN {
-					colors.Faint.Println("Using config file:", viper.ConfigFileUsed())
+					absConfig, _ := filepath.Abs(viper.ConfigFileUsed())
+					colors.Faint.Println("Using config file:", absConfig)
 				}
 			} else {
 				return
@@ -40,7 +44,9 @@ func GetConfig() *Config {
 
 			config = &Config{}
 			if err := viper.UnmarshalExact(config); err != nil {
-				panic(err)
+				colors.Error.Println("Could not parse config file!")
+				lock.Unlock()
+				os.Exit(1)
 			}
 		})
 	}

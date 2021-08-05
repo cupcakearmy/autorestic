@@ -11,11 +11,10 @@ var execCmd = &cobra.Command{
 	Use:   "exec",
 	Short: "Execute arbitrary native restic commands for given backends",
 	Run: func(cmd *cobra.Command, args []string) {
+		internal.GetConfig()
 		err := lock.Lock()
 		CheckErr(err)
 		defer lock.Unlock()
-
-		internal.GetConfig()
 
 		selected, err := internal.GetAllOrSelected(cmd, true)
 		CheckErr(err)

@@ -10,11 +10,10 @@ var forgetCmd = &cobra.Command{
 	Use:   "forget",
 	Short: "Forget and optionally prune snapshots according the specified policies",
 	Run: func(cmd *cobra.Command, args []string) {
+		internal.GetConfig()
 		err := lock.Lock()
 		CheckErr(err)
 		defer lock.Unlock()
-
-		internal.GetConfig()
 
 		selected, err := internal.GetAllOrSelected(cmd, false)
 		CheckErr(err)

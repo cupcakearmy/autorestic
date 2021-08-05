@@ -13,11 +13,10 @@ var backupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Create backups for given locations",
 	Run: func(cmd *cobra.Command, args []string) {
+		internal.GetConfig()
 		err := lock.Lock()
 		CheckErr(err)
 		defer lock.Unlock()
-
-		internal.GetConfig()
 
 		selected, err := internal.GetAllOrSelected(cmd, false)
 		CheckErr(err)
