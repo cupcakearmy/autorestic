@@ -19,9 +19,9 @@ backends:
 backends:
   name-of-backend:
     type: b2
-    path: 'backblaze_bucketID'
+    path: 'bucket_name'
     # Or With a path
-    # path: 'backblaze_bucketID:/some/path'
+    # path: 'bucket_name:/some/path'
     env:
       B2_ACCOUNT_ID: 'backblaze_keyID'
       B2_ACCOUNT_KEY: 'backblaze_applicationKey'
@@ -29,7 +29,7 @@ backends:
 
 #### API Keys gotcha
 
-If you use a _File name prefix_ when making the application key, do not include a leading slash. Make sure to include this prefix in the path (e.g. `path: 'backblaze_bucketID:my/path'`).
+If you use a _File name prefix_ when making the application key, do not include a leading slash. Make sure to include this prefix in the path (e.g. `path: 'bucket_name:my/path'`).
 
 ## S3 / Minio
 
