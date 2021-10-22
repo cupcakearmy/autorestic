@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
@@ -50,11 +51,24 @@ func initConfig() {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
-		home, err := homedir.Dir()
-		CheckErr(err)
-
 		viper.AddConfigPath(".")
-		viper.AddConfigPath(home)
+
+		// Home
+		if home, err := homedir.Dir(); err != nil {
+			viper.AddConfigPath(home)
+		}
+
+		// XDG_CONFIG_HOME
+		{
+			prefix, found := os.LookupEnv("XDG_CONFIG_HOME")
+			if !found {
+				if home, err := homedir.Dir(); err != nil {
+					prefix = filepath.Join(home, ".config")
+				}
+			}
+			viper.AddConfigPath(filepath.Join(prefix, "autorestic"))
+		}
+
 		viper.SetConfigName(".autorestic")
 	}
 	viper.AutomaticEnv()
