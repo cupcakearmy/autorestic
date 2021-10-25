@@ -89,7 +89,8 @@ func (b Backend) getKey() (string, error) {
 	if b.Key != "" {
 		return b.Key, nil
 	}
-	if key, found := os.LookupEnv("AUTORESTIC_KEY_" + strings.ToUpper(b.name)); found {
+	keyName := "AUTORESTIC_" + strings.ToUpper(b.name) + "_KEY"
+	if key, found := os.LookupEnv(keyName); found {
 		return key, nil
 	}
 	return "", fmt.Errorf("no key found for backend \"%s\"", b.name)
