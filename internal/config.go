@@ -10,6 +10,7 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -36,7 +37,13 @@ func GetConfig() *Config {
 			if err := viper.ReadInConfig(); err == nil {
 				if !CRON_LEAN {
 					absConfig, _ := filepath.Abs(viper.ConfigFileUsed())
-					colors.Faint.Println("Using config file:", absConfig)
+					colors.Faint.Println("Using config: \t", absConfig)
+					// Load env file
+					envFile := filepath.Join(filepath.Dir(absConfig), ".autorestic.env")
+					err = godotenv.Load(envFile)
+					if err == nil {
+						colors.Faint.Println("Using env:\t", envFile)
+					}
 				}
 			} else {
 				return
