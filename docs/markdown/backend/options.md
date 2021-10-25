@@ -18,6 +18,8 @@ backend:
 
 In this example, whenever `autorestic` runs `restic backup` it will append a `--tag abc --tag` to the native command.
 
-For more detail see the [location docs](/location/options) for options, as they are the same
+For more detail see the [location docs](/location/options) for options, as they are the same.
+
+> For flags without arguments you can set them to `true`. They will be handled accordingly.
 
 > :ToCPrevNext

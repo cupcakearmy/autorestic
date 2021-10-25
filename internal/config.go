@@ -239,7 +239,18 @@ func getOptions(options Options, key string) []string {
 	var selected []string
 	for k, values := range options[key] {
 		for _, value := range values {
-			selected = append(selected, fmt.Sprintf("--%s", k), value)
+			// Bool
+			asBool, ok := value.(bool)
+			if ok && asBool {
+				selected = append(selected, fmt.Sprintf("--%s", k))
+				continue
+			}
+			// String
+			asString, ok := value.(string)
+			if ok {
+				selected = append(selected, fmt.Sprintf("--%s", k), asString)
+				continue
+			}
 		}
 	}
 	return selected
