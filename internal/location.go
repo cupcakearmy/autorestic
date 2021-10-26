@@ -10,6 +10,7 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/cupcakearmy/autorestic/internal/metadata"
 	"github.com/robfig/cron"
 )
 
@@ -130,6 +131,9 @@ func (l Location) Backup(cron bool) []error {
 	t := l.getType()
 	options := ExecuteOptions{
 		Command: "bash",
+		Envs: map[string]string{
+			"AUTORESTIC_LOCATION": l.name,
+		},
 	}
 
 	if err := l.validate(); err != nil {
@@ -151,7 +155,7 @@ func (l Location) Backup(cron bool) []error {
 	}
 
 	// Backup
-	for _, to := range l.To {
+	for i, to := range l.To {
 		backend, _ := GetBackend(to)
 		colors.Secondary.Printf("Backend: %s\n", backend.name)
 		env, err := backend.getEnv()
@@ -186,6 +190,13 @@ func (l Location) Backup(cron bool) []error {
 			colors.Error.Println(out)
 			errors = append(errors, err)
 			continue
+		}
+
+		md := metadata.ExtractMetadataFromBackupLog(out)
+		mdEnv := metadata.MakeEnvFromMetadata(&md)
+		for k, v := range mdEnv {
+			options.Envs[k+"_"+fmt.Sprint(i)] = v
+			options.Envs[k+"_"+strings.ToUpper(backend.name)] = v
 		}
 		if VERBOSE {
 			colors.Faint.Println(out)
