@@ -10,12 +10,13 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.2.0"
+const VERSION = "1.3.0"
 
 var CI bool = false
 var VERBOSE bool = false
@@ -36,7 +37,13 @@ func GetConfig() *Config {
 			if err := viper.ReadInConfig(); err == nil {
 				if !CRON_LEAN {
 					absConfig, _ := filepath.Abs(viper.ConfigFileUsed())
-					colors.Faint.Println("Using config file:", absConfig)
+					colors.Faint.Println("Using config: \t", absConfig)
+					// Load env file
+					envFile := filepath.Join(filepath.Dir(absConfig), ".autorestic.env")
+					err = godotenv.Load(envFile)
+					if err == nil {
+						colors.Faint.Println("Using env:\t", envFile)
+					}
 				}
 			} else {
 				return
@@ -232,7 +239,18 @@ func getOptions(options Options, key string) []string {
 	var selected []string
 	for k, values := range options[key] {
 		for _, value := range values {
-			selected = append(selected, fmt.Sprintf("--%s", k), value)
+			// Bool
+			asBool, ok := value.(bool)
+			if ok && asBool {
+				selected = append(selected, fmt.Sprintf("--%s", k))
+				continue
+			}
+			// String
+			asString, ok := value.(string)
+			if ok {
+				selected = append(selected, fmt.Sprintf("--%s", k), asString)
+				continue
+			}
 		}
 	}
 	return selected

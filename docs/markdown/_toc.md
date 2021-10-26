@@ -23,6 +23,7 @@
 > [Overview](/backend/overview)
 > [Available Backends](/backend/available)
 > [Options](/backend/options)
+> [Environment](/backend/env)
 
 > :Collapse label=CLI
 >

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2021-10-26
+
+### Added
+
+- Pass restic backup metadata as ENV to hooks
+- Support for `XDG_CONFIG_HOME` and `${HOME}/.config` as default locations for `.autorestic.yaml` file.
+- Binary restic flags are now supported
+- Pass encryption keys from env variables or files.
+
 ## [1.2.0] - 2021-08-05
 
 ### Added
