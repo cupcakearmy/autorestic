@@ -185,20 +185,18 @@ func GetAllOrSelected(cmd *cobra.Command, backends bool) ([]string, error) {
 		selected, _ = cmd.Flags().GetStringSlice("location")
 	}
 	for _, s := range selected {
-		found := false
+		var splitted = strings.Split(s, "@")
 		for _, l := range list {
-			if l == s {
-				found = true
-				break
+			if l == splitted[0] {
+				goto found
 			}
 		}
-		if !found {
-			if backends {
-				return nil, fmt.Errorf("invalid backend \"%s\"", s)
-			} else {
-				return nil, fmt.Errorf("invalid location \"%s\"", s)
-			}
+		if backends {
+			return nil, fmt.Errorf("invalid backend \"%s\"", s)
+		} else {
+			return nil, fmt.Errorf("invalid location \"%s\"", s)
 		}
+	found:
 	}
 
 	if len(selected) == 0 {
