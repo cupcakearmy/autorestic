@@ -31,8 +31,6 @@ type Hooks struct {
 	Failure HookArray `yaml:"failure,omitempty"`
 }
 
-type Options map[string]map[string][]interface{}
-
 type Location struct {
 	name    string   `yaml:",omitempty"`
 	From    string   `yaml:"from,omitempty"`
