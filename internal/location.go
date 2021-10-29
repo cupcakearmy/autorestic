@@ -157,16 +157,13 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 	if specificBackend == "" {
 		backends = l.To
 	} else {
-		for _, b := range l.To {
-			if b == specificBackend {
-				backends = []string{b}
-				goto backup
-			}
+		if l.hasBackend(specificBackend) {
+			backends = []string{specificBackend}
+		} else {
+			errors = append(errors, fmt.Errorf("backup location \"%s\" has no backend \"%s\"", l.name, specificBackend))
+			return errors
 		}
-		errors = append(errors, fmt.Errorf("backup location \"%s\" has no backend \"%s\"", l.name, specificBackend))
-		return errors
 	}
-backup:
 	for i, to := range backends {
 		backend, _ := GetBackend(to)
 		colors.Secondary.Printf("Backend: %s\n", backend.name)
