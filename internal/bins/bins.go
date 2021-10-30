@@ -47,11 +47,11 @@ func dlJSON(url string) (GithubRelease, error) {
 
 func Uninstall(restic bool) error {
 	if err := os.Remove(path.Join(INSTALL_PATH, "autorestic")); err != nil {
-		colors.Error.Println(err)
+		return err
 	}
 	if restic {
 		if err := os.Remove(path.Join(INSTALL_PATH, "restic")); err != nil {
-			colors.Error.Println(err)
+			return err
 		}
 	}
 	return nil
@@ -79,11 +79,15 @@ func downloadAndInstallAsset(body GithubRelease, name string) error {
 				return err
 			}
 			defer tmp.Close()
-			tmp.Chmod(0755)
-			io.Copy(tmp, bz)
+			if err := tmp.Chmod(0755); err != nil {
+				return err
+			}
+			if _, err := io.Copy(tmp, bz); err != nil {
+				return err
+			}
 
 			to := path.Join(INSTALL_PATH, name)
-			os.Remove(to) // Delete if current, ignore error if file does not exits.
+			defer os.Remove(to) // Delete if current, ignore error if file does not exits.
 			if err := os.Rename(tmp.Name(), to); err != nil {
 				return nil
 			}
@@ -121,9 +125,11 @@ func Upgrade(restic bool) error {
 	// Upgrade restic
 	if restic {
 		if err := InstallRestic(); err != nil {
-			colors.Error.Println(err)
+			return err
 		}
-		upgradeRestic()
+		if err := upgradeRestic(); err != nil {
+			return err
+		}
 	}
 
 	// Upgrade self
@@ -140,7 +146,9 @@ func Upgrade(restic bool) error {
 		return err
 	}
 	if current.LT(latest) {
-		downloadAndInstallAsset(body, "autorestic")
+		if err := downloadAndInstallAsset(body, "autorestic"); err != nil {
+			return err
+		}
 		colors.Success.Println("Updated autorestic")
 	} else {
 		colors.Body.Println("Already up to date")
