@@ -31,8 +31,6 @@ type Hooks struct {
 	Failure HookArray `yaml:"failure,omitempty"`
 }
 
-type Options map[string]map[string][]interface{}
-
 type Location struct {
 	name    string   `yaml:",omitempty"`
 	From    string   `yaml:"from,omitempty"`
@@ -125,8 +123,9 @@ func (l Location) getPath() (string, error) {
 	return "", fmt.Errorf("could not get path for location \"%s\"", l.name)
 }
 
-func (l Location) Backup(cron bool) []error {
+func (l Location) Backup(cron bool, specificBackend string) []error {
 	var errors []error
+	var backends []string
 	colors.PrimaryPrint("  Backing up location \"%s\"  ", l.name)
 	t := l.getType()
 	options := ExecuteOptions{
@@ -155,7 +154,17 @@ func (l Location) Backup(cron bool) []error {
 	}
 
 	// Backup
-	for i, to := range l.To {
+	if specificBackend == "" {
+		backends = l.To
+	} else {
+		if l.hasBackend(specificBackend) {
+			backends = []string{specificBackend}
+		} else {
+			errors = append(errors, fmt.Errorf("backup location \"%s\" has no backend \"%s\"", l.name, specificBackend))
+			return errors
+		}
+	}
+	for i, to := range backends {
 		backend, _ := GetBackend(to)
 		colors.Secondary.Printf("Backend: %s\n", backend.name)
 		env, err := backend.getEnv()
@@ -338,7 +347,7 @@ func (l Location) RunCron() error {
 	now := time.Now()
 	if now.After(next) {
 		lock.SetCron(l.name, now.Unix())
-		l.Backup(true)
+		l.Backup(true, "")
 	} else {
 		if !CRON_LEAN {
 			colors.Body.Printf("Skipping \"%s\", not due yet.\n", l.name)

@@ -53,6 +53,9 @@ func ExecuteCommand(options ExecuteOptions, args ...string) (string, error) {
 
 func ExecuteResticCommand(options ExecuteOptions, args ...string) (string, error) {
 	options.Command = RESTIC_BIN
+	var c = GetConfig()
+	var optionsAsString = getOptions(c.Global, "")
+	args = append(optionsAsString, args...)
 	return ExecuteCommand(options, args...)
 }
 

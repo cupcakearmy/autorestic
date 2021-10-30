@@ -16,16 +16,20 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.3.0"
+const VERSION = "1.4.0"
 
 var CI bool = false
 var VERBOSE bool = false
 var CRON_LEAN bool = false
 
+type OptionMap map[string][]interface{}
+type Options map[string]OptionMap
+
 type Config struct {
 	Extras    interface{}         `yaml:"extras"`
 	Locations map[string]Location `yaml:"locations"`
 	Backends  map[string]Backend  `yaml:"backends"`
+	Global    Options             `yaml:"global"`
 }
 
 var once sync.Once
@@ -185,20 +189,18 @@ func GetAllOrSelected(cmd *cobra.Command, backends bool) ([]string, error) {
 		selected, _ = cmd.Flags().GetStringSlice("location")
 	}
 	for _, s := range selected {
-		found := false
+		var splitted = strings.Split(s, "@")
 		for _, l := range list {
-			if l == s {
-				found = true
-				break
+			if l == splitted[0] {
+				goto found
 			}
 		}
-		if !found {
-			if backends {
-				return nil, fmt.Errorf("invalid backend \"%s\"", s)
-			} else {
-				return nil, fmt.Errorf("invalid location \"%s\"", s)
-			}
+		if backends {
+			return nil, fmt.Errorf("invalid backend \"%s\"", s)
+		} else {
+			return nil, fmt.Errorf("invalid location \"%s\"", s)
 		}
+	found:
 	}
 
 	if len(selected) == 0 {
@@ -235,23 +237,40 @@ func (c *Config) SaveConfig() error {
 	return viper.WriteConfig()
 }
 
-func getOptions(options Options, key string) []string {
-	var selected []string
-	for k, values := range options[key] {
+func optionToString(option string) string {
+	if !strings.HasPrefix(option, "-") {
+		return "--" + option
+	}
+	return option
+}
+
+func appendOptionsToSlice(str *[]string, options OptionMap) {
+	for key, values := range options {
 		for _, value := range values {
 			// Bool
 			asBool, ok := value.(bool)
 			if ok && asBool {
-				selected = append(selected, fmt.Sprintf("--%s", k))
+				*str = append(*str, optionToString(key))
 				continue
 			}
 			// String
 			asString, ok := value.(string)
 			if ok {
-				selected = append(selected, fmt.Sprintf("--%s", k), asString)
+				*str = append(*str, optionToString(key), asString)
 				continue
 			}
 		}
+	}
+}
+
+func getOptions(options Options, key string) []string {
+	var selected []string
+	var keys = []string{"all"}
+	if key != "" {
+		keys = append(keys, key)
+	}
+	for _, key := range keys {
+		appendOptionsToSlice(&selected, options[key])
 	}
 	return selected
 }

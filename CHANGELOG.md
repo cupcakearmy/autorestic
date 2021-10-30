@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2021-10-30
+
+### Added
+
+- Allow specify to specify a backend for location backup
+- Global restic flags
+- Generic ENV support for backends
+
+### Changed
+
+- Install now only requires `wget`
+- Env variable for the `KEY` has been renamed from `AUTORESTIC_[BACKEND NAME]_KEY` -> `AUTORESTIC_[BACKEND NAME]_RESTIC_PASSWORD`
+
+### Fixed
+
+- Error handling during upgrade & uninstall
+
 ## [1.3.0] - 2021-10-26
 
 ### Added
