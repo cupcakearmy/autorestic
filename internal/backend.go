@@ -58,20 +58,27 @@ func (b Backend) generateRepo() (string, error) {
 
 func (b Backend) getEnv() (map[string]string, error) {
 	env := make(map[string]string)
+	// Key
 	if b.Key != "" {
 		env["RESTIC_PASSWORD"] = b.Key
-	} else {
-		key, err := b.getKey()
-		if err != nil {
-			return nil, err
-		}
-		env["RESTIC_PASSWORD"] = key
 	}
+
+	// From config file
 	repo, err := b.generateRepo()
 	env["RESTIC_REPOSITORY"] = repo
 	for key, value := range b.Env {
 		env[strings.ToUpper(key)] = value
 	}
+
+	// From Envfile and passed as env
+	var prefix = "AUTORESTIC_" + strings.ToUpper(b.name) + "_"
+	for _, variable := range os.Environ() {
+		var splitted = strings.SplitN(variable, "=", 2)
+		if strings.HasPrefix(splitted[0], prefix) {
+			env[strings.TrimPrefix(splitted[0], prefix)] = splitted[1]
+		}
+	}
+
 	return env, err
 }
 
@@ -85,17 +92,6 @@ func generateRandomKey() string {
 	return key
 }
 
-func (b Backend) getKey() (string, error) {
-	if b.Key != "" {
-		return b.Key, nil
-	}
-	keyName := "AUTORESTIC_" + strings.ToUpper(b.name) + "_KEY"
-	if key, found := os.LookupEnv(keyName); found {
-		return key, nil
-	}
-	return "", fmt.Errorf("no key found for backend \"%s\"", b.name)
-}
-
 func (b Backend) validate() error {
 	if b.Type == "" {
 		return fmt.Errorf(`Backend "%s" has no "type"`, b.name)
@@ -105,8 +101,9 @@ func (b Backend) validate() error {
 	}
 	if b.Key == "" {
 		// Check if key is set in environment
-		if _, err := b.getKey(); err != nil {
-			// If not generate a new one
+		env, _ := b.getEnv()
+		if _, found := env["RESTIC_PASSWORD"]; !found {
+			// No key set in config file or env => generate random key and save file
 			key := generateRandomKey()
 			b.Key = key
 			c := GetConfig()

@@ -4,6 +4,8 @@ In theory [all the restic backends](https://restic.readthedocs.io/en/stable/030_
 
 Those tested are the following:
 
+> ℹ️ You can also [specify the `env` variables in a config file](/backend/env) to separate them from the config file.
+
 ## Local
 
 ```yaml
