@@ -20,6 +20,7 @@ const (
 	TypeLocal    LocationType = "local"
 	TypeVolume   LocationType = "volume"
 	VolumePrefix string       = "volume:"
+	TagPrefix    string       = "ar:"
 )
 
 type HookArray = []string
@@ -33,7 +34,7 @@ type Hooks struct {
 
 type Location struct {
 	name    string   `yaml:",omitempty"`
-	From    string   `yaml:"from,omitempty"`
+	From    []string `yaml:"from,omitempty"`
 	To      []string `yaml:"to,omitempty"`
 	Hooks   Hooks    `yaml:"hooks,omitempty"`
 	Cron    string   `yaml:"cron,omitempty"`
@@ -179,8 +180,9 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 		cmd = append(cmd, lFlags...)
 		cmd = append(cmd, bFlags...)
 		if cron {
-			cmd = append(cmd, "--tag", "cron")
+			cmd = append(cmd, "--tag", TagPrefix+"cron")
 		}
+		cmd = append(cmd, "--tag", TagPrefix+"location:"+l.name)
 		cmd = append(cmd, ".")
 		backupOptions := ExecuteOptions{
 			Dir:  options.Dir,

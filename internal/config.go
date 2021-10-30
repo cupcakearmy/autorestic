@@ -81,7 +81,8 @@ func (c *Config) Describe() {
 		var tmp string
 		colors.PrimaryPrint(`Location: "%s"`, name)
 
-		colors.PrintDescription("From", l.From)
+		// TODO: Add more info
+		// colors.PrintDescription("From", l.From)
 
 		tmp = ""
 		for _, to := range l.To {
