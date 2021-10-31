@@ -77,3 +77,9 @@ func CopyFile(from, to string) error {
 	}
 	return nil
 }
+
+func CheckIfVolumeExists(volume string) bool {
+	out, err := ExecuteCommand(ExecuteOptions{Command: "docker"}, "volume", "inspect", volume)
+	fmt.Println(out)
+	return err == nil
+}
