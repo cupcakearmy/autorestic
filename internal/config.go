@@ -253,12 +253,7 @@ func appendOptionsToSlice(str *[]string, options OptionMap) {
 				*str = append(*str, optionToString(key))
 				continue
 			}
-			// String
-			asString, ok := value.(string)
-			if ok {
-				*str = append(*str, optionToString(key), asString)
-				continue
-			}
+			*str = append(*str, optionToString(key), fmt.Sprint(value))
 		}
 	}
 }
