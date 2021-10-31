@@ -30,7 +30,7 @@ var backupCmd = &cobra.Command{
 			}
 			location, _ := internal.GetLocation(splitted[0])
 			errs := location.Backup(false, specificBackend)
-			for err := range errs {
+			for _, err := range errs {
 				colors.Error.Println(err)
 				errors++
 			}
