@@ -182,6 +182,8 @@ func (b Backend) ExecDocker(l Location, args []string) (string, error) {
 		env["RESTIC_REPOSITORY"] = "/repo"
 	case "b2":
 	case "s3":
+	case "azure":
+	case "gs":
 		// No additional setup needed
 	case "rclone":
 		// Read host rclone config and mount it into the container
@@ -192,6 +194,7 @@ func (b Backend) ExecDocker(l Location, args []string) (string, error) {
 		splitted := strings.Split(strings.TrimSpace(configFile), "\n")
 		configFilePath := splitted[len(splitted)-1]
 		docker = append(docker, "--volume", configFilePath+":"+"/root/.config/rclone/rclone.conf:ro")
+		// Install rclone in the container
 		args = append([]string{"apk", "add", "rclone", "&&"}, args...)
 	default:
 		return "", fmt.Errorf("Backend type \"%s\" is not supported as volume endpoint", b.Type)
