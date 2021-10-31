@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.4.0"
+const VERSION = "1.4.1"
 
 var CI bool = false
 var VERBOSE bool = false
@@ -253,12 +253,7 @@ func appendOptionsToSlice(str *[]string, options OptionMap) {
 				*str = append(*str, optionToString(key))
 				continue
 			}
-			// String
-			asString, ok := value.(string)
-			if ok {
-				*str = append(*str, optionToString(key), asString)
-				continue
-			}
+			*str = append(*str, optionToString(key), fmt.Sprint(value))
 		}
 	}
 }
