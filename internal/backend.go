@@ -163,8 +163,10 @@ func (b Backend) ExecDocker(l Location, args []string) (string, error) {
 		Envs:    env,
 	}
 	dir := "/data"
+	args = append([]string{"restic"}, args...)
 	docker := []string{
 		"run", "--rm",
+		"--pull", "always",
 		"--entrypoint", "ash",
 		"--workdir", dir,
 		"--volume", volume + ":" + dir,
@@ -181,13 +183,23 @@ func (b Backend) ExecDocker(l Location, args []string) (string, error) {
 	case "b2":
 	case "s3":
 		// No additional setup needed
+	case "rclone":
+		// Read host rclone config and mount it into the container
+		configFile, err := ExecuteCommand(ExecuteOptions{Command: "rclone"}, "config", "file")
+		if err != nil {
+			return "", err
+		}
+		splitted := strings.Split(strings.TrimSpace(configFile), "\n")
+		configFilePath := splitted[len(splitted)-1]
+		docker = append(docker, "--volume", configFilePath+":"+"/root/.config/rclone/rclone.conf:ro")
+		args = append([]string{"apk", "add", "rclone", "&&"}, args...)
 	default:
 		return "", fmt.Errorf("Backend type \"%s\" is not supported as volume endpoint", b.Type)
 	}
 	for key, value := range env {
 		docker = append(docker, "--env", key+"="+value)
 	}
-	docker = append(docker, "restic/restic", "-c", "restic "+strings.Join(args, " "))
+	docker = append(docker, "restic/restic", "-c", strings.Join(args, " "))
 	out, err := ExecuteCommand(options, docker...)
 	return out, err
 }
