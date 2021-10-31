@@ -1,12 +1,12 @@
 # Restore
 
 ```bash
-autorestic restore [-l, --location] [--from backend] [--to <out dir>] [-f, --force]
+autorestic restore [-l, --location] [--from backend] [--to <out dir>] [-f, --force] [snapshot]
 ```
 
-This will restore all the locations to the selected target. If for one location there are more than one backends specified autorestic will take the first one.
+This will restore the location to the selected target. If for one location there are more than one backends specified autorestic will take the first one. If no specific snapshot is specified `autorestic` will use `latest`.
 
-The `--to` path has to be empty as no data will be overwritten by default. If you are sure you can pass the `-f, --force` flag and the data will be overwritten in the destination. However note that this will overwrite all the data existent in the backup, not only the 1 file that is missing e.g.
+If you are sure you can pass the `-f, --force` flag and the data will be overwritten in the destination. However note that this will overwrite all the data existent in the backup, not only the 1 file that is missing e.g.
 
 ## Example
 
