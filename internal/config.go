@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.4.0"
+const VERSION = "1.4.1"
 
 var CI bool = false
 var VERBOSE bool = false
@@ -55,6 +55,7 @@ func GetConfig() *Config {
 
 			config = &Config{}
 			if err := viper.UnmarshalExact(config); err != nil {
+				colors.Error.Println(err)
 				colors.Error.Println("Could not parse config file!")
 				lock.Unlock()
 				os.Exit(1)
@@ -81,7 +82,11 @@ func (c *Config) Describe() {
 		var tmp string
 		colors.PrimaryPrint(`Location: "%s"`, name)
 
-		colors.PrintDescription("From", l.From)
+		tmp = ""
+		for _, path := range l.From {
+			tmp += fmt.Sprintf("\t%s %s\n", colors.Success.Sprint("←"), path)
+		}
+		colors.PrintDescription("From", tmp)
 
 		tmp = ""
 		for _, to := range l.To {
@@ -253,12 +258,7 @@ func appendOptionsToSlice(str *[]string, options OptionMap) {
 				*str = append(*str, optionToString(key))
 				continue
 			}
-			// String
-			asString, ok := value.(string)
-			if ok {
-				*str = append(*str, optionToString(key), asString)
-				continue
-			}
+			*str = append(*str, optionToString(key), fmt.Sprint(value))
 		}
 	}
 }
@@ -273,4 +273,16 @@ func getOptions(options Options, key string) []string {
 		appendOptionsToSlice(&selected, options[key])
 	}
 	return selected
+}
+
+func combineOptions(key string, l Location, b Backend) []string {
+	// Priority: location > backend > global
+	var options []string
+	gFlags := getOptions(GetConfig().Global, key)
+	bFlags := getOptions(b.Options, key)
+	lFlags := getOptions(l.Options, key)
+	options = append(options, gFlags...)
+	options = append(options, bFlags...)
+	options = append(options, lFlags...)
+	return options
 }
