@@ -9,8 +9,9 @@ import (
 )
 
 var restoreCmd = &cobra.Command{
-	Use:   "restore",
+	Use:   "restore [snapshot id]",
 	Short: "Restore backup for location",
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		err := lock.Lock()
 		CheckErr(err)
@@ -24,7 +25,11 @@ var restoreCmd = &cobra.Command{
 		target, _ := cmd.Flags().GetString("to")
 		from, _ := cmd.Flags().GetString("from")
 		force, _ := cmd.Flags().GetBool("force")
-		err = l.Restore(target, from, force)
+		snapshot := ""
+		if len(args) > 0 {
+			snapshot = args[0]
+		}
+		err = l.Restore(target, from, force, snapshot)
 		CheckErr(err)
 	},
 }
