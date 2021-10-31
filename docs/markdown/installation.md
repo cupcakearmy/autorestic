@@ -20,6 +20,6 @@ If you are on macOS you can install through brew: `brew install autorestic`.
 
 ### AUR
 
-If you are on Arch there is an [AUR Package](https://aur.archlinux.org/packages/autorestic-bin/) by @n194.
+If you are on Arch there is an [AUR Package](https://aur.archlinux.org/packages/autorestic-bin/) (looking for maintainers).
 
 > :ToCPrevNext

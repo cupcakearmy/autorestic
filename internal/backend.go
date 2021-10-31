@@ -157,25 +157,32 @@ func (b Backend) ExecDocker(l Location, args []string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	volume := l.getVolumeName()
-	path, _ := l.getPath()
+	volume := l.From[0]
 	options := ExecuteOptions{
 		Command: "docker",
 		Envs:    env,
 	}
+	dir := "/data"
 	docker := []string{
 		"run", "--rm",
 		"--entrypoint", "ash",
-		"--workdir", path,
-		"--volume", volume + ":" + path,
+		"--workdir", dir,
+		"--volume", volume + ":" + dir,
 	}
+	// Use of docker host, not the container host
 	if hostname, err := os.Hostname(); err == nil {
 		docker = append(docker, "--hostname", hostname)
 	}
-	if b.Type == "local" {
+	switch b.Type {
+	case "local":
 		actual := env["RESTIC_REPOSITORY"]
 		docker = append(docker, "--volume", actual+":"+"/repo")
 		env["RESTIC_REPOSITORY"] = "/repo"
+	case "b2":
+	case "s3":
+		// No additional setup needed
+	default:
+		return "", fmt.Errorf("Backend type \"%s\" is not supported as volume endpoint", b.Type)
 	}
 	for key, value := range env {
 		docker = append(docker, "--env", key+"="+value)
