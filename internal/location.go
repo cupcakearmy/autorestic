@@ -184,11 +184,8 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 			continue
 		}
 
-		lFlags := getOptions(l.Options, "backup")
-		bFlags := getOptions(backend.Options, "backup")
 		cmd := []string{"backup"}
-		cmd = append(cmd, lFlags...)
-		cmd = append(cmd, bFlags...)
+		cmd = append(cmd, combineOptions("backup", l, backend)...)
 		if cron {
 			cmd = append(cmd, "--tag", l.getTag("cron"))
 		}
@@ -269,8 +266,6 @@ func (l Location) Forget(prune bool, dry bool) error {
 		options := ExecuteOptions{
 			Envs: env,
 		}
-		lFlags := getOptions(l.Options, "forget")
-		bFlags := getOptions(backend.Options, "forget")
 		cmd := []string{"forget", "--tag", l.getLocationTag()}
 		if prune {
 			cmd = append(cmd, "--prune")
@@ -278,8 +273,7 @@ func (l Location) Forget(prune bool, dry bool) error {
 		if dry {
 			cmd = append(cmd, "--dry-run")
 		}
-		cmd = append(cmd, lFlags...)
-		cmd = append(cmd, bFlags...)
+		cmd = append(cmd, combineOptions("forget", l, backend)...)
 		out, err := ExecuteResticCommand(options, cmd...)
 		if VERBOSE {
 			colors.Faint.Println(out)

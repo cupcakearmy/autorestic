@@ -55,6 +55,7 @@ func GetConfig() *Config {
 
 			config = &Config{}
 			if err := viper.UnmarshalExact(config); err != nil {
+				colors.Error.Println(err)
 				colors.Error.Println("Could not parse config file!")
 				lock.Unlock()
 				os.Exit(1)
@@ -272,4 +273,16 @@ func getOptions(options Options, key string) []string {
 		appendOptionsToSlice(&selected, options[key])
 	}
 	return selected
+}
+
+func combineOptions(key string, l Location, b Backend) []string {
+	// Priority: location > backend > global
+	var options []string
+	gFlags := getOptions(GetConfig().Global, key)
+	bFlags := getOptions(b.Options, key)
+	lFlags := getOptions(l.Options, key)
+	options = append(options, gFlags...)
+	options = append(options, bFlags...)
+	options = append(options, lFlags...)
+	return options
 }
