@@ -26,7 +26,7 @@ locations:
 
 ## Example
 
-In this example, whenever `autorestic` runs `restic backup` it will append a `--tag abc --tag` to the native command.
+In this example, whenever `autorestic` runs `restic backup` it will append a `--tag foo --tag bar` to the native command.
 
 ```yaml
 locations:
@@ -39,6 +39,12 @@ locations:
           - foo
           - bar
 ```
+
+## Priority
+
+Options can be set globally, on the backends or on the locations.
+
+The priority is as follows: `location > backend > global`.
 
 ## Global Options
 
