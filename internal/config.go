@@ -26,6 +26,7 @@ type OptionMap map[string][]interface{}
 type Options map[string]OptionMap
 
 type Config struct {
+	Version   string              `yaml:"version"`
 	Extras    interface{}         `yaml:"extras"`
 	Locations map[string]Location `yaml:"locations"`
 	Backends  map[string]Backend  `yaml:"backends"`
@@ -35,7 +36,19 @@ type Config struct {
 var once sync.Once
 var config *Config
 
+func exitConfig(err error, msg string) {
+	if err != nil {
+		colors.Error.Println(err)
+	}
+	if msg != "" {
+		colors.Error.Println(msg)
+	}
+	lock.Unlock()
+	os.Exit(1)
+}
+
 func GetConfig() *Config {
+
 	if config == nil {
 		once.Do(func() {
 			if err := viper.ReadInConfig(); err == nil {
@@ -53,12 +66,24 @@ func GetConfig() *Config {
 				return
 			}
 
+			var versionConfig interface{}
+			viper.UnmarshalKey("version", &versionConfig)
+			if versionConfig == nil {
+				exitConfig(nil, "no version specified in config file. please see docs on how to migrate")
+			}
+			version, ok := versionConfig.(int)
+			if !ok {
+				exitConfig(nil, "version specified in config file is not an int")
+			} else {
+				// Check for version
+				if version != 2 {
+					exitConfig(nil, "unsupported version number. please check the docs")
+				}
+			}
+
 			config = &Config{}
 			if err := viper.UnmarshalExact(config); err != nil {
-				colors.Error.Println(err)
-				colors.Error.Println("Could not parse config file!")
-				lock.Unlock()
-				os.Exit(1)
+				exitConfig(err, "Could not parse config file!")
 			}
 		})
 	}

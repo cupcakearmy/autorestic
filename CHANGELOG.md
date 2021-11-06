@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved error handling
 - Allow for specific snapshot to be restored
 
+### Fixed
+
+- rclone in docker volumes
+
 ### Changed
 
 - [Breaking Change] Declaration of docker volumes. See: https://autorestic.vercel.app/migration/1.4_1.5
@@ -20,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.1] - 2021-10-31
 
-### Fixes
+### Fixed
 
 - Numeric values from config files not being passed to env.
 
