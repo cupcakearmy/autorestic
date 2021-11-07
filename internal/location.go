@@ -126,13 +126,13 @@ func (l Location) getType() (LocationType, error) {
 	return "", fmt.Errorf("invalid location type \"%s\"", l.Type)
 }
 
-func (l Location) getTag(parts ...string) string {
+func buildTag(parts ...string) string {
 	parts = append([]string{"ar"}, parts...)
 	return strings.Join(parts, ":")
 }
 
-func (l Location) getLocationTag() string {
-	return l.getTag("location", l.name)
+func (l Location) getLocationTags() string {
+	return buildTag("location", l.name)
 }
 
 func (l Location) Backup(cron bool, specificBackend string) []error {
@@ -187,9 +187,9 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 		cmd := []string{"backup"}
 		cmd = append(cmd, combineOptions("backup", l, backend)...)
 		if cron {
-			cmd = append(cmd, "--tag", l.getTag("cron"))
+			cmd = append(cmd, "--tag", buildTag("cron"))
 		}
-		cmd = append(cmd, "--tag", l.getLocationTag())
+		cmd = append(cmd, "--tag", l.getLocationTags())
 		backupOptions := ExecuteOptions{
 			Envs: env,
 		}
@@ -266,7 +266,7 @@ func (l Location) Forget(prune bool, dry bool) error {
 		options := ExecuteOptions{
 			Envs: env,
 		}
-		cmd := []string{"forget", "--tag", l.getLocationTag()}
+		cmd := []string{"forget", "--tag", l.getLocationTags()}
 		if prune {
 			cmd = append(cmd, "--prune")
 		}
@@ -339,9 +339,9 @@ func (l Location) Restore(to, from string, force bool, snapshot string) error {
 				}
 			}
 		}
-		err = backend.Exec([]string{"restore", "--target", to, "--tag", l.getLocationTag(), snapshot})
+		err = backend.Exec([]string{"restore", "--target", to, "--tag", l.getLocationTags(), snapshot})
 	case TypeVolume:
-		_, err = backend.ExecDocker(l, []string{"restore", "--target", "/", "--tag", l.getLocationTag(), snapshot})
+		_, err = backend.ExecDocker(l, []string{"restore", "--target", "/", "--tag", l.getLocationTags(), snapshot})
 	}
 	if err != nil {
 		return err
