@@ -40,6 +40,11 @@
 > [Uninstall](/cli/uninstall)
 > [Upgrade](/cli/upgrade)
 
+> :Collapse label=Migration
+>
+> [0.x → 1.0](/migration/0.x_1.0)
+> [1.4 → 1.5](/migration/1.4_1.5)
+
 [Examples](/examples)
 [QA](/qa)
 [Community](/community)

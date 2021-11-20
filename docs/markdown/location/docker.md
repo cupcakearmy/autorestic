@@ -3,7 +3,7 @@
 autorestic supports docker volumes directly, without needing them to be mounted to the host filesystem.
 
 ```yaml | docker-compose.yml
-version: '3.7'
+version: '3.8'
 
 volumes:
   data:
@@ -18,13 +18,9 @@ services:
 
 ```yaml | .autorestic.yml
 locations:
-  - name: hello
-    from: volume:my-data
-    to:
-      - remote
-
-backends:
-  - name: remote
+  foo:
+    from: my-data
+    type: volume
     # ...
 ```
 

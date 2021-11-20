@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.4.1"
+const VERSION = "1.5.0"
 
 var CI bool = false
 var VERBOSE bool = false
@@ -26,6 +26,7 @@ type OptionMap map[string][]interface{}
 type Options map[string]OptionMap
 
 type Config struct {
+	Version   string              `yaml:"version"`
 	Extras    interface{}         `yaml:"extras"`
 	Locations map[string]Location `yaml:"locations"`
 	Backends  map[string]Backend  `yaml:"backends"`
@@ -35,7 +36,19 @@ type Config struct {
 var once sync.Once
 var config *Config
 
+func exitConfig(err error, msg string) {
+	if err != nil {
+		colors.Error.Println(err)
+	}
+	if msg != "" {
+		colors.Error.Println(msg)
+	}
+	lock.Unlock()
+	os.Exit(1)
+}
+
 func GetConfig() *Config {
+
 	if config == nil {
 		once.Do(func() {
 			if err := viper.ReadInConfig(); err == nil {
@@ -53,11 +66,24 @@ func GetConfig() *Config {
 				return
 			}
 
+			var versionConfig interface{}
+			viper.UnmarshalKey("version", &versionConfig)
+			if versionConfig == nil {
+				exitConfig(nil, "no version specified in config file. please see docs on how to migrate")
+			}
+			version, ok := versionConfig.(int)
+			if !ok {
+				exitConfig(nil, "version specified in config file is not an int")
+			} else {
+				// Check for version
+				if version != 2 {
+					exitConfig(nil, "unsupported config version number. please check the docs for migration\nhttps://autorestic.vercel.app/migration/")
+				}
+			}
+
 			config = &Config{}
 			if err := viper.UnmarshalExact(config); err != nil {
-				colors.Error.Println("Could not parse config file!")
-				lock.Unlock()
-				os.Exit(1)
+				exitConfig(err, "Could not parse config file!")
 			}
 		})
 	}
@@ -81,7 +107,11 @@ func (c *Config) Describe() {
 		var tmp string
 		colors.PrimaryPrint(`Location: "%s"`, name)
 
-		colors.PrintDescription("From", l.From)
+		tmp = ""
+		for _, path := range l.From {
+			tmp += fmt.Sprintf("\t%s %s\n", colors.Success.Sprint("←"), path)
+		}
+		colors.PrintDescription("From", tmp)
 
 		tmp = ""
 		for _, to := range l.To {
@@ -268,4 +298,16 @@ func getOptions(options Options, key string) []string {
 		appendOptionsToSlice(&selected, options[key])
 	}
 	return selected
+}
+
+func combineOptions(key string, l Location, b Backend) []string {
+	// Priority: location > backend > global
+	var options []string
+	gFlags := getOptions(GetConfig().Global, key)
+	bFlags := getOptions(b.Options, key)
+	lFlags := getOptions(l.Options, key)
+	options = append(options, gFlags...)
+	options = append(options, bFlags...)
+	options = append(options, lFlags...)
+	return options
 }

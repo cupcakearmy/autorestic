@@ -17,14 +17,14 @@ import (
 type LocationType string
 
 const (
-	TypeLocal    LocationType = "local"
-	TypeVolume   LocationType = "volume"
-	VolumePrefix string       = "volume:"
+	TypeLocal  LocationType = "local"
+	TypeVolume LocationType = "volume"
 )
 
 type HookArray = []string
 
 type Hooks struct {
+	Dir     string    `yaml:"dir"`
 	Before  HookArray `yaml:"before,omitempty"`
 	After   HookArray `yaml:"after,omitempty"`
 	Success HookArray `yaml:"success,omitempty"`
@@ -33,7 +33,8 @@ type Hooks struct {
 
 type Location struct {
 	name    string   `yaml:",omitempty"`
-	From    string   `yaml:"from,omitempty"`
+	From    []string `yaml:"from,omitempty"`
+	Type    string   `yaml:"type,omitempty"`
 	To      []string `yaml:"to,omitempty"`
 	Hooks   Hooks    `yaml:"hooks,omitempty"`
 	Cron    string   `yaml:"cron,omitempty"`
@@ -47,20 +48,31 @@ func GetLocation(name string) (Location, bool) {
 }
 
 func (l Location) validate() error {
-	if l.From == "" {
+	if len(l.From) == 0 {
 		return fmt.Errorf(`Location "%s" is missing "from" key`, l.name)
 	}
-	if l.getType() == TypeLocal {
-		if from, err := GetPathRelativeToConfig(l.From); err != nil {
-			return err
-		} else {
-			if stat, err := os.Stat(from); err != nil {
+	t, err := l.getType()
+	if err != nil {
+		return err
+	}
+	switch t {
+	case TypeLocal:
+		for _, path := range l.From {
+			if from, err := GetPathRelativeToConfig(path); err != nil {
 				return err
 			} else {
-				if !stat.IsDir() {
-					return fmt.Errorf("\"%s\" is not valid directory for location \"%s\"", from, l.name)
+				if stat, err := os.Stat(from); err != nil {
+					return err
+				} else {
+					if !stat.IsDir() {
+						return fmt.Errorf("\"%s\" is not valid directory for location \"%s\"", from, l.name)
+					}
 				}
 			}
+		}
+	case TypeVolume:
+		if len(l.From) > 1 {
+			return fmt.Errorf(`location "%s" has more than one docker volume`, l.name)
 		}
 	}
 
@@ -77,9 +89,16 @@ func (l Location) validate() error {
 	return nil
 }
 
-func ExecuteHooks(commands []string, options ExecuteOptions) error {
+func (l Location) ExecuteHooks(commands []string, options ExecuteOptions) error {
 	if len(commands) == 0 {
 		return nil
+	}
+	if l.Hooks.Dir != "" {
+		if dir, err := GetPathRelativeToConfig(l.Hooks.Dir); err != nil {
+			return err
+		} else {
+			options.Dir = dir
+		}
 	}
 	colors.Secondary.Println("\nRunning hooks")
 	for _, command := range commands {
@@ -97,39 +116,38 @@ func ExecuteHooks(commands []string, options ExecuteOptions) error {
 	return nil
 }
 
-func (l Location) getType() LocationType {
-	if strings.HasPrefix(l.From, VolumePrefix) {
-		return TypeVolume
+func (l Location) getType() (LocationType, error) {
+	t := strings.ToLower(l.Type)
+	if t == "" || t == "local" {
+		return TypeLocal, nil
+	} else if t == "volume" {
+		return TypeVolume, nil
 	}
-	return TypeLocal
+	return "", fmt.Errorf("invalid location type \"%s\"", l.Type)
 }
 
-func (l Location) getVolumeName() string {
-	return strings.TrimPrefix(l.From, VolumePrefix)
+func buildTag(parts ...string) string {
+	parts = append([]string{"ar"}, parts...)
+	return strings.Join(parts, ":")
 }
 
-func (l Location) getPath() (string, error) {
-	t := l.getType()
-	switch t {
-	case TypeLocal:
-		if path, err := GetPathRelativeToConfig(l.From); err != nil {
-			return "", err
-		} else {
-			return path, nil
-		}
-	case TypeVolume:
-		return "/volume/" + l.name + "/" + l.getVolumeName(), nil
-	}
-	return "", fmt.Errorf("could not get path for location \"%s\"", l.name)
+func (l Location) getLocationTags() string {
+	return buildTag("location", l.name)
 }
 
 func (l Location) Backup(cron bool, specificBackend string) []error {
 	var errors []error
 	var backends []string
 	colors.PrimaryPrint("  Backing up location \"%s\"  ", l.name)
-	t := l.getType()
+	t, err := l.getType()
+	if err != nil {
+		errors = append(errors, err)
+		return errors
+	}
+	cwd, _ := GetPathRelativeToConfig(".")
 	options := ExecuteOptions{
 		Command: "bash",
+		Dir:     cwd,
 		Envs: map[string]string{
 			"AUTORESTIC_LOCATION": l.name,
 		},
@@ -137,18 +155,11 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 
 	if err := l.validate(); err != nil {
 		errors = append(errors, err)
-		colors.Error.Print(err)
 		goto after
 	}
 
-	if t == TypeLocal {
-		dir, _ := GetPathRelativeToConfig(l.From)
-		colors.Faint.Printf("Executing under: \"%s\"\n", dir)
-		options.Dir = dir
-	}
-
 	// Hooks
-	if err := ExecuteHooks(l.Hooks.Before, options); err != nil {
+	if err := l.ExecuteHooks(l.Hooks.Before, options); err != nil {
 		errors = append(errors, err)
 		goto after
 	}
@@ -173,30 +184,38 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 			continue
 		}
 
-		lFlags := getOptions(l.Options, "backup")
-		bFlags := getOptions(backend.Options, "backup")
 		cmd := []string{"backup"}
-		cmd = append(cmd, lFlags...)
-		cmd = append(cmd, bFlags...)
+		cmd = append(cmd, combineOptions("backup", l, backend)...)
 		if cron {
-			cmd = append(cmd, "--tag", "cron")
+			cmd = append(cmd, "--tag", buildTag("cron"))
 		}
-		cmd = append(cmd, ".")
+		cmd = append(cmd, "--tag", l.getLocationTags())
 		backupOptions := ExecuteOptions{
-			Dir:  options.Dir,
 			Envs: env,
 		}
 
 		var out string
-
 		switch t {
 		case TypeLocal:
+			for _, from := range l.From {
+				path, err := GetPathRelativeToConfig(from)
+				if err != nil {
+					errors = append(errors, err)
+					goto after
+				}
+				cmd = append(cmd, path)
+			}
 			out, err = ExecuteResticCommand(backupOptions, cmd...)
 		case TypeVolume:
+			ok := CheckIfVolumeExists(l.From[0])
+			if !ok {
+				errors = append(errors, fmt.Errorf("volume \"%s\" does not exist", l.From[0]))
+				continue
+			}
+			cmd = append(cmd, "/data")
 			out, err = backend.ExecDocker(l, cmd)
 		}
 		if err != nil {
-			colors.Error.Println(out)
 			errors = append(errors, err)
 			continue
 		}
@@ -213,7 +232,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 	}
 
 	// After hooks
-	if err := ExecuteHooks(l.Hooks.After, options); err != nil {
+	if err := l.ExecuteHooks(l.Hooks.After, options); err != nil {
 		errors = append(errors, err)
 	}
 
@@ -224,21 +243,18 @@ after:
 	} else {
 		commands = l.Hooks.Success
 	}
-	if err := ExecuteHooks(commands, options); err != nil {
+	if err := l.ExecuteHooks(commands, options); err != nil {
 		errors = append(errors, err)
 	}
 
-	colors.Success.Println("Done")
+	if len(errors) == 0 {
+		colors.Success.Println("Done")
+	}
 	return errors
 }
 
 func (l Location) Forget(prune bool, dry bool) error {
 	colors.PrimaryPrint("Forgetting for location \"%s\"", l.name)
-
-	path, err := l.getPath()
-	if err != nil {
-		return err
-	}
 
 	for _, to := range l.To {
 		backend, _ := GetBackend(to)
@@ -250,17 +266,14 @@ func (l Location) Forget(prune bool, dry bool) error {
 		options := ExecuteOptions{
 			Envs: env,
 		}
-		lFlags := getOptions(l.Options, "forget")
-		bFlags := getOptions(backend.Options, "forget")
-		cmd := []string{"forget", "--path", path}
+		cmd := []string{"forget", "--tag", l.getLocationTags()}
 		if prune {
 			cmd = append(cmd, "--prune")
 		}
 		if dry {
 			cmd = append(cmd, "--dry-run")
 		}
-		cmd = append(cmd, lFlags...)
-		cmd = append(cmd, bFlags...)
+		cmd = append(cmd, combineOptions("forget", l, backend)...)
 		out, err := ExecuteResticCommand(options, cmd...)
 		if VERBOSE {
 			colors.Faint.Println(out)
@@ -282,7 +295,7 @@ func (l Location) hasBackend(backend string) bool {
 	return false
 }
 
-func (l Location) Restore(to, from string, force bool) error {
+func (l Location) Restore(to, from string, force bool, snapshot string) error {
 	if from == "" {
 		from = l.To[0]
 	} else if !l.hasBackend(from) {
@@ -293,16 +306,20 @@ func (l Location) Restore(to, from string, force bool) error {
 	if err != nil {
 		return err
 	}
-	colors.PrimaryPrint("Restoring location \"%s\"", l.name)
 
-	backend, _ := GetBackend(from)
-	path, err := l.getPath()
-	if err != nil {
-		return nil
+	if snapshot == "" {
+		snapshot = "latest"
 	}
-	colors.Secondary.Println("Restoring lastest snapshot")
-	colors.Body.Printf("%s → %s.\n", from, path)
-	switch l.getType() {
+
+	colors.PrimaryPrint("Restoring location \"%s\"", l.name)
+	backend, _ := GetBackend(from)
+	colors.Secondary.Printf("Restoring %s@%s → %s\n", snapshot, backend.name, to)
+
+	t, err := l.getType()
+	if err != nil {
+		return err
+	}
+	switch t {
 	case TypeLocal:
 		// Check if target is empty
 		if !force {
@@ -322,9 +339,9 @@ func (l Location) Restore(to, from string, force bool) error {
 				}
 			}
 		}
-		err = backend.Exec([]string{"restore", "--target", to, "--path", path, "latest"})
+		err = backend.Exec([]string{"restore", "--target", to, "--tag", l.getLocationTags(), snapshot})
 	case TypeVolume:
-		_, err = backend.ExecDocker(l, []string{"restore", "--target", ".", "--path", path, "latest"})
+		_, err = backend.ExecDocker(l, []string{"restore", "--target", "/", "--tag", l.getLocationTags(), snapshot})
 	}
 	if err != nil {
 		return err

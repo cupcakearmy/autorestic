@@ -157,30 +157,52 @@ func (b Backend) ExecDocker(l Location, args []string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	volume := l.getVolumeName()
-	path, _ := l.getPath()
+	volume := l.From[0]
 	options := ExecuteOptions{
 		Command: "docker",
 		Envs:    env,
 	}
+	dir := "/data"
+	args = append([]string{"restic"}, args...)
 	docker := []string{
 		"run", "--rm",
+		"--pull", "always",
 		"--entrypoint", "ash",
-		"--workdir", path,
-		"--volume", volume + ":" + path,
+		"--workdir", dir,
+		"--volume", volume + ":" + dir,
 	}
+	// Use of docker host, not the container host
 	if hostname, err := os.Hostname(); err == nil {
 		docker = append(docker, "--hostname", hostname)
 	}
-	if b.Type == "local" {
+	switch b.Type {
+	case "local":
 		actual := env["RESTIC_REPOSITORY"]
 		docker = append(docker, "--volume", actual+":"+"/repo")
 		env["RESTIC_REPOSITORY"] = "/repo"
+	case "b2":
+	case "s3":
+	case "azure":
+	case "gs":
+		// No additional setup needed
+	case "rclone":
+		// Read host rclone config and mount it into the container
+		configFile, err := ExecuteCommand(ExecuteOptions{Command: "rclone"}, "config", "file")
+		if err != nil {
+			return "", err
+		}
+		splitted := strings.Split(strings.TrimSpace(configFile), "\n")
+		configFilePath := splitted[len(splitted)-1]
+		docker = append(docker, "--volume", configFilePath+":"+"/root/.config/rclone/rclone.conf:ro")
+		// Install rclone in the container
+		args = append([]string{"apk", "add", "rclone", "&&"}, args...)
+	default:
+		return "", fmt.Errorf("Backend type \"%s\" is not supported as volume endpoint", b.Type)
 	}
 	for key, value := range env {
 		docker = append(docker, "--env", key+"="+value)
 	}
-	docker = append(docker, "restic/restic", "-c", "restic "+strings.Join(args, " "))
+	docker = append(docker, "restic/restic", "-c", strings.Join(args, " "))
 	out, err := ExecuteCommand(options, docker...)
 	return out, err
 }

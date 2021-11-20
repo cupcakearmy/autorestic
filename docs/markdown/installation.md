@@ -10,6 +10,10 @@ wget -qO - https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/insta
 
 ## Alternatives
 
+### Docker
+
+There is an official docker image over at [cupcakearmy/autorestic](https://hub.docker.com/r/cupcakearmy/autorestic).
+
 ### Manual
 
 You can download the right binary from the release page and simply copy it to `/usr/local/bin` or whatever path you prefer. Autoupdates will still work.
@@ -20,6 +24,6 @@ If you are on macOS you can install through brew: `brew install autorestic`.
 
 ### AUR
 
-If you are on Arch there is an [AUR Package](https://aur.archlinux.org/packages/autorestic-bin/) (looking for maintainers).
+~~If you are on Arch there is an [AUR Package](https://aur.archlinux.org/packages/autorestic-bin/) (looking for maintainers).~~ - Deprecated
 
 > :ToCPrevNext
