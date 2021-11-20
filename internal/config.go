@@ -77,7 +77,7 @@ func GetConfig() *Config {
 			} else {
 				// Check for version
 				if version != 2 {
-					exitConfig(nil, "unsupported version number. please check the docs")
+					exitConfig(nil, "unsupported config version number. please check the docs for migration\nhttps://autorestic.vercel.app/migration/")
 				}
 			}
 
