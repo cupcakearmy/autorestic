@@ -3,6 +3,8 @@
 Backends are the outputs of the backup process. Each location needs at least one.
 
 ```yaml | .autorestic.yml
+version: 2
+
 backends:
   name-of-backend:
     type: local

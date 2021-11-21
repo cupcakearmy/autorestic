@@ -4,9 +4,15 @@ Locations can be seen as the input to the backup process. Generally this is simp
 The paths can be relative from the config file. A location can have multiple backends, so that the data is secured across multiple servers.
 
 ```yaml | .autorestic.yml
+version: 2
+
 locations:
   my-location-name:
     from: path/to/backup
+    # Or multiple
+    # from:
+    #   - /a
+    #   - /b
     to:
       - name-of-backend
       - also-backup-to-this-backend
@@ -14,7 +20,7 @@ locations:
 
 ## `from`
 
-This is the source of the location.
+This is the source of the location. Can be an `array` for multiple sources.
 
 #### How are paths resolved?
 

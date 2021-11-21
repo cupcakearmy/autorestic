@@ -25,9 +25,15 @@ For a quick overview:
 > Note that the data is automatically encrypted on the server. The key will be generated and added to your config file. Every backend will have a separate key. **You should keep a copy of the keys or config file somewhere in case your server dies**. Otherwise DATA IS LOST!
 
 ```yaml | .autorestic.yml
+version: 2
+
 locations:
   home:
-    from: /home/me
+    from: /home
+    # Or multiple
+    # from:
+    #  - /foo
+    #  - /bar
     to: remote
 
   important:
