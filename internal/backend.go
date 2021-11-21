@@ -194,15 +194,13 @@ func (b Backend) ExecDocker(l Location, args []string) (string, error) {
 		splitted := strings.Split(strings.TrimSpace(configFile), "\n")
 		configFilePath := splitted[len(splitted)-1]
 		docker = append(docker, "--volume", configFilePath+":"+"/root/.config/rclone/rclone.conf:ro")
-		// Install rclone in the container
-		args = append([]string{"apk", "add", "rclone", "&&"}, args...)
 	default:
 		return "", fmt.Errorf("Backend type \"%s\" is not supported as volume endpoint", b.Type)
 	}
 	for key, value := range env {
 		docker = append(docker, "--env", key+"="+value)
 	}
-	docker = append(docker, "restic/restic", "-c", strings.Join(args, " "))
+	docker = append(docker, "cupcakearmy/autorestic", "-c", strings.Join(args, " "))
 	out, err := ExecuteCommand(options, docker...)
 	return out, err
 }
