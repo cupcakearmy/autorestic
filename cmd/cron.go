@@ -11,6 +11,7 @@ var cronCmd = &cobra.Command{
 	Short: "Run cron job for automated backups",
 	Long:  `Intended to be mainly triggered by an automated system like systemd or crontab. For each location checks if a cron backup is due and runs it.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		internal.GetConfig()
 		internal.CRON_LEAN, _ = cmd.Flags().GetBool("lean")
 		err := lock.Lock()
 		CheckErr(err)

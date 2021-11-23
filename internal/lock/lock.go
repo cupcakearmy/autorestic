@@ -19,8 +19,14 @@ func getLock() *viper.Viper {
 		once.Do(func() {
 			lock = viper.New()
 			lock.SetDefault("running", false)
-			p := path.Dir(viper.ConfigFileUsed())
-			file = path.Join(p, ".autorestic.lock.yml")
+			p := viper.ConfigFileUsed()
+			colors.Primary.Println(p)
+			if p == "" {
+				colors.Error.Println("cannot lock before reading config location")
+				os.Exit(1)
+			}
+			file = path.Join(path.Dir(p), ".autorestic.lock.yml")
+			colors.Faint.Println("Using lock:\t", file)
 			lock.SetConfigFile(file)
 			lock.SetConfigType("yml")
 			lock.ReadInConfig()

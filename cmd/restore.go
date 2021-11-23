@@ -13,6 +13,7 @@ var restoreCmd = &cobra.Command{
 	Short: "Restore backup for location",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		internal.GetConfig()
 		err := lock.Lock()
 		CheckErr(err)
 		defer lock.Unlock()
