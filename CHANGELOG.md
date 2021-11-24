@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - lock file not always next to the config file.
+- update / install bugs.
 
 ## [1.5.0] - 2021-11-20
 
