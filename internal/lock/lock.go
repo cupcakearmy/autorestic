@@ -20,7 +20,6 @@ func getLock() *viper.Viper {
 			lock = viper.New()
 			lock.SetDefault("running", false)
 			p := viper.ConfigFileUsed()
-			colors.Primary.Println(p)
 			if p == "" {
 				colors.Error.Println("cannot lock before reading config location")
 				os.Exit(1)
