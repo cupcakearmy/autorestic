@@ -14,6 +14,8 @@ wget -qO - https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/insta
 
 There is an official docker image over at [cupcakearmy/autorestic](https://hub.docker.com/r/cupcakearmy/autorestic).
 
+For some examples see [here](/docker).
+
 ### Manual
 
 You can download the right binary from the release page and simply copy it to `/usr/local/bin` or whatever path you prefer. Autoupdates will still work.

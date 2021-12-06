@@ -216,7 +216,8 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 			out, err = backend.ExecDocker(l, cmd)
 		}
 		if err != nil {
-			errors = append(errors, err)
+			colors.Error.Println(out)
+			errors = append(errors, fmt.Errorf("%s@%s:\n%s%s", l.name, backend.name, out, err))
 			continue
 		}
 

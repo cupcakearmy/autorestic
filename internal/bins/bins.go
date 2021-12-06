@@ -87,9 +87,23 @@ func downloadAndInstallAsset(body GithubRelease, name string) error {
 			}
 
 			to := path.Join(INSTALL_PATH, name)
-			defer os.Remove(to) // Delete if current, ignore error if file does not exits.
+			defer os.Remove(tmp.Name()) // Cleanup temporary file after thread exits
 			if err := os.Rename(tmp.Name(), to); err != nil {
-				return nil
+				colors.Error.Printf("os.Rename() failed (%v), retrying with io.Copy()\n", err.Error())
+				var src *os.File
+				var dst *os.File
+				if src, err = os.Open(tmp.Name()); err != nil {
+					return err
+				}
+				if dst, err = os.Create(to); err != nil {
+					return err
+				}
+				if _, err := io.Copy(dst, src); err != nil {
+					return err
+				}
+				if err := os.Chmod(to, 0755); err != nil {
+					return err
+				}
 			}
 
 			colors.Success.Printf("Successfully installed '%s' under %s\n", name, INSTALL_PATH)

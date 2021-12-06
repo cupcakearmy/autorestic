@@ -5,23 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2021-11-24
+
+### Changed
+
+- use official docker image instead of installing rclone every time docker is used.
+
+### Fixed
+
+- lock file not always next to the config file.
+- update / install bugs.
+
 ## [1.5.0] - 2021-11-20
 
 ### Added
 
-- Support for multiple paths
-- Improved error handling
-- Allow for specific snapshot to be restored
-- Docker image
+- Support for multiple paths.
+- Improved error handling.
+- Allow for specific snapshot to be restored.
+- Docker image.
 
 ### Fixed
 
-- rclone in docker volumes
+- rclone in docker volumes.
 
 ### Changed
 
-- [Breaking Change] Declaration of docker volumes. See: https://autorestic.vercel.app/migration/1.4_1.5
-- [Breaking Change] Hooks default executing directory now defaults to the config file directory. See: https://autorestic.vercel.app/migration/1.4_1.5
+- [Breaking Change] Declaration of docker volumes. See: https://autorestic.vercel.app/migration/1.4_1.5.
+- [Breaking Change] Hooks default executing directory now defaults to the config file directory. See: https://autorestic.vercel.app/migration/1.4_1.5.
 
 ## [1.4.1] - 2021-10-31
 
@@ -33,26 +44,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Allow specify to specify a backend for location backup
-- Global restic flags
-- Generic ENV support for backends
+- Allow specify to specify a backend for location backup.
+- Global restic flags.
+- Generic ENV support for backends.
 
 ### Changed
 
-- Install now only requires `wget`
-- Env variable for the `KEY` has been renamed from `AUTORESTIC_[BACKEND NAME]_KEY` -> `AUTORESTIC_[BACKEND NAME]_RESTIC_PASSWORD`
+- Install now only requires `wget`.
+- Env variable for the `KEY` has been renamed from `AUTORESTIC_[BACKEND NAME]_KEY` -> `AUTORESTIC_[BACKEND NAME]_RESTIC_PASSWORD`.
 
 ### Fixed
 
-- Error handling during upgrade & uninstall
+- Error handling during upgrade & uninstall.
 
 ## [1.3.0] - 2021-10-26
 
 ### Added
 
-- Pass restic backup metadata as ENV to hooks
+- Pass restic backup metadata as ENV to hooks.
 - Support for `XDG_CONFIG_HOME` and `${HOME}/.config` as default locations for `.autorestic.yaml` file.
-- Binary restic flags are now supported
+- Binary restic flags are now supported.
 - Pass encryption keys from env variables or files.
 
 ## [1.2.0] - 2021-08-05
@@ -60,12 +71,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Community page
-- Support for yaml references and aliases
+- Support for yaml references and aliases.
 
 ### Fixed
 
-- Better verbose output for hooks
-- Better error message for bad formatted configs
+- Better verbose output for hooks.
+- Better error message for bad formatted configs.
 
 ## [1.1.2] - 2021-07-11
 
@@ -77,24 +88,24 @@ Don't check all backend when running `forget` or `exec` commands.
 
 ### Added
 
-- Options for backends
+- Options for backends.
 
 ## [1.1.0] - 2021-05-06
 
 ### Added
 
-- use custom restic binary
-- success & failure hooks
+- use custom restic binary.
+- success & failure hooks.
 
 ### Fixed
 
-- don't skip other locations on failure
+- don't skip other locations on failure.
 
 ## [1.0.9] - 2021-05-01
 
 ### Fixed
 
-- Validation for docker volumes
+- Validation for docker volumes.
 
 ## [1.0.8] - 2021-04-28
 
@@ -117,7 +128,7 @@ Don't check all backend when running `forget` or `exec` commands.
 
 ### Added
 
-- Support for rclone
+- Support for rclone.
 
 ## [1.0.5] - 2021-04-24
 
@@ -130,17 +141,17 @@ Don't check all backend when running `forget` or `exec` commands.
 
 ### Added
 
-- Options to add rest username and password in config
+- Options to add rest username and password in config.
 
 ### Fixed
 
-- Don't add empty strings when saving config
+- Don't add empty strings when saving config.
 
 ## [1.0.3] - 2021-04-20
 
 ### Fixed
 
-- Auto upgrade script was not working on linux as linux does not support writing to the binary that is being executed
+- Auto upgrade script was not working on linux as linux does not support writing to the binary that is being executed.
 
 ## [1.0.2] - 2021-04-20
 
@@ -156,7 +167,7 @@ Don't check all backend when running `forget` or `exec` commands.
 
 ### Added
 
-- Completion command for various shells
+- Completion command for various shells.
 
 ## [1.0.0] - 2021-04-17
 

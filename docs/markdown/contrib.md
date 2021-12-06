@@ -3,6 +3,7 @@
 This amazing people helped the project!
 
 - @agateblue - Docs, Pruning, S3
+- @g-a-c - Update/Install bugs.
 - @david-boles - Docs
 - @SebDanielsson - Brew
 - @n194 - AUR Package
