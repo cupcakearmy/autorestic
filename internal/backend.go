@@ -200,7 +200,7 @@ func (b Backend) ExecDocker(l Location, args []string) (string, error) {
 	for key, value := range env {
 		docker = append(docker, "--env", key+"="+value)
 	}
-	docker = append(docker, "cupcakearmy/autorestic", "-c", strings.Join(args, " "))
+	docker = append(docker, "cupcakearmy/autorestic:"+VERSION, "-c", strings.Join(args, " "))
 	out, err := ExecuteCommand(options, docker...)
 	return out, err
 }
