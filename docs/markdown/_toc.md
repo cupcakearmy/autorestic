@@ -46,6 +46,7 @@
 > [1.4 → 1.5](/migration/1.4_1.5)
 
 [Examples](/examples)
+[Docker](/docker)
 [QA](/qa)
 [Community](/community)
 [Contributors](/contrib)
