@@ -27,7 +27,7 @@ var rootCmd = &cobra.Command{
 	Version: internal.VERSION,
 	Use:     "autorestic",
 	Short:   "CLI Wrapper for restic",
-	Long:    "Documentation: https://autorestic.vercel.app",
+	Long:    "Documentation:\thttps://autorestic.vercel.app\nSupport:\thttps://discord.gg/wS7RpYTYd2",
 }
 
 func Execute() {
