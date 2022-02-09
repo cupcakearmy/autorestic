@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
@@ -49,13 +51,21 @@ func initConfig() {
 	}
 
 	if cfgFile != "" {
+		if internal.VERBOSE {
+			colors.Faint.Printf("> Using config file: %s\n", cfgFile)
+		}
 		viper.SetConfigFile(cfgFile)
+		viper.AutomaticEnv()
+		if viper.ConfigFileUsed() == "" {
+			colors.Error.Println("cannot read config file %s\n", cfgFile)
+			os.Exit(1)
+		}
 	} else {
-		viper.AddConfigPath(".")
+		configPaths := []string{"."}
 
 		// Home
 		if home, err := homedir.Dir(); err != nil {
-			viper.AddConfigPath(home)
+			configPaths = append(configPaths, home)
 		}
 
 		// XDG_CONFIG_HOME
@@ -66,10 +76,24 @@ func initConfig() {
 					prefix = filepath.Join(home, ".config")
 				}
 			}
-			viper.AddConfigPath(filepath.Join(prefix, "autorestic"))
+			xdgConfig := filepath.Join(prefix, "autorestic")
+			configPaths = append(configPaths, xdgConfig)
 		}
-
-		viper.SetConfigName(".autorestic")
+		for _, cfgPath := range configPaths {
+			if internal.VERBOSE {
+				colors.Faint.Printf("> Adding config path: '%s'\n", cfgPath)
+			}
+			viper.AddConfigPath(cfgPath)
+		}
+		cfgFileName := ".autorestic"
+		viper.SetConfigName(cfgFileName)
+		viper.AutomaticEnv()
+		if viper.ConfigFileUsed() == "" {
+			colors.Error.Println(
+				fmt.Sprintf(
+					"cannot find configuration file '%s.yml' or '%s.yaml' in config paths: ['%s']",
+					cfgFileName, cfgFileName, strings.Join(configPaths, "', '")))
+			os.Exit(1)
+		}
 	}
-	viper.AutomaticEnv()
 }
