@@ -60,13 +60,13 @@ func ExecuteResticCommand(options ExecuteOptions, args ...string) (string, error
 }
 
 func CopyFile(from, to string) error {
-	original, err := os.Open("original.txt")
+	original, err := os.Open(from)
 	if err != nil {
 		return nil
 	}
 	defer original.Close()
 
-	new, err := os.Create("new.txt")
+	new, err := os.Create(to)
 	if err != nil {
 		return nil
 	}
