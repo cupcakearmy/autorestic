@@ -259,7 +259,7 @@ func (c *Config) SaveConfig() error {
 	if err := CopyFile(file, file+".old"); err != nil {
 		return err
 	}
-	colors.Secondary.Println("Saved a backup copy of your file next the the original.")
+	colors.Secondary.Println("Saved a backup copy of your file next to the original.")
 
 	viper.Set("backends", c.Backends)
 	viper.Set("locations", c.Locations)
