@@ -2,17 +2,18 @@
 
 This amazing people helped the project!
 
-- @agateblue - Docs, Pruning, S3
+- @agateblue - Docs, Pruning, S3.
 - @g-a-c - Update/Install bugs.
-- @david-boles - Docs
-- @SebDanielsson - Brew
-- @n194 - AUR Package
-- @jin-park-dev - Typos
-- @sumnerboy12 - Typos
-- @FuzzyMistborn - Typos
-- @ChanceM - Typos
-- @TheForcer - Typos
-- @themorlan - Typos
-- @somebox - Typos
+- @jjromannet - Bug fixes.
+- @david-boles - Docs.
+- @SebDanielsson - Brew.
+- @n194 - AUR Package.
+- @jin-park-dev - Typos.
+- @sumnerboy12 - Typos.
+- @FuzzyMistborn - Typos.
+- @ChanceM - Typos.
+- @TheForcer - Typos.
+- @themorlan - Typos.
+- @somebox - Typos.
 
 > :ToCPrevNext
