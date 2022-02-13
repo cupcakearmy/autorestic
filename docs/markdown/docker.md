@@ -10,7 +10,7 @@ For remote backups (S3, B2, GCS, etc.) it's quite easy, as you only need to moun
 docker run --rm \\
   -v $(pwd):/data \\
   cupcakearmy/autorestic \\
-  autorestic backup -va
+  autorestic backup -va -c /data/.autorestic.yaml
 ```
 
 ## Rclone
