@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.5.2"
+const VERSION = "1.5.3"
 
 var CI bool = false
 var VERBOSE bool = false
@@ -63,7 +63,12 @@ func GetConfig() *Config {
 					}
 				}
 			} else {
-				return
+				cfgFileName := ".autorestic"
+				colors.Error.Println(
+					fmt.Sprintf(
+						"cannot find configuration file '%s.yml' or '%s.yaml'.",
+						cfgFileName, cfgFileName))
+				os.Exit(1)
 			}
 
 			var versionConfig interface{}

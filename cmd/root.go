@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -80,20 +79,13 @@ func initConfig() {
 			configPaths = append(configPaths, xdgConfig)
 		}
 		for _, cfgPath := range configPaths {
-			if internal.VERBOSE {
-				colors.Faint.Printf("> Adding config path: '%s'\n", cfgPath)
-			}
 			viper.AddConfigPath(cfgPath)
+		}
+		if internal.VERBOSE {
+			colors.Faint.Printf("Using config paths: %s\n", strings.Join(configPaths, " "))
 		}
 		cfgFileName := ".autorestic"
 		viper.SetConfigName(cfgFileName)
 		viper.AutomaticEnv()
-		if viper.ConfigFileUsed() == "" {
-			colors.Error.Println(
-				fmt.Sprintf(
-					"cannot find configuration file '%s.yml' or '%s.yaml' in config paths: ['%s']",
-					cfgFileName, cfgFileName, strings.Join(configPaths, "', '")))
-			os.Exit(1)
-		}
 	}
 }
