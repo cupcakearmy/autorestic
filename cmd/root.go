@@ -61,7 +61,7 @@ func initConfig() {
 		configPaths := []string{"."}
 
 		// Home
-		if home, err := homedir.Dir(); err != nil {
+		if home, err := homedir.Dir(); err == nil {
 			configPaths = append(configPaths, home)
 		}
 
