@@ -63,7 +63,12 @@ func GetConfig() *Config {
 					}
 				}
 			} else {
-				return
+				cfgFileName := ".autorestic"
+				colors.Error.Println(
+					fmt.Sprintf(
+						"cannot find configuration file '%s.yml' or '%s.yaml'.",
+						cfgFileName, cfgFileName))
+				os.Exit(1)
 			}
 
 			var versionConfig interface{}

@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
@@ -88,12 +86,5 @@ func initConfig() {
 		cfgFileName := ".autorestic"
 		viper.SetConfigName(cfgFileName)
 		viper.AutomaticEnv()
-		if viper.ConfigFileUsed() == "" {
-			colors.Error.Println(
-				fmt.Sprintf(
-					"cannot find configuration file '%s.yml' or '%s.yaml' in config paths: ['%s']",
-					cfgFileName, cfgFileName, strings.Join(configPaths, "', '")))
-			os.Exit(1)
-		}
 	}
 }
