@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
@@ -78,10 +79,10 @@ func initConfig() {
 			configPaths = append(configPaths, xdgConfig)
 		}
 		for _, cfgPath := range configPaths {
-			if internal.VERBOSE {
-				colors.Faint.Printf("> Adding config path: '%s'\n", cfgPath)
-			}
 			viper.AddConfigPath(cfgPath)
+		}
+		if internal.VERBOSE {
+			colors.Faint.Printf("Using config paths: %s\n", strings.Join(configPaths, " "))
 		}
 		cfgFileName := ".autorestic"
 		viper.SetConfigName(cfgFileName)
