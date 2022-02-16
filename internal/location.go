@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/cupcakearmy/autorestic/internal/metadata"
 	"github.com/robfig/cron"
@@ -108,7 +109,7 @@ func (l Location) ExecuteHooks(commands []string, options ExecuteOptions) error 
 			colors.Error.Println(out)
 			return err
 		}
-		if VERBOSE {
+		if flags.VERBOSE {
 			colors.Faint.Println(out)
 		}
 	}
@@ -227,7 +228,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 			options.Envs[k+"_"+fmt.Sprint(i)] = v
 			options.Envs[k+"_"+strings.ToUpper(backend.name)] = v
 		}
-		if VERBOSE {
+		if flags.VERBOSE {
 			colors.Faint.Println(out)
 		}
 	}
@@ -276,7 +277,7 @@ func (l Location) Forget(prune bool, dry bool) error {
 		}
 		cmd = append(cmd, combineOptions("forget", l, backend)...)
 		out, err := ExecuteResticCommand(options, cmd...)
-		if VERBOSE {
+		if flags.VERBOSE {
 			colors.Faint.Println(out)
 		}
 		if err != nil {
@@ -367,7 +368,7 @@ func (l Location) RunCron() error {
 		lock.SetCron(l.name, now.Unix())
 		l.Backup(true, "")
 	} else {
-		if !CRON_LEAN {
+		if !flags.CRON_LEAN {
 			colors.Body.Printf("Skipping \"%s\", not due yet.\n", l.name)
 		}
 	}

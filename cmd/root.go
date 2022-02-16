@@ -7,6 +7,7 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 
@@ -37,8 +38,8 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.autorestic.yml or ./.autorestic.yml)")
-	rootCmd.PersistentFlags().BoolVar(&internal.CI, "ci", false, "CI mode disabled interactive mode and colors and enables verbosity")
-	rootCmd.PersistentFlags().BoolVarP(&internal.VERBOSE, "verbose", "v", false, "verbose mode")
+	rootCmd.PersistentFlags().BoolVar(&flags.CI, "ci", false, "CI mode disabled interactive mode and colors and enables verbosity")
+	rootCmd.PersistentFlags().BoolVarP(&flags.VERBOSE, "verbose", "v", false, "verbose mode")
 	rootCmd.PersistentFlags().StringVar(&internal.RESTIC_BIN, "restic-bin", "restic", "specify custom restic binary")
 	cobra.OnInitialize(initConfig)
 }
@@ -46,13 +47,10 @@ func init() {
 func initConfig() {
 	if ci, _ := rootCmd.Flags().GetBool("ci"); ci {
 		colors.DisableColors(true)
-		internal.VERBOSE = true
+		flags.VERBOSE = true
 	}
 
 	if cfgFile != "" {
-		if internal.VERBOSE {
-			colors.Faint.Printf("> Using config file: %s\n", cfgFile)
-		}
 		viper.SetConfigFile(cfgFile)
 		viper.AutomaticEnv()
 		if viper.ConfigFileUsed() == "" {
@@ -81,7 +79,7 @@ func initConfig() {
 		for _, cfgPath := range configPaths {
 			viper.AddConfigPath(cfgPath)
 		}
-		if internal.VERBOSE {
+		if flags.VERBOSE {
 			colors.Faint.Printf("Using config paths: %s\n", strings.Join(configPaths, " "))
 		}
 		cfgFileName := ".autorestic"

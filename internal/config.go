@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
@@ -16,11 +17,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.5.3"
-
-var CI bool = false
-var VERBOSE bool = false
-var CRON_LEAN bool = false
+const VERSION = "1.5.4"
 
 type OptionMap map[string][]interface{}
 type Options map[string]OptionMap
@@ -52,15 +49,15 @@ func GetConfig() *Config {
 	if config == nil {
 		once.Do(func() {
 			if err := viper.ReadInConfig(); err == nil {
-				if !CRON_LEAN {
-					absConfig, _ := filepath.Abs(viper.ConfigFileUsed())
+				absConfig, _ := filepath.Abs(viper.ConfigFileUsed())
+				if !flags.CRON_LEAN {
 					colors.Faint.Println("Using config: \t", absConfig)
-					// Load env file
-					envFile := filepath.Join(filepath.Dir(absConfig), ".autorestic.env")
-					err = godotenv.Load(envFile)
-					if err == nil {
-						colors.Faint.Println("Using env:\t", envFile)
-					}
+				}
+				// Load env file
+				envFile := filepath.Join(filepath.Dir(absConfig), ".autorestic.env")
+				err = godotenv.Load(envFile)
+				if err == nil {
+					colors.Faint.Println("Using env:\t", envFile)
 				}
 			} else {
 				cfgFileName := ".autorestic"

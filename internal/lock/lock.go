@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/spf13/viper"
 )
 
@@ -25,7 +26,9 @@ func getLock() *viper.Viper {
 				os.Exit(1)
 			}
 			file = path.Join(path.Dir(p), ".autorestic.lock.yml")
-			colors.Faint.Println("Using lock:\t", file)
+			if !flags.CRON_LEAN {
+				colors.Faint.Println("Using lock:\t", file)
+			}
 			lock.SetConfigFile(file)
 			lock.SetConfigType("yml")
 			lock.ReadInConfig()

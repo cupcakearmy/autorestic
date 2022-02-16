@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 )
 
 type BackendRest struct {
@@ -128,7 +129,7 @@ func (b Backend) validate() error {
 		// If not initialize
 		colors.Body.Printf("Initializing backend \"%s\"...\n", b.name)
 		out, err := ExecuteResticCommand(options, "init")
-		if VERBOSE {
+		if flags.VERBOSE {
 			colors.Faint.Println(out)
 		}
 		return err
@@ -146,7 +147,7 @@ func (b Backend) Exec(args []string) error {
 		colors.Error.Println(out)
 		return err
 	}
-	if VERBOSE {
+	if flags.VERBOSE {
 		colors.Faint.Println(out)
 	}
 	return nil

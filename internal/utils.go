@@ -8,6 +8,7 @@ import (
 	"os/exec"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 )
 
 var RESTIC_BIN string
@@ -36,7 +37,7 @@ func ExecuteCommand(options ExecuteOptions, args ...string) (string, error) {
 	cmd.Env = env
 	cmd.Dir = options.Dir
 
-	if VERBOSE {
+	if flags.VERBOSE {
 		colors.Faint.Printf("> Executing: %s\n", cmd)
 	}
 
