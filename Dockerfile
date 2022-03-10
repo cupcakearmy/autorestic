@@ -7,6 +7,6 @@ COPY . .
 RUN go build
 
 FROM alpine
-RUN apk add --no-cache restic rclone
+RUN apk add --no-cache restic rclone bash
 COPY --from=builder /app/autorestic /usr/bin/autorestic
 CMD [ "autorestic" ]
