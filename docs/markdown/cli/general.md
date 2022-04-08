@@ -2,7 +2,7 @@
 
 ## `-c, --config`
 
-Specify the config file to be used.
+Specify the config file to be used (must use .yml as an extension).
 If omitted `autorestic` will search for for a `.autorestic.yml` in the current directory and your home directory.
 
 ```bash
