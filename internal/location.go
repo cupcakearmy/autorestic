@@ -297,16 +297,17 @@ func (l Location) hasBackend(backend string) bool {
 	return false
 }
 
-func (l Location) Restore(to, from string, force bool, snapshot string) error {
+func buildRestoreCommand(l Location, to string, snapshot string, options []string) []string {
+	base := []string{"restore", "--target", to, "--tag", l.getLocationTags(), snapshot}
+	base = append(base, options...)
+	return base
+}
+
+func (l Location) Restore(to, from string, force bool, snapshot string, options []string) error {
 	if from == "" {
 		from = l.To[0]
 	} else if !l.hasBackend(from) {
 		return fmt.Errorf("invalid backend: \"%s\"", from)
-	}
-
-	to, err := filepath.Abs(to)
-	if err != nil {
-		return err
 	}
 
 	if snapshot == "" {
@@ -323,6 +324,10 @@ func (l Location) Restore(to, from string, force bool, snapshot string) error {
 	}
 	switch t {
 	case TypeLocal:
+		to, err = filepath.Abs(to)
+		if err != nil {
+			return err
+		}
 		// Check if target is empty
 		if !force {
 			notEmptyError := fmt.Errorf("target %s is not empty", to)
@@ -341,9 +346,9 @@ func (l Location) Restore(to, from string, force bool, snapshot string) error {
 				}
 			}
 		}
-		err = backend.Exec([]string{"restore", "--target", to, "--tag", l.getLocationTags(), snapshot})
+		err = backend.Exec(buildRestoreCommand(l, to, snapshot, options))
 	case TypeVolume:
-		_, err = backend.ExecDocker(l, []string{"restore", "--target", "/", "--tag", l.getLocationTags(), snapshot})
+		_, err = backend.ExecDocker(l, buildRestoreCommand(l, "/", snapshot, options))
 	}
 	if err != nil {
 		return err
