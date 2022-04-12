@@ -24,22 +24,31 @@ const (
 
 type HookArray = []string
 
+type LocationForgetOption string
+
+const (
+	LocationForgetYes   LocationForgetOption = "yes"
+	LocationForgetNo    LocationForgetOption = "no"
+	LocationForgetPrune LocationForgetOption = "prune"
+)
+
 type Hooks struct {
-	Dir     string    `yaml:"dir"`
-	Before  HookArray `yaml:"before,omitempty"`
-	After   HookArray `yaml:"after,omitempty"`
-	Success HookArray `yaml:"success,omitempty"`
-	Failure HookArray `yaml:"failure,omitempty"`
+	Dir     string    `mapstructure:"dir"`
+	Before  HookArray `mapstructure:"before,omitempty"`
+	After   HookArray `mapstructure:"after,omitempty"`
+	Success HookArray `mapstructure:"success,omitempty"`
+	Failure HookArray `mapstructure:"failure,omitempty"`
 }
 
 type Location struct {
-	name    string   `yaml:",omitempty"`
-	From    []string `yaml:"from,omitempty"`
-	Type    string   `yaml:"type,omitempty"`
-	To      []string `yaml:"to,omitempty"`
-	Hooks   Hooks    `yaml:"hooks,omitempty"`
-	Cron    string   `yaml:"cron,omitempty"`
-	Options Options  `yaml:"options,omitempty"`
+	name         string               `mapstructure:",omitempty"`
+	From         []string             `mapstructure:"from,omitempty"`
+	Type         string               `mapstructure:"type,omitempty"`
+	To           []string             `mapstructure:"to,omitempty"`
+	Hooks        Hooks                `mapstructure:"hooks,omitempty"`
+	Cron         string               `mapstructure:"cron,omitempty"`
+	Options      Options              `mapstructure:"options,omitempty"`
+	ForgetOption LocationForgetOption `mapstructure:"forget,omitempty"`
 }
 
 func GetLocation(name string) (Location, bool) {
@@ -85,6 +94,12 @@ func (l Location) validate() error {
 		_, ok := GetBackend(to)
 		if !ok {
 			return fmt.Errorf("invalid backend `%s`", to)
+		}
+	}
+	// Check if forget type is correct
+	if l.ForgetOption != "" {
+		if l.ForgetOption != LocationForgetYes && l.ForgetOption != LocationForgetNo && l.ForgetOption != LocationForgetPrune {
+			return fmt.Errorf("invalid value for forget option: %s", l.ForgetOption)
 		}
 	}
 	return nil
@@ -246,13 +261,19 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 
 after:
 	var commands []string
-	if len(errors) > 0 {
-		commands = l.Hooks.Failure
-	} else {
+	var isSuccess = len(errors) == 0
+	if isSuccess {
 		commands = l.Hooks.Success
+	} else {
+		commands = l.Hooks.Failure
 	}
 	if err := l.ExecuteHooks(commands, options); err != nil {
 		errors = append(errors, err)
+	}
+
+	// Forget and optionally prune
+	if isSuccess && l.ForgetOption != "" && l.ForgetOption != LocationForgetNo {
+		l.Forget(l.ForgetOption == LocationForgetPrune, false)
 	}
 
 	if len(errors) == 0 {
