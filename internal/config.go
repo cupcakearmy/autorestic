@@ -56,7 +56,7 @@ func GetConfig() *Config {
 				// Load env file
 				envFile := filepath.Join(filepath.Dir(absConfig), ".autorestic.env")
 				err = godotenv.Load(envFile)
-				if err == nil {
+				if err == nil && !flags.CRON_LEAN {
 					colors.Faint.Println("Using env:\t", envFile)
 				}
 			} else {
