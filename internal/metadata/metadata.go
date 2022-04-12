@@ -21,6 +21,7 @@ type BackupLogMetadata struct {
 	AddedSize        string
 	Processed        BackupLogMetadataProcessed
 	SnapshotID       string
+	ExitCode         string
 }
 
 type MetadatExtractor interface {
@@ -67,6 +68,7 @@ func MakeEnvFromMetadata(metadata *BackupLogMetadata) map[string]string {
 	env[prefix+"PROCESSED_FILES"] = metadata.Processed.Files
 	env[prefix+"PROCESSED_SIZE"] = metadata.Processed.Size
 	env[prefix+"PROCESSED_DURATION"] = metadata.Processed.Duration
+	env[prefix+"EXIT_CODE"] = metadata.ExitCode
 
 	return env
 }

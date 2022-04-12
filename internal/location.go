@@ -104,7 +104,7 @@ func (l Location) ExecuteHooks(commands []string, options ExecuteOptions) error 
 	colors.Secondary.Println("\nRunning hooks")
 	for _, command := range commands {
 		colors.Body.Println("> " + command)
-		out, err := ExecuteCommand(options, "-c", command)
+		_, out, err := ExecuteCommand(options, "-c", command)
 		if err != nil {
 			colors.Error.Println(out)
 			return err
@@ -195,6 +195,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 			Envs: env,
 		}
 
+		var code int = 0
 		var out string
 		switch t {
 		case TypeLocal:
@@ -206,7 +207,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 				}
 				cmd = append(cmd, path)
 			}
-			out, err = ExecuteResticCommand(backupOptions, cmd...)
+			code, out, err = ExecuteResticCommand(backupOptions, cmd...)
 		case TypeVolume:
 			ok := CheckIfVolumeExists(l.From[0])
 			if !ok {
@@ -214,20 +215,25 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 				continue
 			}
 			cmd = append(cmd, "/data")
-			out, err = backend.ExecDocker(l, cmd)
+			code, out, err = backend.ExecDocker(l, cmd)
 		}
+
+		// Extract metadata
+		md := metadata.ExtractMetadataFromBackupLog(out)
+		md.ExitCode = fmt.Sprint(code)
+		mdEnv := metadata.MakeEnvFromMetadata(&md)
+		for k, v := range mdEnv {
+			options.Envs[k+"_"+fmt.Sprint(i)] = v
+			options.Envs[k+"_"+strings.ToUpper(backend.name)] = v
+		}
+
+		// If error save it and continue
 		if err != nil {
 			colors.Error.Println(out)
 			errors = append(errors, fmt.Errorf("%s@%s:\n%s%s", l.name, backend.name, out, err))
 			continue
 		}
 
-		md := metadata.ExtractMetadataFromBackupLog(out)
-		mdEnv := metadata.MakeEnvFromMetadata(&md)
-		for k, v := range mdEnv {
-			options.Envs[k+"_"+fmt.Sprint(i)] = v
-			options.Envs[k+"_"+strings.ToUpper(backend.name)] = v
-		}
 		if flags.VERBOSE {
 			colors.Faint.Println(out)
 		}
@@ -276,7 +282,7 @@ func (l Location) Forget(prune bool, dry bool) error {
 			cmd = append(cmd, "--dry-run")
 		}
 		cmd = append(cmd, combineOptions("forget", l, backend)...)
-		out, err := ExecuteResticCommand(options, cmd...)
+		_, out, err := ExecuteResticCommand(options, cmd...)
 		if flags.VERBOSE {
 			colors.Faint.Println(out)
 		}
@@ -348,7 +354,7 @@ func (l Location) Restore(to, from string, force bool, snapshot string, options 
 		}
 		err = backend.Exec(buildRestoreCommand(l, to, snapshot, options))
 	case TypeVolume:
-		_, err = backend.ExecDocker(l, buildRestoreCommand(l, "/", snapshot, options))
+		_, _, err = backend.ExecDocker(l, buildRestoreCommand(l, "/", snapshot, options))
 	}
 	if err != nil {
 		return err
