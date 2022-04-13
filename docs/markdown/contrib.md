@@ -9,6 +9,7 @@ This amazing people helped the project!
 - @david-boles - Docs.
 - @SebDanielsson - Brew.
 - @n194 - AUR Package.
+- @olofvndrhr - Healthchecks example.
 - @jin-park-dev - Typos.
 - @sumnerboy12 - Typos.
 - @FuzzyMistborn - Typos.

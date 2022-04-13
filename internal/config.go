@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.5.7"
+const VERSION = "1.5.8"
 
 type OptionMap map[string][]interface{}
 type Options map[string]OptionMap
@@ -60,11 +60,16 @@ func GetConfig() *Config {
 					colors.Faint.Println("Using env:\t", envFile)
 				}
 			} else {
-				cfgFileName := ".autorestic"
-				colors.Error.Println(
-					fmt.Sprintf(
-						"cannot find configuration file '%s.yml' or '%s.yaml'.",
-						cfgFileName, cfgFileName))
+				text := err.Error()
+				if strings.Contains(text, "no such file or directory") {
+					cfgFileName := ".autorestic"
+					colors.Error.Println(
+						fmt.Sprintf(
+							"cannot find configuration file '%s.yml' or '%s.yaml'.",
+							cfgFileName, cfgFileName))
+				} else {
+					colors.Error.Println("could not load config file\n" + text)
+				}
 				os.Exit(1)
 			}
 

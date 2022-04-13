@@ -3,6 +3,7 @@
 Locations can be seen as the input to the backup process. Generally this is simply a folder.
 The paths can be relative from the config file. A location can have multiple backends, so that the data is secured across multiple servers.
 
+Note: names of locations MUST be lower case!
 ```yaml | .autorestic.yml
 version: 2
 
