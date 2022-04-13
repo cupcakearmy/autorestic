@@ -13,18 +13,18 @@ import (
 )
 
 type BackendRest struct {
-	User     string `yaml:"user,omitempty"`
-	Password string `yaml:"password,omitempty"`
+	User     string `mapstructure:"user,omitempty"`
+	Password string `mapstructure:"password,omitempty"`
 }
 
 type Backend struct {
 	name    string
-	Type    string            `yaml:"type,omitempty"`
-	Path    string            `yaml:"path,omitempty"`
-	Key     string            `yaml:"key,omitempty"`
-	Env     map[string]string `yaml:"env,omitempty"`
-	Rest    BackendRest       `yaml:"rest,omitempty"`
-	Options Options           `yaml:"options,omitempty"`
+	Type    string            `mapstructure:"type,omitempty"`
+	Path    string            `mapstructure:"path,omitempty"`
+	Key     string            `mapstructure:"key,omitempty"`
+	Env     map[string]string `mapstructure:"env,omitempty"`
+	Rest    BackendRest       `mapstructure:"rest,omitempty"`
+	Options Options           `mapstructure:"options,omitempty"`
 }
 
 func GetBackend(name string) (Backend, bool) {

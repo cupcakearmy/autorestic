@@ -23,11 +23,11 @@ type OptionMap map[string][]interface{}
 type Options map[string]OptionMap
 
 type Config struct {
-	Version   string              `yaml:"version"`
-	Extras    interface{}         `yaml:"extras"`
-	Locations map[string]Location `yaml:"locations"`
-	Backends  map[string]Backend  `yaml:"backends"`
-	Global    Options             `yaml:"global"`
+	Version   string              `mapstructure:"version"`
+	Extras    interface{}         `mapstructure:"extras"`
+	Locations map[string]Location `mapstructure:"locations"`
+	Backends  map[string]Backend  `mapstructure:"backends"`
+	Global    Options             `mapstructure:"global"`
 }
 
 var once sync.Once

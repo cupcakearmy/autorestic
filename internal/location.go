@@ -40,6 +40,8 @@ type Hooks struct {
 	Failure HookArray `mapstructure:"failure,omitempty"`
 }
 
+type LocationCopy = map[string][]string
+
 type Location struct {
 	name         string               `mapstructure:",omitempty"`
 	From         []string             `mapstructure:"from,omitempty"`
@@ -49,6 +51,7 @@ type Location struct {
 	Cron         string               `mapstructure:"cron,omitempty"`
 	Options      Options              `mapstructure:"options,omitempty"`
 	ForgetOption LocationForgetOption `mapstructure:"forget,omitempty"`
+	CopyOption   LocationCopy         `mapstructure:"copy,omitempty"`
 }
 
 func GetLocation(name string) (Location, bool) {
@@ -87,15 +90,34 @@ func (l Location) validate() error {
 	}
 
 	if len(l.To) == 0 {
-		return fmt.Errorf(`Location "%s" has no "to" targets`, l.name)
+		return fmt.Errorf(`location "%s" has no "to" targets`, l.name)
 	}
 	// Check if backends are all valid
 	for _, to := range l.To {
 		_, ok := GetBackend(to)
 		if !ok {
-			return fmt.Errorf("invalid backend `%s`", to)
+			return fmt.Errorf(`location "%s" has an invalid backend "%s"`, l.name, to)
 		}
 	}
+
+	// Check copy option
+	for copyFrom, copyTo := range l.CopyOption {
+		if _, ok := GetBackend(copyFrom); !ok {
+			return fmt.Errorf(`location "%s" has an invalid backend "%s" in copy option`, l.name, copyFrom)
+		}
+		if !ArrayContains(l.To, copyFrom) {
+			return fmt.Errorf(`location "%s" has an invalid copy from "%s"`, l.name, copyFrom)
+		}
+		for _, copyToTarget := range copyTo {
+			if _, ok := GetBackend(copyToTarget); !ok {
+				return fmt.Errorf(`location "%s" has an invalid backend "%s" in copy option`, l.name, copyToTarget)
+			}
+			if ArrayContains(l.To, copyToTarget) {
+				return fmt.Errorf(`location "%s" cannot copy to "%s" as it's already a target`, l.name, copyToTarget)
+			}
+		}
+	}
+
 	// Check if forget type is correct
 	if l.ForgetOption != "" {
 		if l.ForgetOption != LocationForgetYes && l.ForgetOption != LocationForgetNo && l.ForgetOption != LocationForgetPrune {
@@ -247,6 +269,34 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 			colors.Error.Println(out)
 			errors = append(errors, fmt.Errorf("%s@%s:\n%s%s", l.name, backend.name, out, err))
 			continue
+		}
+
+		// Copy
+		if md.SnapshotID != "" {
+			for copyFrom, copyTo := range l.CopyOption {
+				b1, _ := GetBackend(copyFrom)
+				for _, copyToTarget := range copyTo {
+					b2, _ := GetBackend(copyToTarget)
+					colors.Secondary.Println("Copying " + copyFrom + " → " + copyToTarget)
+					env, _ := b1.getEnv()
+					env2, _ := b2.getEnv()
+					// Add the second repo to the env with a "2" suffix
+					for k, v := range env2 {
+						env[k+"2"] = v
+					}
+					_, out, err := ExecuteResticCommand(ExecuteOptions{
+						Envs: env,
+					}, "copy", md.SnapshotID)
+
+					if flags.VERBOSE {
+						colors.Faint.Println(out)
+					}
+
+					if err != nil {
+						errors = append(errors, err)
+					}
+				}
+			}
 		}
 
 		if flags.VERBOSE {

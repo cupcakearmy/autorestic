@@ -87,3 +87,12 @@ func CheckIfVolumeExists(volume string) bool {
 	_, _, err := ExecuteCommand(ExecuteOptions{Command: "docker"}, "volume", "inspect", volume)
 	return err == nil
 }
+
+func ArrayContains[T comparable](arr []T, needle T) bool {
+	for _, item := range arr {
+		if item == needle {
+			return true
+		}
+	}
+	return false
+}
