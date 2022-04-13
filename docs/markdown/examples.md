@@ -16,7 +16,7 @@ autorestic exec -b my-backend -- unlock
 
 ## Use hooks to integrate with [healthchecks](https://healthchecks.io/)
 
-> Thanks to @Zottelchen for providing it ❤️
+> Thanks to @olofvndrhr for providing it ❤️
 
 ```yaml
 extras:
