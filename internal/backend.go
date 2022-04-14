@@ -13,18 +13,18 @@ import (
 )
 
 type BackendRest struct {
-	User     string `yaml:"user,omitempty"`
-	Password string `yaml:"password,omitempty"`
+	User     string `mapstructure:"user,omitempty"`
+	Password string `mapstructure:"password,omitempty"`
 }
 
 type Backend struct {
 	name    string
-	Type    string            `yaml:"type,omitempty"`
-	Path    string            `yaml:"path,omitempty"`
-	Key     string            `yaml:"key,omitempty"`
-	Env     map[string]string `yaml:"env,omitempty"`
-	Rest    BackendRest       `yaml:"rest,omitempty"`
-	Options Options           `yaml:"options,omitempty"`
+	Type    string            `mapstructure:"type,omitempty"`
+	Path    string            `mapstructure:"path,omitempty"`
+	Key     string            `mapstructure:"key,omitempty"`
+	Env     map[string]string `mapstructure:"env,omitempty"`
+	Rest    BackendRest       `mapstructure:"rest,omitempty"`
+	Options Options           `mapstructure:"options,omitempty"`
 }
 
 func GetBackend(name string) (Backend, bool) {
@@ -122,13 +122,13 @@ func (b Backend) validate() error {
 	}
 	options := ExecuteOptions{Envs: env}
 	// Check if already initialized
-	_, err = ExecuteResticCommand(options, "snapshots")
+	_, _, err = ExecuteResticCommand(options, "snapshots")
 	if err == nil {
 		return nil
 	} else {
 		// If not initialize
 		colors.Body.Printf("Initializing backend \"%s\"...\n", b.name)
-		out, err := ExecuteResticCommand(options, "init")
+		_, out, err := ExecuteResticCommand(options, "init")
 		if flags.VERBOSE {
 			colors.Faint.Println(out)
 		}
@@ -142,7 +142,7 @@ func (b Backend) Exec(args []string) error {
 		return err
 	}
 	options := ExecuteOptions{Envs: env}
-	out, err := ExecuteResticCommand(options, args...)
+	_, out, err := ExecuteResticCommand(options, args...)
 	if err != nil {
 		colors.Error.Println(out)
 		return err
@@ -153,10 +153,10 @@ func (b Backend) Exec(args []string) error {
 	return nil
 }
 
-func (b Backend) ExecDocker(l Location, args []string) (string, error) {
+func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	env, err := b.getEnv()
 	if err != nil {
-		return "", err
+		return -1, "", err
 	}
 	volume := l.From[0]
 	options := ExecuteOptions{
@@ -188,20 +188,19 @@ func (b Backend) ExecDocker(l Location, args []string) (string, error) {
 		// No additional setup needed
 	case "rclone":
 		// Read host rclone config and mount it into the container
-		configFile, err := ExecuteCommand(ExecuteOptions{Command: "rclone"}, "config", "file")
+		code, configFile, err := ExecuteCommand(ExecuteOptions{Command: "rclone"}, "config", "file")
 		if err != nil {
-			return "", err
+			return code, "", err
 		}
 		splitted := strings.Split(strings.TrimSpace(configFile), "\n")
 		configFilePath := splitted[len(splitted)-1]
 		docker = append(docker, "--volume", configFilePath+":"+"/root/.config/rclone/rclone.conf:ro")
 	default:
-		return "", fmt.Errorf("Backend type \"%s\" is not supported as volume endpoint", b.Type)
+		return -1, "", fmt.Errorf("Backend type \"%s\" is not supported as volume endpoint", b.Type)
 	}
 	for key, value := range env {
 		docker = append(docker, "--env", key+"="+value)
 	}
 	docker = append(docker, "cupcakearmy/autorestic:"+VERSION, "-c", strings.Join(args, " "))
-	out, err := ExecuteCommand(options, docker...)
-	return out, err
+	return ExecuteCommand(options, docker...)
 }

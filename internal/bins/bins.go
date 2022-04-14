@@ -128,7 +128,7 @@ func InstallRestic() error {
 }
 
 func upgradeRestic() error {
-	out, err := internal.ExecuteCommand(internal.ExecuteOptions{
+	_, out, err := internal.ExecuteCommand(internal.ExecuteOptions{
 		Command: "restic",
 	}, "self-update")
 	colors.Faint.Println(out)

@@ -30,7 +30,19 @@ var restoreCmd = &cobra.Command{
 		if len(args) > 0 {
 			snapshot = args[0]
 		}
-		err = l.Restore(target, from, force, snapshot)
+
+		// Get optional flags
+		optional := []string{}
+		for _, flag := range []string{"include", "exclude", "iinclude", "iexclude"} {
+			values, err := cmd.Flags().GetStringSlice(flag)
+			if err == nil {
+				for _, value := range values {
+					optional = append(optional, "--"+flag, value)
+				}
+			}
+		}
+
+		err = l.Restore(target, from, force, snapshot, optional)
 		CheckErr(err)
 	},
 }
@@ -42,4 +54,10 @@ func init() {
 	restoreCmd.Flags().String("to", "", "Where to restore the data")
 	restoreCmd.Flags().StringP("location", "l", "", "Location to be restored")
 	restoreCmd.MarkFlagRequired("location")
+
+	// Passed on flags
+	restoreCmd.Flags().StringSliceP("include", "i", []string{}, "Include a pattern")
+	restoreCmd.Flags().StringSliceP("exclude", "e", []string{}, "Exclude a pattern")
+	restoreCmd.Flags().StringSlice("iinclude", []string{}, "Include a pattern, case insensitive")
+	restoreCmd.Flags().StringSlice("iexclude", []string{}, "Exclude a pattern, case insensitive")
 }

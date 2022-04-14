@@ -14,6 +14,7 @@
 > > [Overview](/location/options)
 > > [Excluding Files](/location/exclude)
 > > [Forget Policy](/location/forget)
+> > [Copy](/location/copy)
 >
 > [Cron](/location/cron)
 > [Docker Volumes](/location/docker)

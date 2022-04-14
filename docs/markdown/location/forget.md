@@ -37,4 +37,21 @@ global:
     keep-weekly: 52
 ```
 
+## Automatically forget after backup
+
+You can also configure `autorestic` to automatically run the forget command for you after every backup. You can do that by specifying the `forget` option.
+
+```yaml | .autorestic.yml
+version: 2
+
+locations:
+  etc:
+    from: /etc
+    to: local
+    forget: prune # Or only "yes" if you don't want to prune
+    options:
+      forget:
+        keep-last: 5
+```
+
 > :ToCPrevNext
