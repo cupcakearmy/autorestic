@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.5.8"
+const VERSION = "1.6.0"
 
 type OptionMap map[string][]interface{}
 type Options map[string]OptionMap
