@@ -24,22 +24,34 @@ const (
 
 type HookArray = []string
 
+type LocationForgetOption string
+
+const (
+	LocationForgetYes   LocationForgetOption = "yes"
+	LocationForgetNo    LocationForgetOption = "no"
+	LocationForgetPrune LocationForgetOption = "prune"
+)
+
 type Hooks struct {
-	Dir     string    `yaml:"dir"`
-	Before  HookArray `yaml:"before,omitempty"`
-	After   HookArray `yaml:"after,omitempty"`
-	Success HookArray `yaml:"success,omitempty"`
-	Failure HookArray `yaml:"failure,omitempty"`
+	Dir     string    `mapstructure:"dir"`
+	Before  HookArray `mapstructure:"before,omitempty"`
+	After   HookArray `mapstructure:"after,omitempty"`
+	Success HookArray `mapstructure:"success,omitempty"`
+	Failure HookArray `mapstructure:"failure,omitempty"`
 }
 
+type LocationCopy = map[string][]string
+
 type Location struct {
-	name    string   `yaml:",omitempty"`
-	From    []string `yaml:"from,omitempty"`
-	Type    string   `yaml:"type,omitempty"`
-	To      []string `yaml:"to,omitempty"`
-	Hooks   Hooks    `yaml:"hooks,omitempty"`
-	Cron    string   `yaml:"cron,omitempty"`
-	Options Options  `yaml:"options,omitempty"`
+	name         string               `mapstructure:",omitempty"`
+	From         []string             `mapstructure:"from,omitempty"`
+	Type         string               `mapstructure:"type,omitempty"`
+	To           []string             `mapstructure:"to,omitempty"`
+	Hooks        Hooks                `mapstructure:"hooks,omitempty"`
+	Cron         string               `mapstructure:"cron,omitempty"`
+	Options      Options              `mapstructure:"options,omitempty"`
+	ForgetOption LocationForgetOption `mapstructure:"forget,omitempty"`
+	CopyOption   LocationCopy         `mapstructure:"copy,omitempty"`
 }
 
 func GetLocation(name string) (Location, bool) {
@@ -78,13 +90,38 @@ func (l Location) validate() error {
 	}
 
 	if len(l.To) == 0 {
-		return fmt.Errorf(`Location "%s" has no "to" targets`, l.name)
+		return fmt.Errorf(`location "%s" has no "to" targets`, l.name)
 	}
 	// Check if backends are all valid
 	for _, to := range l.To {
 		_, ok := GetBackend(to)
 		if !ok {
-			return fmt.Errorf("invalid backend `%s`", to)
+			return fmt.Errorf(`location "%s" has an invalid backend "%s"`, l.name, to)
+		}
+	}
+
+	// Check copy option
+	for copyFrom, copyTo := range l.CopyOption {
+		if _, ok := GetBackend(copyFrom); !ok {
+			return fmt.Errorf(`location "%s" has an invalid backend "%s" in copy option`, l.name, copyFrom)
+		}
+		if !ArrayContains(l.To, copyFrom) {
+			return fmt.Errorf(`location "%s" has an invalid copy from "%s"`, l.name, copyFrom)
+		}
+		for _, copyToTarget := range copyTo {
+			if _, ok := GetBackend(copyToTarget); !ok {
+				return fmt.Errorf(`location "%s" has an invalid backend "%s" in copy option`, l.name, copyToTarget)
+			}
+			if ArrayContains(l.To, copyToTarget) {
+				return fmt.Errorf(`location "%s" cannot copy to "%s" as it's already a target`, l.name, copyToTarget)
+			}
+		}
+	}
+
+	// Check if forget type is correct
+	if l.ForgetOption != "" {
+		if l.ForgetOption != LocationForgetYes && l.ForgetOption != LocationForgetNo && l.ForgetOption != LocationForgetPrune {
+			return fmt.Errorf("invalid value for forget option: %s", l.ForgetOption)
 		}
 	}
 	return nil
@@ -104,7 +141,7 @@ func (l Location) ExecuteHooks(commands []string, options ExecuteOptions) error 
 	colors.Secondary.Println("\nRunning hooks")
 	for _, command := range commands {
 		colors.Body.Println("> " + command)
-		out, err := ExecuteCommand(options, "-c", command)
+		_, out, err := ExecuteCommand(options, "-c", command)
 		if err != nil {
 			colors.Error.Println(out)
 			return err
@@ -195,6 +232,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 			Envs: env,
 		}
 
+		var code int = 0
 		var out string
 		switch t {
 		case TypeLocal:
@@ -206,7 +244,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 				}
 				cmd = append(cmd, path)
 			}
-			out, err = ExecuteResticCommand(backupOptions, cmd...)
+			code, out, err = ExecuteResticCommand(backupOptions, cmd...)
 		case TypeVolume:
 			ok := CheckIfVolumeExists(l.From[0])
 			if !ok {
@@ -214,20 +252,53 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 				continue
 			}
 			cmd = append(cmd, "/data")
-			out, err = backend.ExecDocker(l, cmd)
+			code, out, err = backend.ExecDocker(l, cmd)
 		}
+
+		// Extract metadata
+		md := metadata.ExtractMetadataFromBackupLog(out)
+		md.ExitCode = fmt.Sprint(code)
+		mdEnv := metadata.MakeEnvFromMetadata(&md)
+		for k, v := range mdEnv {
+			options.Envs[k+"_"+fmt.Sprint(i)] = v
+			options.Envs[k+"_"+strings.ToUpper(backend.name)] = v
+		}
+
+		// If error save it and continue
 		if err != nil {
 			colors.Error.Println(out)
 			errors = append(errors, fmt.Errorf("%s@%s:\n%s%s", l.name, backend.name, out, err))
 			continue
 		}
 
-		md := metadata.ExtractMetadataFromBackupLog(out)
-		mdEnv := metadata.MakeEnvFromMetadata(&md)
-		for k, v := range mdEnv {
-			options.Envs[k+"_"+fmt.Sprint(i)] = v
-			options.Envs[k+"_"+strings.ToUpper(backend.name)] = v
+		// Copy
+		if md.SnapshotID != "" {
+			for copyFrom, copyTo := range l.CopyOption {
+				b1, _ := GetBackend(copyFrom)
+				for _, copyToTarget := range copyTo {
+					b2, _ := GetBackend(copyToTarget)
+					colors.Secondary.Println("Copying " + copyFrom + " → " + copyToTarget)
+					env, _ := b1.getEnv()
+					env2, _ := b2.getEnv()
+					// Add the second repo to the env with a "2" suffix
+					for k, v := range env2 {
+						env[k+"2"] = v
+					}
+					_, out, err := ExecuteResticCommand(ExecuteOptions{
+						Envs: env,
+					}, "copy", md.SnapshotID)
+
+					if flags.VERBOSE {
+						colors.Faint.Println(out)
+					}
+
+					if err != nil {
+						errors = append(errors, err)
+					}
+				}
+			}
 		}
+
 		if flags.VERBOSE {
 			colors.Faint.Println(out)
 		}
@@ -240,13 +311,19 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 
 after:
 	var commands []string
-	if len(errors) > 0 {
-		commands = l.Hooks.Failure
-	} else {
+	var isSuccess = len(errors) == 0
+	if isSuccess {
 		commands = l.Hooks.Success
+	} else {
+		commands = l.Hooks.Failure
 	}
 	if err := l.ExecuteHooks(commands, options); err != nil {
 		errors = append(errors, err)
+	}
+
+	// Forget and optionally prune
+	if isSuccess && l.ForgetOption != "" && l.ForgetOption != LocationForgetNo {
+		l.Forget(l.ForgetOption == LocationForgetPrune, false)
 	}
 
 	if len(errors) == 0 {
@@ -276,7 +353,7 @@ func (l Location) Forget(prune bool, dry bool) error {
 			cmd = append(cmd, "--dry-run")
 		}
 		cmd = append(cmd, combineOptions("forget", l, backend)...)
-		out, err := ExecuteResticCommand(options, cmd...)
+		_, out, err := ExecuteResticCommand(options, cmd...)
 		if flags.VERBOSE {
 			colors.Faint.Println(out)
 		}
@@ -297,16 +374,17 @@ func (l Location) hasBackend(backend string) bool {
 	return false
 }
 
-func (l Location) Restore(to, from string, force bool, snapshot string) error {
+func buildRestoreCommand(l Location, to string, snapshot string, options []string) []string {
+	base := []string{"restore", "--target", to, "--tag", l.getLocationTags(), snapshot}
+	base = append(base, options...)
+	return base
+}
+
+func (l Location) Restore(to, from string, force bool, snapshot string, options []string) error {
 	if from == "" {
 		from = l.To[0]
 	} else if !l.hasBackend(from) {
 		return fmt.Errorf("invalid backend: \"%s\"", from)
-	}
-
-	to, err := filepath.Abs(to)
-	if err != nil {
-		return err
 	}
 
 	if snapshot == "" {
@@ -323,6 +401,10 @@ func (l Location) Restore(to, from string, force bool, snapshot string) error {
 	}
 	switch t {
 	case TypeLocal:
+		to, err = filepath.Abs(to)
+		if err != nil {
+			return err
+		}
 		// Check if target is empty
 		if !force {
 			notEmptyError := fmt.Errorf("target %s is not empty", to)
@@ -341,9 +423,9 @@ func (l Location) Restore(to, from string, force bool, snapshot string) error {
 				}
 			}
 		}
-		err = backend.Exec([]string{"restore", "--target", to, "--tag", l.getLocationTags(), snapshot})
+		err = backend.Exec(buildRestoreCommand(l, to, snapshot, options))
 	case TypeVolume:
-		_, err = backend.ExecDocker(l, []string{"restore", "--target", "/", "--tag", l.getLocationTags(), snapshot})
+		_, _, err = backend.ExecDocker(l, buildRestoreCommand(l, "/", snapshot, options))
 	}
 	if err != nil {
 		return err

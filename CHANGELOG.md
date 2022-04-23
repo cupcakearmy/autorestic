@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] - 2022-04-14
+
+### Fixed
+
+- Version bump in code
+
+## [1.6.1] - 2022-04-14
+
+### Fixed
+
+- Bump go version in docker file to 18.
+
+## [1.6.0] - 2022-04-14
+
+### Added
+
+- support for copy command #145
+- partial restore with `--include`, `--exclude`, `--iinclude`, `--iexclude` flags #161
+- run forget automatically after backup #158
+- exit codes to hooks as env variable #142
+
+### Fixed
+
+- Lean flag not removing all output #178
+
 ## [1.5.8] - 2022-03-18
 
 ### Fixed

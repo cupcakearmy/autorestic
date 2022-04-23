@@ -17,17 +17,17 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.5.8"
+const VERSION = "1.6.2"
 
 type OptionMap map[string][]interface{}
 type Options map[string]OptionMap
 
 type Config struct {
-	Version   string              `yaml:"version"`
-	Extras    interface{}         `yaml:"extras"`
-	Locations map[string]Location `yaml:"locations"`
-	Backends  map[string]Backend  `yaml:"backends"`
-	Global    Options             `yaml:"global"`
+	Version   string              `mapstructure:"version"`
+	Extras    interface{}         `mapstructure:"extras"`
+	Locations map[string]Location `mapstructure:"locations"`
+	Backends  map[string]Backend  `mapstructure:"backends"`
+	Global    Options             `mapstructure:"global"`
 }
 
 var once sync.Once
@@ -56,7 +56,7 @@ func GetConfig() *Config {
 				// Load env file
 				envFile := filepath.Join(filepath.Dir(absConfig), ".autorestic.env")
 				err = godotenv.Load(envFile)
-				if err == nil {
+				if err == nil && !flags.CRON_LEAN {
 					colors.Faint.Println("Using env:\t", envFile)
 				}
 			} else {

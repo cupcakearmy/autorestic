@@ -28,7 +28,7 @@ type ExecuteOptions struct {
 	Dir     string
 }
 
-func ExecuteCommand(options ExecuteOptions, args ...string) (string, error) {
+func ExecuteCommand(options ExecuteOptions, args ...string) (int, string, error) {
 	cmd := exec.Command(options.Command, args...)
 	env := os.Environ()
 	for k, v := range options.Envs {
@@ -47,12 +47,16 @@ func ExecuteCommand(options ExecuteOptions, args ...string) (string, error) {
 	cmd.Stderr = &error
 	err := cmd.Run()
 	if err != nil {
-		return error.String(), err
+		if exitError, ok := err.(*exec.ExitError); ok {
+			return exitError.ExitCode(), error.String(), err
+		} else {
+			return -1, error.String(), err
+		}
 	}
-	return out.String(), nil
+	return 0, out.String(), nil
 }
 
-func ExecuteResticCommand(options ExecuteOptions, args ...string) (string, error) {
+func ExecuteResticCommand(options ExecuteOptions, args ...string) (int, string, error) {
 	options.Command = RESTIC_BIN
 	var c = GetConfig()
 	var optionsAsString = getOptions(c.Global, "")
@@ -80,6 +84,15 @@ func CopyFile(from, to string) error {
 }
 
 func CheckIfVolumeExists(volume string) bool {
-	_, err := ExecuteCommand(ExecuteOptions{Command: "docker"}, "volume", "inspect", volume)
+	_, _, err := ExecuteCommand(ExecuteOptions{Command: "docker"}, "volume", "inspect", volume)
 	return err == nil
+}
+
+func ArrayContains[T comparable](arr []T, needle T) bool {
+	for _, item := range arr {
+		if item == needle {
+			return true
+		}
+	}
+	return false
 }
