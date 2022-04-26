@@ -13,7 +13,6 @@ var cronCmd = &cobra.Command{
 	Long:  `Intended to be mainly triggered by an automated system like systemd or crontab. For each location checks if a cron backup is due and runs it.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		internal.GetConfig()
-		flags.CRON_LEAN, _ = cmd.Flags().GetBool("lean")
 		err := lock.Lock()
 		CheckErr(err)
 		defer lock.Unlock()
@@ -25,5 +24,5 @@ var cronCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(cronCmd)
-	cronCmd.Flags().Bool("lean", false, "only output information about actual backups")
+	cronCmd.Flags().BoolVar(&flags.CRON_LEAN, "lean", false, "only output information about actual backups")
 }
