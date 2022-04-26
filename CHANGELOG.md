@@ -5,11 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2022-04-27
+
+### Changed
+
+- #147 Stream output instead of buffering.
+
+### Fixed
+
+- #184 duplicate global options.
+- #154 add docs for migration.
+- #182 fix bug with upgrading custom restic with custom path.
+
 ## [1.6.2] - 2022-04-14
 
 ### Fixed
 
-- Version bump in code
+- Version bump in code.
 
 ## [1.6.1] - 2022-04-14
 

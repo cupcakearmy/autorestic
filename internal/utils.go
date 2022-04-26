@@ -9,9 +9,8 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
+	"github.com/fatih/color"
 )
-
-var RESTIC_BIN string
 
 func CheckIfCommandIsCallable(cmd string) bool {
 	_, err := exec.LookPath(cmd)
@@ -19,13 +18,25 @@ func CheckIfCommandIsCallable(cmd string) bool {
 }
 
 func CheckIfResticIsCallable() bool {
-	return CheckIfCommandIsCallable(RESTIC_BIN)
+	return CheckIfCommandIsCallable(flags.RESTIC_BIN)
 }
 
 type ExecuteOptions struct {
 	Command string
 	Envs    map[string]string
 	Dir     string
+	Silent  bool
+}
+
+type ColoredWriter struct {
+	target io.Writer
+	color  *color.Color
+}
+
+func (w ColoredWriter) Write(p []byte) (n int, err error) {
+	colored := []byte(w.color.Sprint(string(p)))
+	w.target.Write(colored)
+	return len(p), nil
 }
 
 func ExecuteCommand(options ExecuteOptions, args ...string) (int, string, error) {
@@ -43,23 +54,32 @@ func ExecuteCommand(options ExecuteOptions, args ...string) (int, string, error)
 
 	var out bytes.Buffer
 	var error bytes.Buffer
-	cmd.Stdout = &out
+	if flags.VERBOSE && !options.Silent {
+		var colored ColoredWriter = ColoredWriter{
+			target: os.Stdout,
+			color:  colors.Faint,
+		}
+		mw := io.MultiWriter(colored, &out)
+		cmd.Stdout = mw
+	} else {
+		cmd.Stdout = &out
+	}
 	cmd.Stderr = &error
 	err := cmd.Run()
 	if err != nil {
+		code := -1
 		if exitError, ok := err.(*exec.ExitError); ok {
-			return exitError.ExitCode(), error.String(), err
-		} else {
-			return -1, error.String(), err
+			code = exitError.ExitCode()
 		}
+		return code, error.String(), err
 	}
 	return 0, out.String(), nil
 }
 
 func ExecuteResticCommand(options ExecuteOptions, args ...string) (int, string, error) {
-	options.Command = RESTIC_BIN
+	options.Command = flags.RESTIC_BIN
 	var c = GetConfig()
-	var optionsAsString = getOptions(c.Global, "")
+	var optionsAsString = getOptions(c.Global, []string{"all"})
 	args = append(optionsAsString, args...)
 	return ExecuteCommand(options, args...)
 }

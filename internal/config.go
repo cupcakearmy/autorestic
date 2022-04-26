@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.6.2"
+const VERSION = "1.7.0"
 
 type OptionMap map[string][]interface{}
 type Options map[string]OptionMap
@@ -185,7 +185,7 @@ func CheckConfig() error {
 		return fmt.Errorf("config could not be loaded/found")
 	}
 	if !CheckIfResticIsCallable() {
-		return fmt.Errorf(`%s was not found. Install either with "autorestic install" or manually`, RESTIC_BIN)
+		return fmt.Errorf(`%s was not found. Install either with "autorestic install" or manually`, flags.RESTIC_BIN)
 	}
 	for name, backend := range c.Backends {
 		backend.name = name
@@ -295,12 +295,8 @@ func appendOptionsToSlice(str *[]string, options OptionMap) {
 	}
 }
 
-func getOptions(options Options, key string) []string {
+func getOptions(options Options, keys []string) []string {
 	var selected []string
-	var keys = []string{"all"}
-	if key != "" {
-		keys = append(keys, key)
-	}
 	for _, key := range keys {
 		appendOptionsToSlice(&selected, options[key])
 	}
@@ -310,9 +306,9 @@ func getOptions(options Options, key string) []string {
 func combineOptions(key string, l Location, b Backend) []string {
 	// Priority: location > backend > global
 	var options []string
-	gFlags := getOptions(GetConfig().Global, key)
-	bFlags := getOptions(b.Options, key)
-	lFlags := getOptions(l.Options, key)
+	gFlags := getOptions(GetConfig().Global, []string{key})
+	bFlags := getOptions(b.Options, []string{"all", key})
+	lFlags := getOptions(l.Options, []string{"all", key})
 	options = append(options, gFlags...)
 	options = append(options, bFlags...)
 	options = append(options, lFlags...)
