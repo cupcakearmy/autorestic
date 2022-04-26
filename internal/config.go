@@ -295,12 +295,8 @@ func appendOptionsToSlice(str *[]string, options OptionMap) {
 	}
 }
 
-func getOptions(options Options, key string) []string {
+func getOptions(options Options, keys []string) []string {
 	var selected []string
-	var keys = []string{"all"}
-	if key != "" {
-		keys = append(keys, key)
-	}
 	for _, key := range keys {
 		appendOptionsToSlice(&selected, options[key])
 	}
@@ -310,9 +306,9 @@ func getOptions(options Options, key string) []string {
 func combineOptions(key string, l Location, b Backend) []string {
 	// Priority: location > backend > global
 	var options []string
-	gFlags := getOptions(GetConfig().Global, key)
-	bFlags := getOptions(b.Options, key)
-	lFlags := getOptions(l.Options, key)
+	gFlags := getOptions(GetConfig().Global, []string{key})
+	bFlags := getOptions(b.Options, []string{"all", key})
+	lFlags := getOptions(l.Options, []string{"all", key})
 	options = append(options, gFlags...)
 	options = append(options, bFlags...)
 	options = append(options, lFlags...)
