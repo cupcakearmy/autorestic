@@ -16,6 +16,7 @@ import (
 	"github.com/blang/semver/v4"
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 )
 
 const INSTALL_PATH = "/usr/local/bin"
@@ -129,7 +130,7 @@ func InstallRestic() error {
 
 func upgradeRestic() error {
 	_, _, err := internal.ExecuteCommand(internal.ExecuteOptions{
-		Command: "restic",
+		Command: flags.RESTIC_BIN,
 	}, "self-update")
 	return err
 }
