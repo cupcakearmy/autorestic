@@ -12,15 +12,13 @@ import (
 	"github.com/fatih/color"
 )
 
-var RESTIC_BIN string
-
 func CheckIfCommandIsCallable(cmd string) bool {
 	_, err := exec.LookPath(cmd)
 	return err == nil
 }
 
 func CheckIfResticIsCallable() bool {
-	return CheckIfCommandIsCallable(RESTIC_BIN)
+	return CheckIfCommandIsCallable(flags.RESTIC_BIN)
 }
 
 type ExecuteOptions struct {
@@ -79,7 +77,7 @@ func ExecuteCommand(options ExecuteOptions, args ...string) (int, string, error)
 }
 
 func ExecuteResticCommand(options ExecuteOptions, args ...string) (int, string, error) {
-	options.Command = RESTIC_BIN
+	options.Command = flags.RESTIC_BIN
 	var c = GetConfig()
 	var optionsAsString = getOptions(c.Global, []string{"all"})
 	args = append(optionsAsString, args...)
