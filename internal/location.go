@@ -146,9 +146,6 @@ func (l Location) ExecuteHooks(commands []string, options ExecuteOptions) error 
 			colors.Error.Println(out)
 			return err
 		}
-		if flags.VERBOSE {
-			colors.Faint.Println(out)
-		}
 	}
 	colors.Body.Println("")
 	return nil
@@ -284,23 +281,15 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 					for k, v := range env2 {
 						env[k+"2"] = v
 					}
-					_, out, err := ExecuteResticCommand(ExecuteOptions{
+					_, _, err := ExecuteResticCommand(ExecuteOptions{
 						Envs: env,
 					}, "copy", md.SnapshotID)
-
-					if flags.VERBOSE {
-						colors.Faint.Println(out)
-					}
 
 					if err != nil {
 						errors = append(errors, err)
 					}
 				}
 			}
-		}
-
-		if flags.VERBOSE {
-			colors.Faint.Println(out)
 		}
 	}
 
@@ -353,10 +342,7 @@ func (l Location) Forget(prune bool, dry bool) error {
 			cmd = append(cmd, "--dry-run")
 		}
 		cmd = append(cmd, combineOptions("forget", l, backend)...)
-		_, out, err := ExecuteResticCommand(options, cmd...)
-		if flags.VERBOSE {
-			colors.Faint.Println(out)
-		}
+		_, _, err = ExecuteResticCommand(options, cmd...)
 		if err != nil {
 			return err
 		}
