@@ -43,15 +43,15 @@ type Hooks struct {
 type LocationCopy = map[string][]string
 
 type Location struct {
-	name         string               `mapstructure:",omitempty"`
-	From         []string             `mapstructure:"from,omitempty"`
-	Type         string               `mapstructure:"type,omitempty"`
-	To           []string             `mapstructure:"to,omitempty"`
-	Hooks        Hooks                `mapstructure:"hooks,omitempty"`
-	Cron         string               `mapstructure:"cron,omitempty"`
-	Options      Options              `mapstructure:"options,omitempty"`
-	ForgetOption LocationForgetOption `mapstructure:"forget,omitempty"`
-	CopyOption   LocationCopy         `mapstructure:"copy,omitempty"`
+	name    string               `mapstructure:",omitempty"`
+	From    []string             `mapstructure:"from,omitempty"`
+	Type    string               `mapstructure:"type,omitempty"`
+	To      []string             `mapstructure:"to,omitempty"`
+	Hooks   Hooks                `mapstructure:"hooks,omitempty"`
+	Cron    string               `mapstructure:"cron,omitempty"`
+	Options Options              `mapstructure:"options,omitempty"`
+	Forget  LocationForgetOption `mapstructure:"forget,omitempty"`
+	Copy    LocationCopy         `mapstructure:"copy,omitempty"`
 }
 
 func GetLocation(name string) (Location, bool) {
@@ -101,7 +101,7 @@ func (l Location) validate() error {
 	}
 
 	// Check copy option
-	for copyFrom, copyTo := range l.CopyOption {
+	for copyFrom, copyTo := range l.Copy {
 		if _, ok := GetBackend(copyFrom); !ok {
 			return fmt.Errorf(`location "%s" has an invalid backend "%s" in copy option`, l.name, copyFrom)
 		}
@@ -119,9 +119,9 @@ func (l Location) validate() error {
 	}
 
 	// Check if forget type is correct
-	if l.ForgetOption != "" {
-		if l.ForgetOption != LocationForgetYes && l.ForgetOption != LocationForgetNo && l.ForgetOption != LocationForgetPrune {
-			return fmt.Errorf("invalid value for forget option: %s", l.ForgetOption)
+	if l.Forget != "" {
+		if l.Forget != LocationForgetYes && l.Forget != LocationForgetNo && l.Forget != LocationForgetPrune {
+			return fmt.Errorf("invalid value for forget option: %s", l.Forget)
 		}
 	}
 	return nil
@@ -270,7 +270,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 
 		// Copy
 		if md.SnapshotID != "" {
-			for copyFrom, copyTo := range l.CopyOption {
+			for copyFrom, copyTo := range l.Copy {
 				b1, _ := GetBackend(copyFrom)
 				for _, copyToTarget := range copyTo {
 					b2, _ := GetBackend(copyToTarget)
@@ -311,8 +311,8 @@ after:
 	}
 
 	// Forget and optionally prune
-	if isSuccess && l.ForgetOption != "" && l.ForgetOption != LocationForgetNo {
-		l.Forget(l.ForgetOption == LocationForgetPrune, false)
+	if isSuccess && l.Forget != "" && l.Forget != LocationForgetNo {
+		l.DoForget(l.Forget == LocationForgetPrune, false)
 	}
 
 	if len(errors) == 0 {
@@ -321,7 +321,7 @@ after:
 	return errors
 }
 
-func (l Location) Forget(prune bool, dry bool) error {
+func (l Location) DoForget(prune bool, dry bool) error {
 	colors.PrimaryPrint("Forgetting for location \"%s\"", l.name)
 
 	for _, to := range l.To {

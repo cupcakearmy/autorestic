@@ -21,7 +21,7 @@ var forgetCmd = &cobra.Command{
 		dry, _ := cmd.Flags().GetBool("dry-run")
 		for _, name := range selected {
 			location, _ := internal.GetLocation(name)
-			err := location.Forget(prune, dry)
+			err := location.DoForget(prune, dry)
 			CheckErr(err)
 		}
 	},
