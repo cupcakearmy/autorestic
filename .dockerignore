@@ -1,0 +1,6 @@
+*
+!**/*.go
+!build
+!cmd
+!internal
+!go.*

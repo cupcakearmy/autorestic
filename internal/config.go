@@ -9,44 +9,88 @@ import (
 	"sync"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.2.0"
+const VERSION = "1.7.1"
 
-var CI bool = false
-var VERBOSE bool = false
-var CRON_LEAN bool = false
+type OptionMap map[string][]interface{}
+type Options map[string]OptionMap
 
 type Config struct {
-	Extras    interface{}         `yaml:"extras"`
-	Locations map[string]Location `yaml:"locations"`
-	Backends  map[string]Backend  `yaml:"backends"`
+	Version   string              `mapstructure:"version"`
+	Extras    interface{}         `mapstructure:"extras"`
+	Locations map[string]Location `mapstructure:"locations"`
+	Backends  map[string]Backend  `mapstructure:"backends"`
+	Global    Options             `mapstructure:"global"`
 }
 
 var once sync.Once
 var config *Config
 
+func exitConfig(err error, msg string) {
+	if err != nil {
+		colors.Error.Println(err)
+	}
+	if msg != "" {
+		colors.Error.Println(msg)
+	}
+	lock.Unlock()
+	os.Exit(1)
+}
+
 func GetConfig() *Config {
+
 	if config == nil {
 		once.Do(func() {
 			if err := viper.ReadInConfig(); err == nil {
-				if !CRON_LEAN {
-					absConfig, _ := filepath.Abs(viper.ConfigFileUsed())
-					colors.Faint.Println("Using config file:", absConfig)
+				absConfig, _ := filepath.Abs(viper.ConfigFileUsed())
+				if !flags.CRON_LEAN {
+					colors.Faint.Println("Using config: \t", absConfig)
+				}
+				// Load env file
+				envFile := filepath.Join(filepath.Dir(absConfig), ".autorestic.env")
+				err = godotenv.Load(envFile)
+				if err == nil && !flags.CRON_LEAN {
+					colors.Faint.Println("Using env:\t", envFile)
 				}
 			} else {
-				return
+				text := err.Error()
+				if strings.Contains(text, "no such file or directory") {
+					cfgFileName := ".autorestic"
+					colors.Error.Println(
+						fmt.Sprintf(
+							"cannot find configuration file '%s.yml' or '%s.yaml'.",
+							cfgFileName, cfgFileName))
+				} else {
+					colors.Error.Println("could not load config file\n" + text)
+				}
+				os.Exit(1)
+			}
+
+			var versionConfig interface{}
+			viper.UnmarshalKey("version", &versionConfig)
+			if versionConfig == nil {
+				exitConfig(nil, "no version specified in config file. please see docs on how to migrate")
+			}
+			version, ok := versionConfig.(int)
+			if !ok {
+				exitConfig(nil, "version specified in config file is not an int")
+			} else {
+				// Check for version
+				if version != 2 {
+					exitConfig(nil, "unsupported config version number. please check the docs for migration\nhttps://autorestic.vercel.app/migration/")
+				}
 			}
 
 			config = &Config{}
 			if err := viper.UnmarshalExact(config); err != nil {
-				colors.Error.Println("Could not parse config file!")
-				lock.Unlock()
-				os.Exit(1)
+				exitConfig(err, "Could not parse config file!")
 			}
 		})
 	}
@@ -70,7 +114,11 @@ func (c *Config) Describe() {
 		var tmp string
 		colors.PrimaryPrint(`Location: "%s"`, name)
 
-		colors.PrintDescription("From", l.From)
+		tmp = ""
+		for _, path := range l.From {
+			tmp += fmt.Sprintf("\t%s %s\n", colors.Success.Sprint("←"), path)
+		}
+		colors.PrintDescription("From", tmp)
 
 		tmp = ""
 		for _, to := range l.To {
@@ -137,7 +185,7 @@ func CheckConfig() error {
 		return fmt.Errorf("config could not be loaded/found")
 	}
 	if !CheckIfResticIsCallable() {
-		return fmt.Errorf(`%s was not found. Install either with "autorestic install" or manually`, RESTIC_BIN)
+		return fmt.Errorf(`%s was not found. Install either with "autorestic install" or manually`, flags.RESTIC_BIN)
 	}
 	for name, backend := range c.Backends {
 		backend.name = name
@@ -178,20 +226,18 @@ func GetAllOrSelected(cmd *cobra.Command, backends bool) ([]string, error) {
 		selected, _ = cmd.Flags().GetStringSlice("location")
 	}
 	for _, s := range selected {
-		found := false
+		var splitted = strings.Split(s, "@")
 		for _, l := range list {
-			if l == s {
-				found = true
-				break
+			if l == splitted[0] {
+				goto found
 			}
 		}
-		if !found {
-			if backends {
-				return nil, fmt.Errorf("invalid backend \"%s\"", s)
-			} else {
-				return nil, fmt.Errorf("invalid location \"%s\"", s)
-			}
+		if backends {
+			return nil, fmt.Errorf("invalid backend \"%s\"", s)
+		} else {
+			return nil, fmt.Errorf("invalid location \"%s\"", s)
 		}
+	found:
 	}
 
 	if len(selected) == 0 {
@@ -220,7 +266,7 @@ func (c *Config) SaveConfig() error {
 	if err := CopyFile(file, file+".old"); err != nil {
 		return err
 	}
-	colors.Secondary.Println("Saved a backup copy of your file next the the original.")
+	colors.Secondary.Println("Saved a backup copy of your file next to the original.")
 
 	viper.Set("backends", c.Backends)
 	viper.Set("locations", c.Locations)
@@ -228,12 +274,43 @@ func (c *Config) SaveConfig() error {
 	return viper.WriteConfig()
 }
 
-func getOptions(options Options, key string) []string {
-	var selected []string
-	for k, values := range options[key] {
+func optionToString(option string) string {
+	if !strings.HasPrefix(option, "-") {
+		return "--" + option
+	}
+	return option
+}
+
+func appendOptionsToSlice(str *[]string, options OptionMap) {
+	for key, values := range options {
 		for _, value := range values {
-			selected = append(selected, fmt.Sprintf("--%s", k), value)
+			// Bool
+			asBool, ok := value.(bool)
+			if ok && asBool {
+				*str = append(*str, optionToString(key))
+				continue
+			}
+			*str = append(*str, optionToString(key), fmt.Sprint(value))
 		}
 	}
+}
+
+func getOptions(options Options, keys []string) []string {
+	var selected []string
+	for _, key := range keys {
+		appendOptionsToSlice(&selected, options[key])
+	}
 	return selected
+}
+
+func combineOptions(key string, l Location, b Backend) []string {
+	// Priority: location > backend > global
+	var options []string
+	gFlags := getOptions(GetConfig().Global, []string{key})
+	bFlags := getOptions(b.Options, []string{"all", key})
+	lFlags := getOptions(l.Options, []string{"all", key})
+	options = append(options, gFlags...)
+	options = append(options, bFlags...)
+	options = append(options, lFlags...)
+	return options
 }

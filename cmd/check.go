@@ -11,6 +11,7 @@ var checkCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Check if everything is setup",
 	Run: func(cmd *cobra.Command, args []string) {
+		internal.GetConfig()
 		err := lock.Lock()
 		CheckErr(err)
 		defer lock.Unlock()

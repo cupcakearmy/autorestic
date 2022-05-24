@@ -16,6 +16,8 @@ You can also specify a custom file with the `-c path/to/some/config.yml`
 ## Example configuration
 
 ```yaml | .autorestic.yml
+version: 2
+
 locations:
   home:
     from: /home/me
@@ -49,6 +51,8 @@ Aliases allow to reuse snippets of config throughout the same file.
 The following example shows how the locations `a` and `b` share the same hooks and forget policies.
 
 ```yaml | .autorestic.yml
+version: 2
+
 extras:
   hooks: &foo
     before:

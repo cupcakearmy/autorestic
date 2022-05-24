@@ -16,6 +16,7 @@ import (
 	"github.com/blang/semver/v4"
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 )
 
 const INSTALL_PATH = "/usr/local/bin"
@@ -47,11 +48,11 @@ func dlJSON(url string) (GithubRelease, error) {
 
 func Uninstall(restic bool) error {
 	if err := os.Remove(path.Join(INSTALL_PATH, "autorestic")); err != nil {
-		colors.Error.Println(err)
+		return err
 	}
 	if restic {
 		if err := os.Remove(path.Join(INSTALL_PATH, "restic")); err != nil {
-			colors.Error.Println(err)
+			return err
 		}
 	}
 	return nil
@@ -79,13 +80,31 @@ func downloadAndInstallAsset(body GithubRelease, name string) error {
 				return err
 			}
 			defer tmp.Close()
-			tmp.Chmod(0755)
-			io.Copy(tmp, bz)
+			if err := tmp.Chmod(0755); err != nil {
+				return err
+			}
+			if _, err := io.Copy(tmp, bz); err != nil {
+				return err
+			}
 
 			to := path.Join(INSTALL_PATH, name)
-			os.Remove(to) // Delete if current, ignore error if file does not exits.
+			defer os.Remove(tmp.Name()) // Cleanup temporary file after thread exits
 			if err := os.Rename(tmp.Name(), to); err != nil {
-				return nil
+				colors.Error.Printf("os.Rename() failed (%v), retrying with io.Copy()\n", err.Error())
+				var src *os.File
+				var dst *os.File
+				if src, err = os.Open(tmp.Name()); err != nil {
+					return err
+				}
+				if dst, err = os.Create(to); err != nil {
+					return err
+				}
+				if _, err := io.Copy(dst, src); err != nil {
+					return err
+				}
+				if err := os.Chmod(to, 0755); err != nil {
+					return err
+				}
 			}
 
 			colors.Success.Printf("Successfully installed '%s' under %s\n", name, INSTALL_PATH)
@@ -110,10 +129,9 @@ func InstallRestic() error {
 }
 
 func upgradeRestic() error {
-	out, err := internal.ExecuteCommand(internal.ExecuteOptions{
-		Command: "restic",
+	_, _, err := internal.ExecuteCommand(internal.ExecuteOptions{
+		Command: flags.RESTIC_BIN,
 	}, "self-update")
-	colors.Faint.Println(out)
 	return err
 }
 
@@ -121,9 +139,11 @@ func Upgrade(restic bool) error {
 	// Upgrade restic
 	if restic {
 		if err := InstallRestic(); err != nil {
-			colors.Error.Println(err)
+			return err
 		}
-		upgradeRestic()
+		if err := upgradeRestic(); err != nil {
+			return err
+		}
 	}
 
 	// Upgrade self
@@ -140,7 +160,9 @@ func Upgrade(restic bool) error {
 		return err
 	}
 	if current.LT(latest) {
-		downloadAndInstallAsset(body, "autorestic")
+		if err := downloadAndInstallAsset(body, "autorestic"); err != nil {
+			return err
+		}
 		colors.Success.Println("Updated autorestic")
 	} else {
 		colors.Body.Println("Already up to date")

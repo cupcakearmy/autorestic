@@ -14,4 +14,12 @@ autorestic backup -a
 autorestic backup -l foo -l bar
 ```
 
+## Specific location
+
+`autorestic` also allows selecting specific backends for a location with the `location@backend` syntax.
+
+```bash
+autorestic backup -l location@backend
+```
+
 > :ToCPrevNext

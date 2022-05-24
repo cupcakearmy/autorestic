@@ -7,6 +7,8 @@ This is based on [Restic's snapshots policies](https://restic.readthedocs.io/en/
 > **Note** This is a full example, of course you also can specify only one of them
 
 ```yaml | .autorestic.yml
+version: 2
+
 locations:
   etc:
     from: /etc
@@ -20,6 +22,36 @@ locations:
         keep-monthly: 12 # keep 12 last monthly snapshots
         keep-yearly: 7 # keep 7 last yearly snapshots
         keep-within: '2w' # keep snapshots from the last 2 weeks
+```
+
+## Globally
+
+You can specify global forget policies that would be applied to all locations:
+
+```yaml | .autorestic.yml
+version: 2
+
+global:
+  forget:
+    keep-daily: 30
+    keep-weekly: 52
+```
+
+## Automatically forget after backup
+
+You can also configure `autorestic` to automatically run the forget command for you after every backup. You can do that by specifying the `forget` option.
+
+```yaml | .autorestic.yml
+version: 2
+
+locations:
+  etc:
+    from: /etc
+    to: local
+    forget: prune # Or only "yes" if you don't want to prune
+    options:
+      forget:
+        keep-last: 5
 ```
 
 > :ToCPrevNext

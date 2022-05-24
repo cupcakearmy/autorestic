@@ -35,8 +35,46 @@ locations:
 2. Run backup
 3. `after` hook
 4. - `success` hook if no errors were found
-   - `failure` hook if at least error was encountered
+   - `failure` hook if at least one error was encountered
 
 If the `before` hook encounters errors the backup and `after` hooks will be skipped and only the `failed` hooks will run.
+
+## Environment variables
+
+All hooks are exposed to the `AUTORESTIC_LOCATION` environment variable, which contains the location name.
+
+The `after` and `success` hooks have access to additional information with the following syntax:
+
+```bash
+AUTORESTIC_[TYPE]_[I]
+AUTORESTIC_[TYPE]_[BACKEND_NAME]
+```
+
+Every type of metadata is appended with both the name of the backend associated with and the number in which the backends where executed.
+
+### Available Metadata Types
+
+- `SNAPSHOT_ID`
+- `PARENT_SNAPSHOT_ID`
+- `FILES_ADDED`
+- `FILES_CHANGED`
+- `FILES_UNMODIFIED`
+- `DIRS_ADDED`
+- `DIRS_CHANGED`
+- `DIRS_UNMODIFIED`
+- `ADDED_SIZE`
+- `PROCESSED_FILES`
+- `PROCESSED_SIZE`
+- `PROCESSED_DURATION`
+
+#### Example
+
+Assuming you have a location `bar` that backs up to a single backend named `foo` you could expect the following env variables:
+
+```bash
+AUTORESTIC_LOCATION=bar
+AUTORESTIC_FILES_ADDED_0=42
+AUTORESTIC_FILES_ADDED_FOO=42
+```
 
 > :ToCPrevNext

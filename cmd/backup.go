@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
@@ -22,10 +23,15 @@ var backupCmd = &cobra.Command{
 		CheckErr(err)
 		errors := 0
 		for _, name := range selected {
-			location, _ := internal.GetLocation(name)
-			errs := location.Backup(false)
-			for err := range errs {
-				colors.Error.Println(err)
+			var splitted = strings.Split(name, "@")
+			var specificBackend = ""
+			if len(splitted) > 1 {
+				specificBackend = splitted[1]
+			}
+			location, _ := internal.GetLocation(splitted[0])
+			errs := location.Backup(false, specificBackend)
+			for _, err := range errs {
+				colors.Error.Printf("%s\n\n", err)
 				errors++
 			}
 		}

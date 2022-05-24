@@ -37,10 +37,16 @@ Then paste this at the bottom of the file and save it. Note that in this specifi
 PATH="/usr/local/bin:/usr/bin:/bin"
 
 # Example running every 5 minutes
-*/5 * * * * autorestic --ci cron
+*/5 * * * * autorestic -c /path/to/my/.autorestic.yml --ci cron
 ```
 
 > The `--ci` option is not required, but recommended
+
+To debug a cron job you can use
+
+```bash
+*/5 * * * * autorestic -c /path/to/my/.autorestic.yml --ci cron > /tmp/autorestic.log 2>&1
+```
 
 Now you can add as many `cron` attributes as you wish in the config file ⏱
 

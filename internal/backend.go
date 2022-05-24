@@ -12,18 +12,18 @@ import (
 )
 
 type BackendRest struct {
-	User     string `yaml:"user,omitempty"`
-	Password string `yaml:"password,omitempty"`
+	User     string `mapstructure:"user,omitempty"`
+	Password string `mapstructure:"password,omitempty"`
 }
 
 type Backend struct {
 	name    string
-	Type    string            `yaml:"type,omitempty"`
-	Path    string            `yaml:"path,omitempty"`
-	Key     string            `yaml:"key,omitempty"`
-	Env     map[string]string `yaml:"env,omitempty"`
-	Rest    BackendRest       `yaml:"rest,omitempty"`
-	Options Options           `yaml:"options,omitempty"`
+	Type    string            `mapstructure:"type,omitempty"`
+	Path    string            `mapstructure:"path,omitempty"`
+	Key     string            `mapstructure:"key,omitempty"`
+	Env     map[string]string `mapstructure:"env,omitempty"`
+	Rest    BackendRest       `mapstructure:"rest,omitempty"`
+	Options Options           `mapstructure:"options,omitempty"`
 }
 
 func GetBackend(name string) (Backend, bool) {
@@ -58,12 +58,27 @@ func (b Backend) generateRepo() (string, error) {
 
 func (b Backend) getEnv() (map[string]string, error) {
 	env := make(map[string]string)
-	env["RESTIC_PASSWORD"] = b.Key
+	// Key
+	if b.Key != "" {
+		env["RESTIC_PASSWORD"] = b.Key
+	}
+
+	// From config file
 	repo, err := b.generateRepo()
 	env["RESTIC_REPOSITORY"] = repo
 	for key, value := range b.Env {
 		env[strings.ToUpper(key)] = value
 	}
+
+	// From Envfile and passed as env
+	var prefix = "AUTORESTIC_" + strings.ToUpper(b.name) + "_"
+	for _, variable := range os.Environ() {
+		var splitted = strings.SplitN(variable, "=", 2)
+		if strings.HasPrefix(splitted[0], prefix) {
+			env[strings.TrimPrefix(splitted[0], prefix)] = splitted[1]
+		}
+	}
+
 	return env, err
 }
 
@@ -85,32 +100,34 @@ func (b Backend) validate() error {
 		return fmt.Errorf(`Backend "%s" has no "path"`, b.name)
 	}
 	if b.Key == "" {
-		key := generateRandomKey()
-		b.Key = key
-		c := GetConfig()
-		tmp := c.Backends[b.name]
-		tmp.Key = key
-		c.Backends[b.name] = tmp
-		if err := c.SaveConfig(); err != nil {
-			return err
+		// Check if key is set in environment
+		env, _ := b.getEnv()
+		if _, found := env["RESTIC_PASSWORD"]; !found {
+			// No key set in config file or env => generate random key and save file
+			key := generateRandomKey()
+			b.Key = key
+			c := GetConfig()
+			tmp := c.Backends[b.name]
+			tmp.Key = key
+			c.Backends[b.name] = tmp
+			if err := c.SaveConfig(); err != nil {
+				return err
+			}
 		}
 	}
 	env, err := b.getEnv()
 	if err != nil {
 		return err
 	}
-	options := ExecuteOptions{Envs: env}
+	options := ExecuteOptions{Envs: env, Silent: true}
 	// Check if already initialized
-	_, err = ExecuteResticCommand(options, "snapshots")
+	_, _, err = ExecuteResticCommand(options, "check")
 	if err == nil {
 		return nil
 	} else {
 		// If not initialize
 		colors.Body.Printf("Initializing backend \"%s\"...\n", b.name)
-		out, err := ExecuteResticCommand(options, "init")
-		if VERBOSE {
-			colors.Faint.Println(out)
-		}
+		_, _, err := ExecuteResticCommand(options, "init")
 		return err
 	}
 }
@@ -121,46 +138,62 @@ func (b Backend) Exec(args []string) error {
 		return err
 	}
 	options := ExecuteOptions{Envs: env}
-	out, err := ExecuteResticCommand(options, args...)
+	_, out, err := ExecuteResticCommand(options, args...)
 	if err != nil {
 		colors.Error.Println(out)
 		return err
 	}
-	if VERBOSE {
-		colors.Faint.Println(out)
-	}
 	return nil
 }
 
-func (b Backend) ExecDocker(l Location, args []string) (string, error) {
+func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	env, err := b.getEnv()
 	if err != nil {
-		return "", err
+		return -1, "", err
 	}
-	volume := l.getVolumeName()
-	path, _ := l.getPath()
+	volume := l.From[0]
 	options := ExecuteOptions{
 		Command: "docker",
 		Envs:    env,
 	}
+	dir := "/data"
+	args = append([]string{"restic"}, args...)
 	docker := []string{
 		"run", "--rm",
+		"--pull", "always",
 		"--entrypoint", "ash",
-		"--workdir", path,
-		"--volume", volume + ":" + path,
+		"--workdir", dir,
+		"--volume", volume + ":" + dir,
 	}
+	// Use of docker host, not the container host
 	if hostname, err := os.Hostname(); err == nil {
 		docker = append(docker, "--hostname", hostname)
 	}
-	if b.Type == "local" {
+	switch b.Type {
+	case "local":
 		actual := env["RESTIC_REPOSITORY"]
 		docker = append(docker, "--volume", actual+":"+"/repo")
 		env["RESTIC_REPOSITORY"] = "/repo"
+	case "b2":
+	case "s3":
+	case "azure":
+	case "gs":
+		// No additional setup needed
+	case "rclone":
+		// Read host rclone config and mount it into the container
+		code, configFile, err := ExecuteCommand(ExecuteOptions{Command: "rclone"}, "config", "file")
+		if err != nil {
+			return code, "", err
+		}
+		splitted := strings.Split(strings.TrimSpace(configFile), "\n")
+		configFilePath := splitted[len(splitted)-1]
+		docker = append(docker, "--volume", configFilePath+":"+"/root/.config/rclone/rclone.conf:ro")
+	default:
+		return -1, "", fmt.Errorf("Backend type \"%s\" is not supported as volume endpoint", b.Type)
 	}
 	for key, value := range env {
 		docker = append(docker, "--env", key+"="+value)
 	}
-	docker = append(docker, "restic/restic", "-c", "restic "+strings.Join(args, " "))
-	out, err := ExecuteCommand(options, docker...)
-	return out, err
+	docker = append(docker, "cupcakearmy/autorestic:"+VERSION, "-c", strings.Join(args, " "))
+	return ExecuteCommand(options, docker...)
 }
