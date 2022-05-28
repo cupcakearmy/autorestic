@@ -7,44 +7,59 @@ import (
 	"testing"
 )
 
-func TestOptionToStringWithoutPrefix(t *testing.T) {
-	opt := "test"
-	result := optionToString(opt)
-	assertEqual(t, result, "--test")
-}
+func TestOptionToString(t *testing.T) {
+	t.Run("no prefix", func(t *testing.T) {
+		opt := "test"
+		result := optionToString(opt)
+		assertEqual(t, result, "--test")
+	})
 
-func TestOptionsToStringWithSinglePrefix(t *testing.T) {
-	opt := "-test"
-	result := optionToString(opt)
-	assertEqual(t, result, "-test")
-}
+	t.Run("single prefix", func(t *testing.T) {
+		opt := "-test"
+		result := optionToString(opt)
+		assertEqual(t, result, "-test")
+	})
 
-func TestOptionsToStringWithDoublePrefix(t *testing.T) {
-	opt := "--test"
-	result := optionToString(opt)
-	assertEqual(t, result, "--test")
+	t.Run("double prefix", func(t *testing.T) {
+		opt := "--test"
+		result := optionToString(opt)
+		assertEqual(t, result, "--test")
+	})
 }
 
 func TestAppendOneOptionToSlice(t *testing.T) {
-	result := []string{}
-	optionMap := OptionMap{"string-flag": []interface{}{"/root"}}
+	t.Run("string flag", func(t *testing.T) {
+		result := []string{}
+		optionMap := OptionMap{"string-flag": []interface{}{"/root"}}
 
-	appendOptionsToSlice(&result, optionMap)
-	expected := []string{
-		"--string-flag", "/root",
-	}
-	assertSliceEqual(t, result, expected)
-}
+		appendOptionsToSlice(&result, optionMap)
+		expected := []string{
+			"--string-flag", "/root",
+		}
+		assertSliceEqual(t, result, expected)
+	})
 
-func TestAppendBoolOptionToSlice(t *testing.T) {
-	result := []string{}
-	optionMap := OptionMap{"boolean-flag": []interface{}{true}}
+	t.Run("bool flag", func(t *testing.T) {
+		result := []string{}
+		optionMap := OptionMap{"boolean-flag": []interface{}{true}}
 
-	appendOptionsToSlice(&result, optionMap)
-	expected := []string{
-		"--boolean-flag",
-	}
-	assertSliceEqual(t, result, expected)
+		appendOptionsToSlice(&result, optionMap)
+		expected := []string{
+			"--boolean-flag",
+		}
+		assertSliceEqual(t, result, expected)
+	})
+
+	t.Run("int flag", func(t *testing.T) {
+		result := []string{}
+		optionMap := OptionMap{"int-flag": []interface{}{123}}
+
+		appendOptionsToSlice(&result, optionMap)
+		expected := []string{
+			"--int-flag", "123",
+		}
+		assertSliceEqual(t, result, expected)
+	})
 }
 
 func TestAppendMultipleOptionsToSlice(t *testing.T) {
