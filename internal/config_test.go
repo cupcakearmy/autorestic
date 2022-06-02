@@ -143,11 +143,11 @@ func TestGetOptionsMultipleKeys(t *testing.T) {
 	reflect.DeepEqual(result, expected)
 }
 
-func assertEqual(t testing.TB, result, expected string) {
+func assertEqual[T comparable](t testing.TB, result, expected T) {
 	t.Helper()
 
 	if result != expected {
-		t.Errorf("got %s, want %s", result, expected)
+		t.Errorf("got %v, want %v", result, expected)
 	}
 }
 
