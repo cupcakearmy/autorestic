@@ -31,7 +31,7 @@ func TestLock(t *testing.T) {
 	setup(t)
 
 	t.Run("getLock", func(t *testing.T) {
-		result := getLock().GetBool("running")
+		result := getLock().GetBool(RUNNING)
 
 		if result {
 			t.Errorf("got %v, want %v", result, false)
@@ -39,24 +39,24 @@ func TestLock(t *testing.T) {
 	})
 
 	t.Run("lock", func(t *testing.T) {
-		err := Lock()
+		lock, err := setLockValue(RUNNING, true)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
 
-		result := getLock().GetBool("running")
+		result := lock.GetBool(RUNNING)
 		if !result {
 			t.Errorf("got %v, want %v", result, true)
 		}
 	})
 
 	t.Run("unlock", func(t *testing.T) {
-		err := Unlock()
+		lock, err := setLockValue(RUNNING, false)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
 
-		result := getLock().GetBool("running")
+		result := lock.GetBool(RUNNING)
 		if result {
 			t.Errorf("got %v, want %v", result, false)
 		}

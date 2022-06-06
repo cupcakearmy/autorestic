@@ -14,6 +14,10 @@ var lock *viper.Viper
 var file string
 var once sync.Once
 
+const (
+	RUNNING = "running"
+)
+
 func getLock() *viper.Viper {
 	if lock == nil {
 
@@ -37,36 +41,38 @@ func getLock() *viper.Viper {
 	return lock
 }
 
-func setLock(locked bool) error {
+func setLockValue(key string, value interface{}) (*viper.Viper, error) {
 	lock := getLock()
-	if locked {
-		running := lock.GetBool("running")
-		if running {
+
+	if key == RUNNING {
+		value := value.(bool)
+		if value && lock.GetBool(key) {
 			colors.Error.Println("an instance is already running. exiting")
 			os.Exit(1)
 		}
 	}
-	lock.Set("running", locked)
+
+	lock.Set(key, value)
 	if err := lock.WriteConfigAs(file); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return lock, nil
 }
 
 func GetCron(location string) int64 {
-	lock := getLock()
-	return lock.GetInt64("cron." + location)
+	return getLock().GetInt64("cron." + location)
 }
 
 func SetCron(location string, value int64) {
-	lock.Set("cron."+location, value)
-	lock.WriteConfigAs(file)
+	setLockValue("cron."+location, value)
 }
 
 func Lock() error {
-	return setLock(true)
+	_, err := setLockValue(RUNNING, true)
+	return err
 }
 
 func Unlock() error {
-	return setLock(false)
+	_, err := setLockValue(RUNNING, false)
+	return err
 }
