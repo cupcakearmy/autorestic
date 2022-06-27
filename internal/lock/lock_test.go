@@ -3,6 +3,7 @@ package lock
 import (
 	"log"
 	"os"
+	"os/exec"
 	"strconv"
 	"testing"
 
@@ -59,6 +60,33 @@ func TestLock(t *testing.T) {
 		result := lock.GetBool(RUNNING)
 		if result {
 			t.Errorf("got %v, want %v", result, false)
+		}
+	})
+
+	// locking a locked instance exits the instance
+	// this trick to capture os.Exit(1) is discussed here:
+	// https://talks.golang.org/2014/testing.slide#23
+	t.Run("lock twice", func(t *testing.T) {
+		if os.Getenv("CRASH") == "1" {
+			err := Lock()
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+			// should fail
+			Lock()
+		}
+
+		cmd := exec.Command(os.Args[0], "-test.run=TestLock/lock_twice")
+		cmd.Env = append(os.Environ(), "CRASH=1")
+		err := cmd.Run()
+
+		err, ok := err.(*exec.ExitError)
+		if !ok {
+			t.Error("unexpected error")
+		}
+		expected := "exit status 1"
+		if err.Error() != expected {
+			t.Errorf("got %q, want %q", err.Error(), expected)
 		}
 	})
 
