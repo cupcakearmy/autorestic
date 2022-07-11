@@ -83,7 +83,7 @@ func GetConfig() *Config {
 				exitConfig(nil, "version specified in config file is not an int")
 			} else {
 				// Check for version
-				if version != 2 {
+				if version != 3 {
 					exitConfig(nil, "unsupported config version number. please check the docs for migration\nhttps://autorestic.vercel.app/migration/")
 				}
 			}
@@ -132,10 +132,14 @@ func (c *Config) Describe() {
 
 		tmp = ""
 		hooks := map[string][]string{
-			"Before":  l.Hooks.Before,
-			"After":   l.Hooks.After,
-			"Failure": l.Hooks.Failure,
-			"Success": l.Hooks.Success,
+			"Before backup":  l.Hooks.BackupOption.Before,
+			"After backup":   l.Hooks.BackupOption.After,
+			"Failure backup": l.Hooks.BackupOption.Failure,
+			"Success backup": l.Hooks.BackupOption.Success,
+			"Before restore":  l.Hooks.RestoreOption.Before,
+			"After restore":   l.Hooks.RestoreOption.After,
+			"Failure restore": l.Hooks.RestoreOption.Failure,
+			"Success restore": l.Hooks.RestoreOption.Success,
 		}
 		for hook, commands := range hooks {
 			if len(commands) > 0 {
