@@ -74,12 +74,8 @@ func (l Location) validate() error {
 			if from, err := GetPathRelativeToConfig(path); err != nil {
 				return err
 			} else {
-				if stat, err := os.Stat(from); err != nil {
+				if _, err := os.Stat(from); err != nil {
 					return err
-				} else {
-					if !stat.IsDir() {
-						return fmt.Errorf("\"%s\" is not valid directory for location \"%s\"", from, l.name)
-					}
 				}
 			}
 		}
