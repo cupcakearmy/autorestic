@@ -320,7 +320,12 @@ after:
 func (l Location) Forget(prune bool, dry bool) error {
 	colors.PrimaryPrint("Forgetting for location \"%s\"", l.name)
 
-	for _, to := range l.To {
+	backendsToForget := l.To
+	for _, copyBackends := range l.CopyOption {
+		backendsToForget = append(backendsToForget, copyBackends...)
+	}
+
+	for _, to := range backendsToForget {
 		backend, _ := GetBackend(to)
 		colors.Secondary.Printf("For backend \"%s\"\n", backend.name)
 		env, err := backend.getEnv()
