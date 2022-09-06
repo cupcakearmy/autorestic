@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 )
 
 type BackendRest struct {
@@ -160,7 +161,6 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	args = append([]string{"restic"}, args...)
 	docker := []string{
 		"run", "--rm",
-		"--pull", "always",
 		"--entrypoint", "ash",
 		"--workdir", dir,
 		"--volume", volume + ":" + dir,
@@ -194,6 +194,7 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	for key, value := range env {
 		docker = append(docker, "--env", key+"="+value)
 	}
-	docker = append(docker, "cupcakearmy/autorestic:"+VERSION, "-c", strings.Join(args, " "))
+
+	docker = append(docker, flags.DOCKER_IMAGE, "-c", strings.Join(args, " "))
 	return ExecuteCommand(options, docker...)
 }
