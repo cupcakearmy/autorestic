@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
@@ -169,6 +170,11 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	if hostname, err := os.Hostname(); err == nil {
 		docker = append(docker, "--hostname", hostname)
 	}
+	resticPath, err := GetResticPath()
+	if err != nil {
+		return -1, "", err
+	}
+	docker = append(docker, "--volume", resticPath+":/usr/bin/restic:ro")
 	switch b.Type {
 	case "local":
 		actual := env["RESTIC_REPOSITORY"]
@@ -180,6 +186,9 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	case "gs":
 		// No additional setup needed
 	case "rclone":
+		if rclonePath, err := exec.LookPath("rclone"); err == nil {
+			docker = append(docker, "--volume", rclonePath+":/usr/bin/rclone:ro")
+		}
 		// Read host rclone config and mount it into the container
 		code, configFile, err := ExecuteCommand(ExecuteOptions{Command: "rclone"}, "config", "file")
 		if err != nil {
@@ -194,6 +203,6 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	for key, value := range env {
 		docker = append(docker, "--env", key+"="+value)
 	}
-	docker = append(docker, "cupcakearmy/autorestic:"+VERSION, "-c", strings.Join(args, " "))
+	docker = append(docker, "alpine:3", "-c", strings.Join(args, " "))
 	return ExecuteCommand(options, docker...)
 }

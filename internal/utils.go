@@ -21,6 +21,10 @@ func CheckIfResticIsCallable() bool {
 	return CheckIfCommandIsCallable(flags.RESTIC_BIN)
 }
 
+func GetResticPath() (result string, err error) {
+	return exec.LookPath(flags.RESTIC_BIN)
+}
+
 type ExecuteOptions struct {
 	Command string
 	Envs    map[string]string
