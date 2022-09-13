@@ -21,7 +21,7 @@ locations:
         keep-weekly: 1 # keep 1 last weekly snapshots
         keep-monthly: 12 # keep 12 last monthly snapshots
         keep-yearly: 7 # keep 7 last yearly snapshots
-        keep-within: '2w' # keep snapshots from the last 2 weeks
+        keep-within: '14d' # keep snapshots from the last 14 days
 ```
 
 ## Globally
