@@ -122,13 +122,17 @@ func (b Backend) validate() error {
 	}
 	options := ExecuteOptions{Envs: env, Silent: true}
 	// Check if already initialized
-	_, _, err = ExecuteResticCommand(options, "check")
+	cmd := []string{"check"}
+	cmd = append(cmd, combineBackendOptions("check", b)...)
+	_, _, err = ExecuteResticCommand(options, cmd...)
 	if err == nil {
 		return nil
 	} else {
 		// If not initialize
 		colors.Body.Printf("Initializing backend \"%s\"...\n", b.name)
-		_, _, err := ExecuteResticCommand(options, "init")
+		cmd := []string{"init"}
+		cmd = append(cmd, combineBackendOptions("init", b)...)
+		_, _, err := ExecuteResticCommand(options, cmd...)
 		return err
 	}
 }
