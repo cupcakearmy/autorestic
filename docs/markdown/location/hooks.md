@@ -1,8 +1,8 @@
 # Hooks
 
-If you want to perform some commands before and/or after a backup, you can use hooks.
+If you want to perform some commands before and/or after a backup or restore, you can use hooks.
 
-They consist of a list of commands that will be executed in the same directory as the target `from`.
+They consist of a list of commands that will be executed in the same directory as the config file or in the `dir` directory if configured.
 
 The following hooks groups are supported, none are required:
 
@@ -17,16 +17,27 @@ locations:
     from: /data
     to: my-backend
     hooks:
-      before:
-        - echo "One"
-        - echo "Two"
-        - echo "Three"
-      after:
-        - echo "Byte"
-      failure:
-        - echo "Something went wrong"
-      success:
-        - echo "Well done!"
+      backup:
+        before:
+          - echo "One"
+          - echo "Two"
+          - echo "Three"
+        after:
+          - echo "Byte"
+        failure:
+          - echo "Something went wrong"
+        success:
+          - echo "Well done!"
+      restore:
+        dir: /var/www/html
+        before:
+          - echo "Let's restore this backup!"
+        after:
+          - echo "Finished to restore"
+        failure:
+          - echo "A problem has been encountered :("
+        success:
+          - echo "Successfully restored!"
 ```
 
 ## Flowchart

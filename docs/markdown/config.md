@@ -55,10 +55,11 @@ version: 2
 
 extras:
   hooks: &foo
-    before:
-      - echo "Hello"
-    after:
-      - echo "kthxbye"
+    backup:
+      before:
+        - echo "Hello"
+      after:
+        - echo "kthxbye"
   policies: &bar
     keep-daily: 14
     keep-weekly: 52
