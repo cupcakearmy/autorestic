@@ -308,7 +308,10 @@ after:
 
 	// Forget and optionally prune
 	if isSuccess && l.ForgetOption != "" && l.ForgetOption != LocationForgetNo {
-		l.Forget(l.ForgetOption == LocationForgetPrune, false)
+		err := l.Forget(l.ForgetOption == LocationForgetPrune, false)
+		if err != nil {
+			errors = append(errors, err)
+		}
 	}
 
 	if len(errors) == 0 {
