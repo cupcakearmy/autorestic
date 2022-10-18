@@ -31,6 +31,11 @@ else
 fi
 echo $ARCH
 
+if ! command -v bzip2 &>/dev/null; then
+    echo "Missing bzip2 command. Please install the bzip2 package for your system."
+    exit 1
+fi
+
 wget -qO - https://api.github.com/repos/cupcakearmy/autorestic/releases/latest \
 | grep "browser_download_url.*_${OS}_${ARCH}" \
 | cut -d : -f 2,3 \
