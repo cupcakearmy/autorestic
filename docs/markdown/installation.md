@@ -5,7 +5,7 @@ Linux & macOS. Windows is not supported. If you have problems installing please 
 Autorestic requires `bash`, `wget` and `bzip2` to be installed. For most systems these should be already installed.
 
 ```bash
-wget -qO - https://raw.githubusercontent.com/CupCakeArmy/autorestic/master/install.sh | bash
+wget -qO - https://raw.githubusercontent.com/cupcakearmy/autorestic/master/install.sh | bash
 ```
 
 ## Alternatives
