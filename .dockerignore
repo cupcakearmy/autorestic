@@ -4,3 +4,4 @@
 !cmd
 !internal
 !go.*
+!/*.sh
