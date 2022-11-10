@@ -2,7 +2,11 @@
 
 shopt -s nocaseglob
 
-OUT_FILE=/usr/local/bin/autorestic
+# set OUT_FILE to custom install path
+# wget -qO - https://raw.githubusercontent.com/cupcakearmy/autorestic/master/install.sh | OUT_FILE=~/.local/bin/autorestic bash
+if [[ -z $OUT_FILE ]]; then
+    OUT_FILE=/usr/local/bin/autorestic
+fi
 
 # Type
 NATIVE_OS=$(uname | tr '[:upper:]' '[:lower:]')

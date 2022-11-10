@@ -8,6 +8,12 @@ Autorestic requires `bash`, `wget` and `bzip2` to be installed. For most systems
 wget -qO - https://raw.githubusercontent.com/cupcakearmy/autorestic/master/install.sh | bash
 ```
 
+Or for custom install paths.
+
+```bash
+wget -qO - https://raw.githubusercontent.com/cupcakearmy/autorestic/master/install.sh | OUT_FILE=~/.local/bin/autorestic bash
+```
+
 ## Alternatives
 
 ### Docker
