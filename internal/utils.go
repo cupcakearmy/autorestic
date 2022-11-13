@@ -104,7 +104,15 @@ func CopyFile(from, to string) error {
 }
 
 func CheckIfVolumeExists(volume string) bool {
-	_, _, err := ExecuteCommand(ExecuteOptions{Command: "docker"}, "volume", "inspect", volume)
+	docker := []string{}
+
+	if flags.DOCKER_HOST != "" {
+		docker = append(docker, "--host", flags.DOCKER_HOST)
+	}
+
+	docker = append(docker, "volume", "inspect", volume)
+
+	_, _, err := ExecuteCommand(ExecuteOptions{Command: "docker"}, docker...)
 	return err == nil
 }
 

@@ -42,6 +42,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&flags.VERBOSE, "verbose", "v", false, "verbose mode")
 	rootCmd.PersistentFlags().StringVar(&flags.RESTIC_BIN, "restic-bin", "restic", "specify custom restic binary")
 	rootCmd.PersistentFlags().StringVar(&flags.DOCKER_IMAGE, "docker-image", "cupcakearmy/autorestic:"+internal.VERSION, "specify a custom docker image")
+	rootCmd.PersistentFlags().StringVar(&flags.DOCKER_HOST, "docker-host", "", "specify a custom docker host")
+	rootCmd.PersistentFlags().BoolVar(&flags.DOCKER_DISCOVERY, "docker-discovery", false, "use docker location discovery")
 	cobra.OnInitialize(initConfig)
 }
 

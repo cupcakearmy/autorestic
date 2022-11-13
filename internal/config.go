@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
@@ -11,6 +12,9 @@ import (
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/volume"
+	"github.com/docker/docker/client"
 	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -44,8 +48,94 @@ func exitConfig(err error, msg string) {
 	os.Exit(1)
 }
 
-func GetConfig() *Config {
+func GetDockerVolumesLocations() (map[string]Location, error) {
+	var (
+		cli              *client.Client
+		err              error
+		volumeListOKBody volume.VolumeListOKBody
+		ctx              context.Context
+	)
 
+	volumesList := make(map[string]Location)
+
+	if flags.DOCKER_HOST != "" {
+		cli, err = client.NewClientWithOpts(client.WithHost(flags.DOCKER_HOST))
+	} else {
+		cli, err = client.NewClientWithOpts()
+	}
+	if err != nil {
+		return volumesList, fmt.Errorf("Could not create client: %s", err.Error())
+	}
+	defer cli.Close()
+
+	ctx = context.Background()
+	volumeListOKBody, err = cli.VolumeList(ctx, filters.NewArgs())
+	if err != nil {
+		return volumesList, fmt.Errorf("Could not list volumes: %s", err.Error())
+	}
+
+	for _, volume := range volumeListOKBody.Volumes {
+		val, ok := volume.Labels["autorestic.enable"]
+		if ok && (val == "1" || val == "true") {
+			volumeTo, ok := volume.Labels["autorestic.to"]
+			if !ok {
+				return volumesList, fmt.Errorf("Autorestic is enabled but there is no \"autorestic.to\" label for volume %s", volume.Name)
+			}
+			volumeLocation := Location{
+				name: volume.Name,
+				From: []string{volume.Name},
+				Type: "volume",
+				To: strings.Split(volumeTo, ";"),
+			}
+			for label, value := range volume.Labels {
+				if label == "autorestic.cron" {
+					volumeLocation.Cron = value
+				} else if label == "autorestic.forget" {
+					volumeLocation.ForgetOption = LocationForgetOption(value)
+				} else if label == "autorestic.hooks.dir" {
+					volumeLocation.Hooks.Dir = value
+				} else if label == "autorestic.hooks.before" {
+					volumeLocation.Hooks.Before = []string{value}
+				} else if label == "autorestic.hooks.after" {
+					volumeLocation.Hooks.After = []string{value}
+				} else if label == "autorestic.hooks.success" {
+					volumeLocation.Hooks.Success = []string{value}
+				} else if label == "autorestic.hooks.failure" {
+					volumeLocation.Hooks.Failure = []string{value}
+				} else if strings.HasPrefix(label, "autorestic.options.") {
+					label = strings.TrimPrefix(label, "autorestic.options.")
+					target := strings.Split(label, ".")
+					if len(target) != 2 {
+						fmt.Errorf("Failed to parse label \"%s\" for volume %s", volume.Name)
+					}
+
+					values := strings.Split(value, ";")
+					interfaceValues := make([]interface{}, 0)
+					for _, v := range values {
+						interfaceValues = append(interfaceValues, interface{}(v))
+					}
+
+					if volumeLocation.Options == nil {
+						volumeLocation.Options = make(Options)
+					}
+					volumeLocation.Options[target[0]] = make(OptionMap)
+					volumeLocation.Options[target[0]][target[1]] = interfaceValues
+				} else if strings.HasPrefix(label, "autorestic.copy.") {
+					fromBackend := strings.TrimPrefix(label, "autorestic.copy.")
+					if volumeLocation.CopyOption == nil {
+						volumeLocation.CopyOption = make(LocationCopy)
+					}
+					volumeLocation.CopyOption[fromBackend] = strings.Split(value, ";")
+				}
+			}
+			volumesList[volume.Name] = volumeLocation
+		}
+	}
+
+	return volumesList, nil
+}
+
+func GetConfig() *Config {
 	if config == nil {
 		once.Do(func() {
 			if err := viper.ReadInConfig(); err == nil {
@@ -91,6 +181,19 @@ func GetConfig() *Config {
 			config = &Config{}
 			if err := viper.UnmarshalExact(config); err != nil {
 				exitConfig(err, "Could not parse config file!")
+			}
+
+			if flags.DOCKER_DISCOVERY {
+				if config.Locations == nil {
+					config.Locations = make(map[string]Location)
+				}
+				volumeLocations, err := GetDockerVolumesLocations()
+				if err != nil {
+					exitConfig(err, "failed to load locations from docker")
+				}
+				for name, location := range volumeLocations {
+					config.Locations[name] = location
+				}
 			}
 		})
 	}
