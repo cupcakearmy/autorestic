@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.7.2"
+const VERSION = "1.7.4"
 
 type OptionMap map[string][]interface{}
 type Options map[string]OptionMap
@@ -303,7 +303,17 @@ func getOptions(options Options, keys []string) []string {
 	return selected
 }
 
-func combineOptions(key string, l Location, b Backend) []string {
+func combineBackendOptions(key string, b Backend) []string {
+	// Priority: backend > global
+	var options []string
+	gFlags := getOptions(GetConfig().Global, []string{key})
+	bFlags := getOptions(b.Options, []string{"all", key})
+	options = append(options, gFlags...)
+	options = append(options, bFlags...)
+	return options
+}
+
+func combineAllOptions(key string, l Location, b Backend) []string {
 	// Priority: location > backend > global
 	var options []string
 	gFlags := getOptions(GetConfig().Global, []string{key})

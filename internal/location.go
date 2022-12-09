@@ -216,7 +216,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 		}
 
 		cmd := []string{"backup"}
-		cmd = append(cmd, combineOptions("backup", l, backend)...)
+		cmd = append(cmd, combineAllOptions("backup", l, backend)...)
 		if cron {
 			cmd = append(cmd, "--tag", buildTag("cron"))
 		}
@@ -308,7 +308,10 @@ after:
 
 	// Forget and optionally prune
 	if isSuccess && l.ForgetOption != "" && l.ForgetOption != LocationForgetNo {
-		l.Forget(l.ForgetOption == LocationForgetPrune, false)
+		err := l.Forget(l.ForgetOption == LocationForgetPrune, false)
+		if err != nil {
+			errors = append(errors, err)
+		}
 	}
 
 	if len(errors) == 0 {
@@ -342,7 +345,7 @@ func (l Location) Forget(prune bool, dry bool) error {
 		if dry {
 			cmd = append(cmd, "--dry-run")
 		}
-		cmd = append(cmd, combineOptions("forget", l, backend)...)
+		cmd = append(cmd, combineAllOptions("forget", l, backend)...)
 		_, _, err = ExecuteResticCommand(options, cmd...)
 		if err != nil {
 			return err

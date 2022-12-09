@@ -8,5 +8,6 @@ A list of community driven projects. (No official affiliation)
 - Ansible Role: <https://github.com/ItsNotGoodName/ansible-role-autorestic>
 - Ansible Role: <https://github.com/FuzzyMistborn/ansible-role-autorestic>
 - Ansible Role: <https://0xacab.org/varac-projects/ansible-role-autorestic>
+- Ansible Role: <https://github.com/dbrennand/ansible-role-autorestic>
 
 > :ToCPrevNext

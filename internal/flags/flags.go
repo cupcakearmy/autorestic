@@ -5,4 +5,5 @@ var (
 	VERBOSE    bool = false
 	CRON_LEAN  bool = false
 	RESTIC_BIN string
+	DOCKER_IMAGE string
 )

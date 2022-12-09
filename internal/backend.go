@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
+	"github.com/cupcakearmy/autorestic/internal/flags"
 )
 
 type BackendRest struct {
@@ -121,13 +122,17 @@ func (b Backend) validate() error {
 	}
 	options := ExecuteOptions{Envs: env, Silent: true}
 	// Check if already initialized
-	_, _, err = ExecuteResticCommand(options, "check")
+	cmd := []string{"check"}
+	cmd = append(cmd, combineBackendOptions("check", b)...)
+	_, _, err = ExecuteResticCommand(options, cmd...)
 	if err == nil {
 		return nil
 	} else {
 		// If not initialize
 		colors.Body.Printf("Initializing backend \"%s\"...\n", b.name)
-		_, _, err := ExecuteResticCommand(options, "init")
+		cmd := []string{"init"}
+		cmd = append(cmd, combineBackendOptions("init", b)...)
+		_, _, err := ExecuteResticCommand(options, cmd...)
 		return err
 	}
 }
@@ -160,7 +165,6 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	args = append([]string{"restic"}, args...)
 	docker := []string{
 		"run", "--rm",
-		"--pull", "always",
 		"--entrypoint", "ash",
 		"--workdir", dir,
 		"--volume", volume + ":" + dir,
@@ -194,6 +198,7 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	for key, value := range env {
 		docker = append(docker, "--env", key+"="+value)
 	}
-	docker = append(docker, "cupcakearmy/autorestic:"+VERSION, "-c", strings.Join(args, " "))
+
+	docker = append(docker, flags.DOCKER_IMAGE, "-c", strings.Join(args, " "))
 	return ExecuteCommand(options, docker...)
 }
