@@ -6,7 +6,7 @@ RUN go mod download
 COPY . .
 RUN go build
 
-FROM restic/restic:0.14.0
+FROM restic/restic:0.15.0
 RUN apk add --no-cache rclone bash
 COPY --from=builder /app/autorestic /usr/bin/autorestic
 ENTRYPOINT []
