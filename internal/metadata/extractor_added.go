@@ -14,9 +14,9 @@ func (e addedExtractor) Matches(line string) bool {
 }
 func (e addedExtractor) Extract(metadata *BackupLogMetadata, line string) {
 	// Sample line: "Added to the repo: 0 B"
-	metadata.AddedSize = strings.TrimSpace(e.re.ReplaceAllString(line, ""))
+	metadata.AddedSize = strings.TrimSpace(e.re.ReplaceAllString(line, "$2"))
 }
 
 func NewAddedExtractor() MetadatExtractor {
-	return addedExtractor{regexp.MustCompile(`(?i)^Added to the repo:`)}
+	return addedExtractor{regexp.MustCompile(`(?i)^Added to the repo(sitory)?: ([\d\.]+ \w+)( \([\d\.]+[\w\s]+\))?`)}
 }
