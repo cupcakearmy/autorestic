@@ -169,6 +169,9 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 		"--workdir", dir,
 		"--volume", volume + ":" + dir,
 	}
+	if flags.DOCKER_HOST != "" {
+		docker = append([]string{"--host", flags.DOCKER_HOST}, docker...)
+	}
 	// Use of docker host, not the container host
 	if hostname, err := os.Hostname(); err == nil {
 		docker = append(docker, "--hostname", hostname)
