@@ -38,7 +38,7 @@ func (b Backend) generateRepo() (string, error) {
 	case "local":
 		return GetPathRelativeToConfig(b.Path)
 	case "rest":
-		parsed, err := url.Parse(b.Path)
+		parsed, err := url.Parse(os.ExpandEnv(b.Path))
 		if err != nil {
 			return "", err
 		}
