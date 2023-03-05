@@ -4,7 +4,11 @@
 package main
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -31,12 +35,37 @@ type buildOptions struct {
 	Target, Arch, Version string
 }
 
-func build(options buildOptions, wg *sync.WaitGroup) {
-	fmt.Printf("Building %s %s\n", options.Target, options.Arch)
+const (
+	CHECKSUM_MD5     = "MD5SUMS"
+	CHECKSUM_SHA_1   = "SHA1SUMS"
+	CHECKSUM_SHA_256 = "SHA256SUMS"
+)
+
+type Checksums struct {
+	filename, md5, sha1, sha256 string
+}
+
+func writeChecksums(checksums *[]Checksums) {
+	FILE_MD5, _ := os.OpenFile(path.Join(DIR, CHECKSUM_MD5), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	defer FILE_MD5.Close()
+	FILE_SHA1, _ := os.OpenFile(path.Join(DIR, CHECKSUM_SHA_1), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	defer FILE_SHA1.Close()
+	FILE_SHA256, _ := os.OpenFile(path.Join(DIR, CHECKSUM_SHA_256), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	defer FILE_SHA256.Close()
+
+	for _, checksum := range *checksums {
+		fmt.Fprintf(FILE_MD5, "%s %s\n", checksum.md5, checksum.filename)
+		fmt.Fprintf(FILE_SHA1, "%s %s\n", checksum.sha1, checksum.filename)
+		fmt.Fprintf(FILE_SHA256, "%s %s\n", checksum.sha256, checksum.filename)
+	}
+}
+
+func build(options buildOptions, wg *sync.WaitGroup, checksums *[]Checksums) {
+	defer wg.Done()
+
+	fmt.Printf("Building: %s %s\n", options.Target, options.Arch)
 	out := fmt.Sprintf("autorestic_%s_%s_%s", options.Version, options.Target, options.Arch)
 	out = path.Join(DIR, out)
-	out, _ = filepath.Abs(out)
-	fmt.Println(out)
 
 	// Build
 	{
@@ -65,22 +94,39 @@ func build(options buildOptions, wg *sync.WaitGroup) {
 			panic(err)
 		}
 	}
-	wg.Done()
+
+	// Checksum
+	{
+		file := out + ".bz2"
+		content, _ := ioutil.ReadFile(file)
+		*checksums = append(*checksums, Checksums{
+			filename: path.Base(file),
+			md5:      fmt.Sprintf("%x", md5.Sum(content)),
+			sha1:     fmt.Sprintf("%x", sha1.Sum(content)),
+			sha256:   fmt.Sprintf("%x", sha256.Sum256(content)),
+		})
+	}
+
+	fmt.Printf("Built: %s\n", path.Base(out))
 }
 
 func main() {
 	os.RemoveAll(DIR)
 	v := internal.VERSION
+	checksums := []Checksums{}
+
+	// Build async
 	var wg sync.WaitGroup
 	for target, archs := range targets {
 		for _, arch := range archs {
 			wg.Add(1)
-			build(buildOptions{
+			go build(buildOptions{
 				Target:  target,
 				Arch:    arch,
 				Version: v,
-			}, &wg)
+			}, &wg, &checksums)
 		}
 	}
 	wg.Wait()
+	writeChecksums(&checksums)
 }
