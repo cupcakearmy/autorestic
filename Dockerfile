@@ -7,7 +7,7 @@ COPY . .
 RUN go build
 
 FROM restic/restic:0.15.1
-RUN apk add --no-cache rclone bash
+RUN apk add --no-cache rclone bash fuse
 COPY --from=builder /app/autorestic /usr/bin/autorestic
 ENTRYPOINT []
 CMD [ "autorestic" ]
