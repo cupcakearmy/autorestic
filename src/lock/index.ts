@@ -51,11 +51,11 @@ export function lockRepo(ctx: Context, repo: string) {
  */
 export async function waitForRepo(ctx: Context, repo: string, timeout = 10) {
   const now = Date.now()
-  while (Date.now() - now < timeout * 1_000) {
+  while (Date.now() - now <= timeout * 1_000) {
     try {
       lockRepo(ctx, repo)
       l.trace('repo is free again', { repo })
-      break
+      return
     } catch {
       l.trace('waiting for repo to be unlocked', { repo })
       await wait(0.1) // Wait for 100ms
