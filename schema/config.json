@@ -1,0 +1,252 @@
+{
+  "$ref": "#/definitions/mySchema",
+  "definitions": {
+    "mySchema": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "description": "version number"
+        },
+        "repos": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "local",
+                  "sftp",
+                  "rest",
+                  "swift",
+                  "s3",
+                  "b2",
+                  "azure",
+                  "gs",
+                  "rclone"
+                ],
+                "description": "type of repository"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "description": "restic path"
+              },
+              "key": {
+                "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/path",
+                "description": "encryption key for the repository"
+              },
+              "env": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/path",
+                  "description": "value of the environment variable"
+                },
+                "description": "environment variables"
+              },
+              "options": {
+                "type": "object",
+                "properties": {
+                  "all": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "type": "boolean",
+                          "const": true,
+                          "description": "boolean flag"
+                        },
+                        {
+                          "anyOf": [
+                            {
+                              "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/path",
+                              "description": "non-empty string that can extrapolate env variables inside it"
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/options/properties/all/additionalProperties/anyOf/1/anyOf/0"
+                              },
+                              "minItems": 1
+                            }
+                          ]
+                        }
+                      ],
+                      "description": "value of option"
+                    }
+                  },
+                  "backup": {
+                    "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/options/properties/all"
+                  },
+                  "forget": {
+                    "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/options/properties/all"
+                  }
+                },
+                "additionalProperties": false,
+                "description": "options"
+              }
+            },
+            "required": [
+              "type",
+              "path",
+              "key"
+            ],
+            "additionalProperties": false
+          },
+          "description": "available repositories"
+        },
+        "locations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/path",
+                    "description": "local path to backup"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/mySchema/properties/locations/additionalProperties/properties/from/anyOf/0"
+                    },
+                    "minItems": 1
+                  }
+                ]
+              },
+              "to": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/path",
+                    "description": "repository to backup to"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/mySchema/properties/locations/additionalProperties/properties/to/anyOf/0"
+                    },
+                    "minItems": 1
+                  }
+                ]
+              },
+              "copy": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/path",
+                      "description": "destination repository"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/mySchema/properties/locations/additionalProperties/properties/copy/additionalProperties/anyOf/0"
+                      },
+                      "minItems": 1
+                    }
+                  ]
+                }
+              },
+              "cron": {
+                "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/path",
+                "description": "execute backups for the given cron job"
+              },
+              "hooks": {
+                "type": "object",
+                "properties": {
+                  "before": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/path",
+                        "description": "command to be executed"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/mySchema/properties/locations/additionalProperties/properties/hooks/properties/before/anyOf/0"
+                        },
+                        "minItems": 1
+                      }
+                    ],
+                    "description": "list of commands"
+                  },
+                  "after": {
+                    "$ref": "#/definitions/mySchema/properties/locations/additionalProperties/properties/hooks/properties/before",
+                    "description": "list of commands"
+                  },
+                  "failure": {
+                    "$ref": "#/definitions/mySchema/properties/locations/additionalProperties/properties/hooks/properties/before",
+                    "description": "list of commands"
+                  },
+                  "success": {
+                    "$ref": "#/definitions/mySchema/properties/locations/additionalProperties/properties/hooks/properties/before",
+                    "description": "list of commands"
+                  }
+                },
+                "additionalProperties": false,
+                "description": "hooks to be executed"
+              },
+              "options": {
+                "type": "object",
+                "properties": {
+                  "all": {
+                    "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/options/properties/all"
+                  },
+                  "backup": {
+                    "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/options/properties/backup"
+                  },
+                  "forget": {
+                    "$ref": "#/definitions/mySchema/properties/repos/additionalProperties/properties/options/properties/forget"
+                  }
+                },
+                "additionalProperties": false,
+                "description": "native restic options"
+              },
+              "forget": {
+                "anyOf": [
+                  {
+                    "type": "boolean",
+                    "description": "automatically run \"forget\" when backing up"
+                  },
+                  {
+                    "type": "string",
+                    "const": "prune",
+                    "description": "also prune when forgetting"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "from",
+              "to"
+            ],
+            "additionalProperties": false,
+            "description": "Location"
+          },
+          "description": "available locations"
+        },
+        "global": {
+          "type": "object",
+          "properties": {
+            "options": {
+              "$ref": "#/definitions/mySchema/properties/locations/additionalProperties/properties/options",
+              "description": "native restic options"
+            }
+          },
+          "additionalProperties": false,
+          "description": "global configuration"
+        },
+        "extras": {}
+      },
+      "required": [
+        "version",
+        "repos",
+        "locations"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

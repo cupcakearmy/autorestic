@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "name": "autorestic",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "schema:gen": "bun run ./scripts/generateSchema.ts",
+    "bin": "bun build ./src/index.ts --compile --outfile autorestic"
+  },
+  "devDependencies": {
+    "bun-types": "^0.6.0",
+    "typescript": "^5.0.0",
+    "zod-to-json-schema": "^3.21.2"
+  },
+  "dependencies": {
+    "@commander-js/extra-typings": "^11.0.0",
+    "commander": "^11.0.0",
+    "pino": "^8.14.1",
+    "pino-pretty": "^10.0.0",
+    "yaml": "^2.3.1",
+    "zod": "^3.21.4"
+  }
+}
