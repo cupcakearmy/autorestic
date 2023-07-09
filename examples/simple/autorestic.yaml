@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../../schema/config.json
+version: 3
+
+repos:
+  foo:
+    type: local
+    path: ./repo
+    # key: foobar
+  # remote:
+  #   type: rest
+  #   path: https://${USER}:$PASS@example.org:8000/my_backup_repo/
+  #   key: password
+
+locations:
+  bar:
+    from: ./data
+    to: foo
