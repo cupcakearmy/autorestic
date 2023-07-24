@@ -1,6 +1,6 @@
 # Cron
 
-Often it is usefully to trigger backups automatically. For this we can specify a `cron` attribute to each location.
+Often it is useful to trigger backups automatically. For this, we can specify a `cron` attribute to each location.
 
 ```yaml | .autorestic.yml
 locations:
@@ -10,15 +10,15 @@ locations:
     cron: '0 3 * * 0' # Every Sunday at 3:00
 ```
 
-Here is a awesome website with [some examples](https://crontab.guru/examples.html) and an [explorer](https://crontab.guru/)
+Here is an awesome website with [some examples](https://crontab.guru/examples.html) and an [explorer](https://crontab.guru/).
 
 ## Installing the cron
 
-**This has to be done only once, regardless of now many cron jobs you have in your config file.**
+**This has to be done only once, regardless of how many cron jobs you have in your config file.**
 
 To actually enable cron jobs you need something to call `autorestic cron` on a timed schedule.
 Note that the schedule has nothing to do with the `cron` attribute in each location.
-My advise would be to trigger the command every 5min, but if you have a cronjob that runs only once a week, it's probably enough to schedule it once a day.
+My advice would be to trigger the command every 5min, but if you have a cronjob that runs only once a week, it's probably enough to schedule it once a day.
 
 ### Crontab
 
@@ -50,6 +50,6 @@ To debug a cron job you can use
 
 Now you can add as many `cron` attributes as you wish in the config file ⏱
 
-> Also note that manually triggered backups with `autorestic backup` will not influence the cron timeline, they are willingly not linked.
+> Also note that manually triggered backups with `autorestic backup` will not influence the cron timeline, they are intentionally not linked.
 
 > :ToCPrevNext
