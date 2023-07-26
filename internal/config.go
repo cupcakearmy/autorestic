@@ -11,23 +11,20 @@ import (
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/cupcakearmy/autorestic/internal/options"
+	"github.com/cupcakearmy/autorestic/internal/utils"
 	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.7.7"
-
-type OptionMap map[string][]interface{}
-type Options map[string]OptionMap
-
 type Config struct {
 	Version   string              `mapstructure:"version"`
 	Extras    interface{}         `mapstructure:"extras"`
 	Locations map[string]Location `mapstructure:"locations"`
 	Backends  map[string]Backend  `mapstructure:"backends"`
-	Global    Options             `mapstructure:"global"`
+	Global    options.Options     `mapstructure:"global"`
 }
 
 var once sync.Once
@@ -184,7 +181,7 @@ func CheckConfig() error {
 	if c == nil {
 		return fmt.Errorf("config could not be loaded/found")
 	}
-	if !CheckIfResticIsCallable() {
+	if !utils.CheckIfResticIsCallable() {
 		return fmt.Errorf(`%s was not found. Install either with "autorestic install" or manually`, flags.RESTIC_BIN)
 	}
 	for name, backend := range c.Backends {
@@ -263,7 +260,7 @@ func AddFlagsToCommand(cmd *cobra.Command, backend bool) {
 
 func (c *Config) SaveConfig() error {
 	file := viper.ConfigFileUsed()
-	if err := CopyFile(file, file+".old"); err != nil {
+	if err := utils.CopyFile(file, file+".old"); err != nil {
 		return err
 	}
 	colors.Secondary.Println("Saved a backup copy of your file next to the original.")
@@ -274,40 +271,11 @@ func (c *Config) SaveConfig() error {
 	return viper.WriteConfig()
 }
 
-func optionToString(option string) string {
-	if !strings.HasPrefix(option, "-") {
-		return "--" + option
-	}
-	return option
-}
-
-func appendOptionsToSlice(str *[]string, options OptionMap) {
-	for key, values := range options {
-		for _, value := range values {
-			// Bool
-			asBool, ok := value.(bool)
-			if ok && asBool {
-				*str = append(*str, optionToString(key))
-				continue
-			}
-			*str = append(*str, optionToString(key), fmt.Sprint(value))
-		}
-	}
-}
-
-func getOptions(options Options, keys []string) []string {
-	var selected []string
-	for _, key := range keys {
-		appendOptionsToSlice(&selected, options[key])
-	}
-	return selected
-}
-
 func combineBackendOptions(key string, b Backend) []string {
 	// Priority: backend > global
 	var options []string
-	gFlags := getOptions(GetConfig().Global, []string{key})
-	bFlags := getOptions(b.Options, []string{"all", key})
+	gFlags := GetConfig().Global.GetOptions([]string{key})
+	bFlags := b.Options.GetOptions([]string{"all", key})
 	options = append(options, gFlags...)
 	options = append(options, bFlags...)
 	return options
@@ -316,9 +284,9 @@ func combineBackendOptions(key string, b Backend) []string {
 func combineAllOptions(key string, l Location, b Backend) []string {
 	// Priority: location > backend > global
 	var options []string
-	gFlags := getOptions(GetConfig().Global, []string{key})
-	bFlags := getOptions(b.Options, []string{"all", key})
-	lFlags := getOptions(l.Options, []string{"all", key})
+	gFlags := GetConfig().Global.GetOptions([]string{key})
+	bFlags := b.Options.GetOptions([]string{"all", key})
+	lFlags := l.Options.GetOptions([]string{"all", key})
 	options = append(options, gFlags...)
 	options = append(options, bFlags...)
 	options = append(options, lFlags...)

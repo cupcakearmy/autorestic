@@ -1,4 +1,4 @@
-package internal
+package utils
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
+	"github.com/cupcakearmy/autorestic/internal/options"
 	"github.com/fatih/color"
 )
 
@@ -26,6 +27,7 @@ type ExecuteOptions struct {
 	Envs    map[string]string
 	Dir     string
 	Silent  bool
+	Global  options.Options
 }
 
 type ColoredWriter struct {
@@ -78,8 +80,7 @@ func ExecuteCommand(options ExecuteOptions, args ...string) (int, string, error)
 
 func ExecuteResticCommand(options ExecuteOptions, args ...string) (int, string, error) {
 	options.Command = flags.RESTIC_BIN
-	var c = GetConfig()
-	var optionsAsString = getOptions(c.Global, []string{"all"})
+	var optionsAsString = options.Global.GetOptions([]string{"all"})
 	args = append(optionsAsString, args...)
 	return ExecuteCommand(options, args...)
 }

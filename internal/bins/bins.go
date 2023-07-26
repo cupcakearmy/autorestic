@@ -14,9 +14,10 @@ import (
 	"strings"
 
 	"github.com/blang/semver/v4"
-	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
+	"github.com/cupcakearmy/autorestic/internal/utils"
+	"github.com/cupcakearmy/autorestic/internal/version"
 )
 
 const INSTALL_PATH = "/usr/local/bin"
@@ -115,7 +116,7 @@ func downloadAndInstallAsset(body GithubRelease, name string) error {
 }
 
 func InstallRestic() error {
-	installed := internal.CheckIfCommandIsCallable("restic")
+	installed := utils.CheckIfCommandIsCallable("restic")
 	if installed {
 		colors.Body.Println("restic already installed")
 		return nil
@@ -129,7 +130,7 @@ func InstallRestic() error {
 }
 
 func upgradeRestic() error {
-	_, _, err := internal.ExecuteCommand(internal.ExecuteOptions{
+	_, _, err := utils.ExecuteCommand(utils.ExecuteOptions{
 		Command: flags.RESTIC_BIN,
 	}, "self-update")
 	return err
@@ -147,7 +148,7 @@ func Upgrade(restic bool) error {
 	}
 
 	// Upgrade self
-	current, err := semver.ParseTolerant(internal.VERSION)
+	current, err := semver.ParseTolerant(version.VERSION)
 	if err != nil {
 		return err
 	}
