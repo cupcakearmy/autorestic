@@ -55,7 +55,7 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 		viper.AutomaticEnv()
 		if viper.ConfigFileUsed() == "" {
-			colors.Error.Println("cannot read config file %s\n", cfgFile)
+			colors.Error.Printf("cannot read config file %s\n", cfgFile)
 			os.Exit(1)
 		}
 	} else {
