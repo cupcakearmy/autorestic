@@ -24,6 +24,10 @@ You can download the right binary from the release page and simply copy it to `/
 
 If you are on macOS you can install through brew: `brew install autorestic`.
 
+### Fedora
+
+Fedora users can install the [autorestic](https://src.fedoraproject.org/rpms/autorestic/) package with `dnf install autorestic`.
+
 ### AUR
 
 ~~If you are on Arch there is an [AUR Package](https://aur.archlinux.org/packages/autorestic-bin/) (looking for maintainers).~~ - Deprecated
