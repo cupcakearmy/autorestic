@@ -33,6 +33,13 @@ const (
 )
 
 type Hooks struct {
+	RestoreOption HooksList `mapstructure:"restore,omitempty"`
+	BackupOption  HooksList `mapstructure:"backup,omitempty"`
+}
+
+type LocationCopy = map[string][]string
+
+type HooksList struct {
 	Dir     string    `mapstructure:"dir"`
 	Before  HookArray `mapstructure:"before,omitempty"`
 	After   HookArray `mapstructure:"after,omitempty"`
@@ -40,18 +47,16 @@ type Hooks struct {
 	Failure HookArray `mapstructure:"failure,omitempty"`
 }
 
-type LocationCopy = map[string][]string
-
 type Location struct {
-	name         string               `mapstructure:",omitempty"`
-	From         []string             `mapstructure:"from,omitempty"`
-	Type         string               `mapstructure:"type,omitempty"`
-	To           []string             `mapstructure:"to,omitempty"`
-	Hooks        Hooks                `mapstructure:"hooks,omitempty"`
-	Cron         string               `mapstructure:"cron,omitempty"`
-	Options      Options              `mapstructure:"options,omitempty"`
-	ForgetOption LocationForgetOption `mapstructure:"forget,omitempty"`
-	CopyOption   LocationCopy         `mapstructure:"copy,omitempty"`
+	name          string               `mapstructure:",omitempty"`
+	From          []string             `mapstructure:"from,omitempty"`
+	Type          string               `mapstructure:"type,omitempty"`
+	To            []string             `mapstructure:"to,omitempty"`
+	Hooks         Hooks                `mapstructure:"hooks,omitempty"`
+	Cron          string               `mapstructure:"cron,omitempty"`
+	Options       Options              `mapstructure:"options,omitempty"`
+	ForgetOption  LocationForgetOption `mapstructure:"forget,omitempty"`
+	CopyOption    LocationCopy         `mapstructure:"copy,omitempty"`
 }
 
 func GetLocation(name string) (Location, bool) {
@@ -123,12 +128,12 @@ func (l Location) validate() error {
 	return nil
 }
 
-func (l Location) ExecuteHooks(commands []string, options ExecuteOptions) error {
+func (l Location) ExecuteHooks(commands []string, directory string, options ExecuteOptions) error {
 	if len(commands) == 0 {
 		return nil
 	}
-	if l.Hooks.Dir != "" {
-		if dir, err := GetPathRelativeToConfig(l.Hooks.Dir); err != nil {
+	if directory != "" {
+		if dir, err := GetPathRelativeToConfig(directory); err != nil {
 			return err
 		} else {
 			options.Dir = dir
@@ -190,7 +195,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 	}
 
 	// Hooks
-	if err := l.ExecuteHooks(l.Hooks.Before, options); err != nil {
+	if err := l.ExecuteHooks(l.Hooks.BackupOption.Before, l.Hooks.BackupOption.Dir, options); err != nil {
 		errors = append(errors, err)
 		goto after
 	}
@@ -290,7 +295,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 	}
 
 	// After hooks
-	if err := l.ExecuteHooks(l.Hooks.After, options); err != nil {
+	if err := l.ExecuteHooks(l.Hooks.BackupOption.After, l.Hooks.BackupOption.Dir, options); err != nil {
 		errors = append(errors, err)
 	}
 
@@ -298,11 +303,11 @@ after:
 	var commands []string
 	var isSuccess = len(errors) == 0
 	if isSuccess {
-		commands = l.Hooks.Success
+		commands = l.Hooks.BackupOption.Success
 	} else {
-		commands = l.Hooks.Failure
+		commands = l.Hooks.BackupOption.Failure
 	}
-	if err := l.ExecuteHooks(commands, options); err != nil {
+	if err := l.ExecuteHooks(commands, l.Hooks.BackupOption.Dir, options); err != nil {
 		errors = append(errors, err)
 	}
 
@@ -370,11 +375,35 @@ func buildRestoreCommand(l Location, to string, snapshot string, options []strin
 	return base
 }
 
-func (l Location) Restore(to, from string, force bool, snapshot string, options []string) error {
+func (l Location) Restore(to, from string, force bool, snapshot string, options []string) (errors []error) {
+	cwd, _ := GetPathRelativeToConfig(".")
+	hooksOptions := ExecuteOptions{
+		Command: "bash",
+		Dir:     cwd,
+		Envs: map[string]string{
+			"AUTORESTIC_LOCATION": l.name,
+		},
+	}
+
+	defer func() {
+		var commands []string
+		var isSuccess = len(errors) == 0
+		if isSuccess {
+			commands = l.Hooks.RestoreOption.Success
+		} else {
+			commands = l.Hooks.RestoreOption.Failure
+		}
+		if err := l.ExecuteHooks(commands, l.Hooks.RestoreOption.Dir, hooksOptions); err != nil {
+			errors = append(errors, err)
+		}
+
+		colors.Success.Println("Done")
+	}()
+
 	if from == "" {
 		from = l.To[0]
 	} else if !l.hasBackend(from) {
-		return fmt.Errorf("invalid backend: \"%s\"", from)
+		errors = append(errors, fmt.Errorf("invalid backend: \"%s\"", from))
 	}
 
 	if snapshot == "" {
@@ -385,15 +414,23 @@ func (l Location) Restore(to, from string, force bool, snapshot string, options 
 	backend, _ := GetBackend(from)
 	colors.Secondary.Printf("Restoring %s@%s → %s\n", snapshot, backend.name, to)
 
+	// Before Hooks for restore
+	if err := l.ExecuteHooks(l.Hooks.RestoreOption.Before, l.Hooks.RestoreOption.Dir, hooksOptions); err != nil {
+		errors = append(errors, err)
+		return
+	}
+
 	t, err := l.getType()
 	if err != nil {
-		return err
+		errors = append(errors, err)
+		return
 	}
 	switch t {
 	case TypeLocal:
 		to, err = filepath.Abs(to)
 		if err != nil {
-			return err
+			errors = append(errors, err)
+			return
 		}
 		// Check if target is empty
 		if !force {
@@ -402,14 +439,17 @@ func (l Location) Restore(to, from string, force bool, snapshot string, options 
 			if err == nil {
 				files, err := ioutil.ReadDir(to)
 				if err != nil {
-					return err
+					errors = append(errors, err)
+					return
 				}
 				if len(files) > 0 {
-					return notEmptyError
+					errors = append(errors, notEmptyError)
+					return
 				}
 			} else {
 				if !os.IsNotExist(err) {
-					return err
+					errors = append(errors, err)
+					return
 				}
 			}
 		}
@@ -418,10 +458,17 @@ func (l Location) Restore(to, from string, force bool, snapshot string, options 
 		_, _, err = backend.ExecDocker(l, buildRestoreCommand(l, "/", snapshot, options))
 	}
 	if err != nil {
-		return err
+		errors = append(errors, err)
+		return
 	}
-	colors.Success.Println("Done")
-	return nil
+
+	// After Hooks for restore
+	if err := l.ExecuteHooks(l.Hooks.RestoreOption.After, l.Hooks.RestoreOption.Dir, hooksOptions); err != nil {
+		errors = append(errors, err)
+		return
+	}
+
+	return
 }
 
 func (l Location) RunCron() error {

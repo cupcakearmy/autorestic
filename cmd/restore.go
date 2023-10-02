@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 )
@@ -42,8 +43,13 @@ var restoreCmd = &cobra.Command{
 			}
 		}
 
-		err = l.Restore(target, from, force, snapshot, optional)
-		CheckErr(err)
+		errs := l.Restore(target, from, force, snapshot, optional)
+		for _, err := range errs {
+			colors.Error.Printf("%s\n\n", err)
+		}
+		if len(errs) > 0 {
+			CheckErr(fmt.Errorf("%d errors were found", len(errs)))
+		}
 	},
 }
 
