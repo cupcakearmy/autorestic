@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/cupcakearmy/autorestic/internal/version"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -26,7 +26,7 @@ func CheckErr(err error) {
 var cfgFile string
 
 var rootCmd = &cobra.Command{
-	Version: internal.VERSION,
+	Version: version.VERSION,
 	Use:     "autorestic",
 	Short:   "CLI Wrapper for restic",
 	Long:    "Documentation:\thttps://autorestic.vercel.app\nSupport:\thttps://discord.gg/wS7RpYTYd2",
@@ -41,7 +41,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&flags.CI, "ci", false, "CI mode disabled interactive mode and colors and enables verbosity")
 	rootCmd.PersistentFlags().BoolVarP(&flags.VERBOSE, "verbose", "v", false, "verbose mode")
 	rootCmd.PersistentFlags().StringVar(&flags.RESTIC_BIN, "restic-bin", "restic", "specify custom restic binary")
-	rootCmd.PersistentFlags().StringVar(&flags.DOCKER_IMAGE, "docker-image", "cupcakearmy/autorestic:"+internal.VERSION, "specify a custom docker image")
+	rootCmd.PersistentFlags().StringVar(&flags.DOCKER_IMAGE, "docker-image", "cupcakearmy/autorestic:"+version.VERSION, "specify a custom docker image")
 	cobra.OnInitialize(initConfig)
 }
 

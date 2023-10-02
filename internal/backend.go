@@ -10,6 +10,8 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
+	"github.com/cupcakearmy/autorestic/internal/options"
+	"github.com/cupcakearmy/autorestic/internal/utils"
 )
 
 type BackendRest struct {
@@ -24,7 +26,7 @@ type Backend struct {
 	Key     string            `mapstructure:"key,omitempty"`
 	Env     map[string]string `mapstructure:"env,omitempty"`
 	Rest    BackendRest       `mapstructure:"rest,omitempty"`
-	Options Options           `mapstructure:"options,omitempty"`
+	Options options.Options   `mapstructure:"options,omitempty"`
 }
 
 func GetBackend(name string) (Backend, bool) {
@@ -120,11 +122,15 @@ func (b Backend) validate() error {
 	if err != nil {
 		return err
 	}
-	options := ExecuteOptions{Envs: env, Silent: true}
+	options := utils.ExecuteOptions{
+		Envs: env,
+		Silent: true,
+		Global: GetConfig().Global,
+	}
 	// Check if already initialized
 	cmd := []string{"check"}
 	cmd = append(cmd, combineBackendOptions("check", b)...)
-	_, _, err = ExecuteResticCommand(options, cmd...)
+	_, _, err = utils.ExecuteResticCommand(options, cmd...)
 	if err == nil {
 		return nil
 	} else {
@@ -132,7 +138,7 @@ func (b Backend) validate() error {
 		colors.Body.Printf("Initializing backend \"%s\"...\n", b.name)
 		cmd := []string{"init"}
 		cmd = append(cmd, combineBackendOptions("init", b)...)
-		_, _, err := ExecuteResticCommand(options, cmd...)
+		_, _, err := utils.ExecuteResticCommand(options, cmd...)
 		return err
 	}
 }
@@ -142,8 +148,11 @@ func (b Backend) Exec(args []string) error {
 	if err != nil {
 		return err
 	}
-	options := ExecuteOptions{Envs: env}
-	_, out, err := ExecuteResticCommand(options, args...)
+	options := utils.ExecuteOptions{
+		Envs: env,
+		Global: GetConfig().Global,
+	}
+	_, out, err := utils.ExecuteResticCommand(options, args...)
 	if err != nil {
 		colors.Error.Println(out)
 		return err
@@ -157,7 +166,7 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 		return -1, "", err
 	}
 	volume := l.From[0]
-	options := ExecuteOptions{
+	options := utils.ExecuteOptions{
 		Command: "docker",
 		Envs:    env,
 	}
@@ -185,7 +194,7 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 		// No additional setup needed
 	case "rclone":
 		// Read host rclone config and mount it into the container
-		code, configFile, err := ExecuteCommand(ExecuteOptions{Command: "rclone"}, "config", "file")
+		code, configFile, err := utils.ExecuteCommand(utils.ExecuteOptions{Command: "rclone"}, "config", "file")
 		if err != nil {
 			return code, "", err
 		}
@@ -200,5 +209,5 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	}
 
 	docker = append(docker, flags.DOCKER_IMAGE, "-c", strings.Join(args, " "))
-	return ExecuteCommand(options, docker...)
+	return utils.ExecuteCommand(options, docker...)
 }

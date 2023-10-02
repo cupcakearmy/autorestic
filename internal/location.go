@@ -12,6 +12,8 @@ import (
 	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/cupcakearmy/autorestic/internal/metadata"
+	"github.com/cupcakearmy/autorestic/internal/utils"
+	"github.com/cupcakearmy/autorestic/internal/options"
 	"github.com/robfig/cron"
 )
 
@@ -49,7 +51,7 @@ type Location struct {
 	To           []string             `mapstructure:"to,omitempty"`
 	Hooks        Hooks                `mapstructure:"hooks,omitempty"`
 	Cron         string               `mapstructure:"cron,omitempty"`
-	Options      Options              `mapstructure:"options,omitempty"`
+	Options      options.Options      `mapstructure:"options,omitempty"`
 	ForgetOption LocationForgetOption `mapstructure:"forget,omitempty"`
 	CopyOption   LocationCopy         `mapstructure:"copy,omitempty"`
 }
@@ -101,14 +103,14 @@ func (l Location) validate() error {
 		if _, ok := GetBackend(copyFrom); !ok {
 			return fmt.Errorf(`location "%s" has an invalid backend "%s" in copy option`, l.name, copyFrom)
 		}
-		if !ArrayContains(l.To, copyFrom) {
+		if !utils.ArrayContains(l.To, copyFrom) {
 			return fmt.Errorf(`location "%s" has an invalid copy from "%s"`, l.name, copyFrom)
 		}
 		for _, copyToTarget := range copyTo {
 			if _, ok := GetBackend(copyToTarget); !ok {
 				return fmt.Errorf(`location "%s" has an invalid backend "%s" in copy option`, l.name, copyToTarget)
 			}
-			if ArrayContains(l.To, copyToTarget) {
+			if utils.ArrayContains(l.To, copyToTarget) {
 				return fmt.Errorf(`location "%s" cannot copy to "%s" as it's already a target`, l.name, copyToTarget)
 			}
 		}
@@ -123,7 +125,7 @@ func (l Location) validate() error {
 	return nil
 }
 
-func (l Location) ExecuteHooks(commands []string, options ExecuteOptions) error {
+func (l Location) ExecuteHooks(commands []string, options utils.ExecuteOptions) error {
 	if len(commands) == 0 {
 		return nil
 	}
@@ -137,7 +139,7 @@ func (l Location) ExecuteHooks(commands []string, options ExecuteOptions) error 
 	colors.Secondary.Println("\nRunning hooks")
 	for _, command := range commands {
 		colors.Body.Println("> " + command)
-		_, out, err := ExecuteCommand(options, "-c", command)
+		_, out, err := utils.ExecuteCommand(options, "-c", command)
 		if err != nil {
 			colors.Error.Println(out)
 			return err
@@ -176,7 +178,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 		return errors
 	}
 	cwd, _ := GetPathRelativeToConfig(".")
-	options := ExecuteOptions{
+	options := utils.ExecuteOptions{
 		Command: "bash",
 		Dir:     cwd,
 		Envs: map[string]string{
@@ -221,8 +223,9 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 			cmd = append(cmd, "--tag", buildTag("cron"))
 		}
 		cmd = append(cmd, "--tag", l.getLocationTags())
-		backupOptions := ExecuteOptions{
+		backupOptions := utils.ExecuteOptions{
 			Envs: env,
+			Global: GetConfig().Global,
 		}
 
 		var code int = 0
@@ -237,9 +240,9 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 				}
 				cmd = append(cmd, path)
 			}
-			code, out, err = ExecuteResticCommand(backupOptions, cmd...)
+			code, out, err = utils.ExecuteResticCommand(backupOptions, cmd...)
 		case TypeVolume:
-			ok := CheckIfVolumeExists(l.From[0])
+			ok := utils.CheckIfVolumeExists(l.From[0])
 			if !ok {
 				errors = append(errors, fmt.Errorf("volume \"%s\" does not exist", l.From[0]))
 				continue
@@ -277,8 +280,9 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 					for k, v := range env2 {
 						env[k+"2"] = v
 					}
-					_, _, err := ExecuteResticCommand(ExecuteOptions{
+					_, _, err := utils.ExecuteResticCommand(utils.ExecuteOptions{
 						Envs: env,
+						Global: GetConfig().Global,
 					}, "copy", md.SnapshotID)
 
 					if err != nil {
@@ -335,8 +339,9 @@ func (l Location) Forget(prune bool, dry bool) error {
 		if err != nil {
 			return nil
 		}
-		options := ExecuteOptions{
+		options := utils.ExecuteOptions{
 			Envs: env,
+			Global: GetConfig().Global,
 		}
 		cmd := []string{"forget", "--tag", l.getLocationTags()}
 		if prune {
@@ -346,7 +351,7 @@ func (l Location) Forget(prune bool, dry bool) error {
 			cmd = append(cmd, "--dry-run")
 		}
 		cmd = append(cmd, combineAllOptions("forget", l, backend)...)
-		_, _, err = ExecuteResticCommand(options, cmd...)
+		_, _, err = utils.ExecuteResticCommand(options, cmd...)
 		if err != nil {
 			return err
 		}
