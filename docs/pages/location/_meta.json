@@ -1,0 +1,7 @@
+{
+  "index": "Overview",
+  "hooks": "Hooks",
+  "options": "Options",
+  "cron": "Cronjobs",
+  "docker": "Docker volumes"
+}
