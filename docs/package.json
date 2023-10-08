@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build",
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next"
+  },
+  "dependencies": {
+    "next": "^13.5.3",
+    "nextra": "^2.13.1",
+    "nextra-theme-docs": "^2.13.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "packageManager": "pnpm@8.8.0"
+}

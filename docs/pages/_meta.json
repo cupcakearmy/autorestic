@@ -1,0 +1,10 @@
+{
+  "index": "Home",
+  "quick": "Quick Start",
+  "installation": "Installation",
+  "config": "Configuration",
+  "location": "Locations",
+  "backend": "Backend",
+  "cli": "CLI",
+  "migration": "Migration"
+}
