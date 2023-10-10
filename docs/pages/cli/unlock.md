@@ -24,3 +24,9 @@ root       39260  0.0  0.0   6976  2696 pts/11   S+   19:41   0:00 grep autorest
 ```bash
 autorestic unlock
 ```
+
+Use the `--force` to prevent the confirmation prompt if an instance is running.
+
+```bash
+autorestic unlock --force
+```

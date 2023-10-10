@@ -20,7 +20,9 @@ To check you can run "ps aux | grep autorestic".`,
 	Run: func(cmd *cobra.Command, args []string) {
 		internal.GetConfig()
 
-		if isAutoresticRunning() {
+		force, _ := cmd.Flags().GetBool("force")
+
+		if !force && isAutoresticRunning() {
 			colors.Error.Print("Another autorestic instance is running. Are you sure you want to unlock? (yes/no): ")
 			var response string
 			fmt.Scanln(&response)
@@ -42,6 +44,7 @@ To check you can run "ps aux | grep autorestic".`,
 
 func init() {
 	rootCmd.AddCommand(unlockCmd)
+	unlockCmd.Flags().Bool("force", false, "force unlock")
 }
 
 // isAutoresticRunning checks if autorestic is running
