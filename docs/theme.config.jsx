@@ -1,6 +1,6 @@
 export default {
   logo: <span>Autorestic</span>,
-  docsRepositoryBase: 'https://github.com/cupcakearmy/autorestic/blob/main',
+  docsRepositoryBase: 'https://github.com/cupcakearmy/autorestic/tree/master/docs',
   project: {
     link: 'https://github.com/cupcakearmy/autorestic',
   },
