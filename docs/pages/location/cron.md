@@ -34,7 +34,7 @@ Then paste this at the bottom of the file and save it. Note that in this specifi
 
 ```bash
 # This is required, as it otherwise cannot find restic as a command.
-PATH="/usr/local/bin:/usr/bin:/bin"
+PATH="/usr/local/bin:$PATH"
 
 # Example running every 5 minutes
 */5 * * * * autorestic -c /path/to/my/.autorestic.yml --ci cron
