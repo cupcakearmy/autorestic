@@ -7,7 +7,7 @@ COPY . .
 RUN go build
 
 FROM restic/restic:0.16.0
-RUN apk add --no-cache rclone bash
+RUN apk add --no-cache rclone bash docker-cli
 COPY --from=builder /app/autorestic /usr/bin/autorestic
 ENTRYPOINT []
 CMD [ "autorestic" ]
