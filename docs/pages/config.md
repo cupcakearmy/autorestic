@@ -2,10 +2,11 @@
 
 ## Path
 
-By default autorestic searches for a `.autorestic.yml` file in the current directory and your home folder.
+By default autorestic searches for a `.autorestic.yml` file in the current directory, your home folder and your XDG config folder (`~/.config/` by default):
 
 - `./.autorestic.yml`
 - `~/.autorestic.yml`
+- `~/.config/autorestic/.autorestic.yml`
 
 You can also specify a custom file with the `-c path/to/some/config.yml`
 

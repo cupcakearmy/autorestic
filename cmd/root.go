@@ -59,24 +59,7 @@ func initConfig() {
 			os.Exit(1)
 		}
 	} else {
-		configPaths := []string{"."}
-
-		// Home
-		if home, err := homedir.Dir(); err == nil {
-			configPaths = append(configPaths, home)
-		}
-
-		// XDG_CONFIG_HOME
-		{
-			prefix, found := os.LookupEnv("XDG_CONFIG_HOME")
-			if !found {
-				if home, err := homedir.Dir(); err != nil {
-					prefix = filepath.Join(home, ".config")
-				}
-			}
-			xdgConfig := filepath.Join(prefix, "autorestic")
-			configPaths = append(configPaths, xdgConfig)
-		}
+		configPaths := getConfigPaths()
 		for _, cfgPath := range configPaths {
 			viper.AddConfigPath(cfgPath)
 		}
@@ -87,4 +70,23 @@ func initConfig() {
 		viper.SetConfigName(cfgFileName)
 		viper.AutomaticEnv()
 	}
+}
+
+func getConfigPaths() []string {
+	result := []string{"."}
+	if home, err := homedir.Dir(); err == nil {
+		result = append(result, home)
+	}
+
+	{
+		xdgConfigHome, found := os.LookupEnv("XDG_CONFIG_HOME")
+		if !found {
+			if home, err := homedir.Dir(); err == nil {
+				xdgConfigHome = filepath.Join(home, ".config")
+			}
+		}
+		xdgConfig := filepath.Join(xdgConfigHome, "autorestic")
+		result = append(result, xdgConfig)
+	}
+	return result
 }
