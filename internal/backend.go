@@ -143,6 +143,7 @@ func (b Backend) Exec(args []string) error {
 		return err
 	}
 	options := ExecuteOptions{Envs: env}
+	args = append(args, combineBackendOptions("exec", b)...)
 	_, out, err := ExecuteResticCommand(options, args...)
 	if err != nil {
 		colors.Error.Println(out)

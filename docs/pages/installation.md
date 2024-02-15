@@ -30,4 +30,4 @@ Fedora users can install the [autorestic](https://src.fedoraproject.org/rpms/aut
 
 ### AUR
 
-~~If you are on Arch there is an [AUR Package](https://aur.archlinux.org/packages/autorestic-bin/) (looking for maintainers).~~ - Deprecated
+If you are on Arch there is an [AUR Package](https://aur.archlinux.org/packages/autorestic-bin/)
