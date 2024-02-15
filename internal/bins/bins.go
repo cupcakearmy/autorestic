@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -37,7 +36,7 @@ func dlJSON(url string) (GithubRelease, error) {
 		return parsed, err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return parsed, err
 
@@ -73,9 +72,10 @@ func downloadAndInstallAsset(body GithubRelease, name string) error {
 			// Uncompress
 			bz := bzip2.NewReader(resp.Body)
 
-			// Save to tmp
-			// Linux does not support overwriting the file that is currently being overwritten, but it can be deleted and a new one moved in its place.
-			tmp, err := ioutil.TempFile(os.TempDir(), "autorestic-")
+			// Save to tmp file in the same directory as the install directory
+			// Linux does not support overwriting the file that is currently being running
+			// But it can be delete the old one and a new one moved in its place.
+			tmp, err := os.CreateTemp(INSTALL_PATH, "autorestic-")
 			if err != nil {
 				return err
 			}
@@ -89,22 +89,24 @@ func downloadAndInstallAsset(body GithubRelease, name string) error {
 
 			to := path.Join(INSTALL_PATH, name)
 			defer os.Remove(tmp.Name()) // Cleanup temporary file after thread exits
-			if err := os.Rename(tmp.Name(), to); err != nil {
-				colors.Error.Printf("os.Rename() failed (%v), retrying with io.Copy()\n", err.Error())
-				var src *os.File
-				var dst *os.File
-				if src, err = os.Open(tmp.Name()); err != nil {
+
+			mode := os.FileMode(0755)
+			if originalBin, err := os.Lstat(to); err == nil {
+				mode = originalBin.Mode()
+				err := os.Remove(to)
+				if err != nil {
 					return err
 				}
-				if dst, err = os.Create(to); err != nil {
-					return err
-				}
-				if _, err := io.Copy(dst, src); err != nil {
-					return err
-				}
-				if err := os.Chmod(to, 0755); err != nil {
-					return err
-				}
+			}
+
+			err = os.Rename(tmp.Name(), to)
+			if err != nil {
+				return err
+			}
+
+			err = os.Chmod(to, mode)
+			if err != nil {
+				return err
 			}
 
 			colors.Success.Printf("Successfully installed '%s' under %s\n", name, INSTALL_PATH)
