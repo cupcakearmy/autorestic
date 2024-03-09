@@ -34,7 +34,7 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 - Backup locations to multiple backends
 - Snapshot policies and pruning
 - Fully encrypted
-- Pre/After hooks
+- Before/after backup hooks
 - Exclude pattern/files
 - Cron jobs for automatic backup
 - Backup & Restore docker volume

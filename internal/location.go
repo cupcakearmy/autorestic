@@ -33,11 +33,12 @@ const (
 )
 
 type Hooks struct {
-	Dir     string    `mapstructure:"dir"`
-	Before  HookArray `mapstructure:"before,omitempty"`
-	After   HookArray `mapstructure:"after,omitempty"`
-	Success HookArray `mapstructure:"success,omitempty"`
-	Failure HookArray `mapstructure:"failure,omitempty"`
+	Dir         string    `mapstructure:"dir"`
+	PreValidate HookArray `mapstructure:"prevalidate,omitempty"`
+	Before      HookArray `mapstructure:"before,omitempty"`
+	After       HookArray `mapstructure:"after,omitempty"`
+	Success     HookArray `mapstructure:"success,omitempty"`
+	Failure     HookArray `mapstructure:"failure,omitempty"`
 }
 
 type LocationCopy = map[string][]string
@@ -184,12 +185,18 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 		},
 	}
 
+	// Hooks before location validation
+	if err := l.ExecuteHooks(l.Hooks.PreValidate, options); err != nil {
+		errors = append(errors, err)
+		goto after
+	}
+
 	if err := l.validate(); err != nil {
 		errors = append(errors, err)
 		goto after
 	}
 
-	// Hooks
+	// Hooks after location validation
 	if err := l.ExecuteHooks(l.Hooks.Before, options); err != nil {
 		errors = append(errors, err)
 		goto after
@@ -289,12 +296,13 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 		}
 	}
 
-	// After hooks
+	// After backup hooks
 	if err := l.ExecuteHooks(l.Hooks.After, options); err != nil {
 		errors = append(errors, err)
 	}
 
 after:
+	// Success/failure hooks
 	var commands []string
 	var isSuccess = len(errors) == 0
 	if isSuccess {

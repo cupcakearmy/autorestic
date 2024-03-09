@@ -6,10 +6,13 @@ They consist of a list of commands that will be executed in the same directory a
 
 The following hooks groups are supported, none are required:
 
+- `prevalidate`
 - `before`
 - `after`
 - `failure`
 - `success`
+
+The difference between `prevalidate` and `before` hooks are that `prevalidate` is run before checking the backup location is valid, including checking that the `from` directories exist. This can be useful, for example, to mount the source filesystem that contains the directories listed in `from`.
 
 ```yml | .autorestic.yml
 locations:
@@ -17,12 +20,14 @@ locations:
     from: /data
     to: my-backend
     hooks:
+      prevalidate:
+        - echo "Checks"
       before:
         - echo "One"
         - echo "Two"
         - echo "Three"
       after:
-        - echo "Byte"
+        - echo "Bye"
       failure:
         - echo "Something went wrong"
       success:
@@ -31,13 +36,15 @@ locations:
 
 ## Flowchart
 
-1. `before` hook
-2. Run backup
-3. `after` hook
-4. - `success` hook if no errors were found
+1. `prevalidate` hook
+2. Check backup location
+3. `before` hook
+4. Run backup
+5. `after` hook
+6. - `success` hook if no errors were found
    - `failure` hook if at least one error was encountered
 
-If the `before` hook encounters errors the backup and `after` hooks will be skipped and only the `failed` hooks will run.
+If either the `prevalidate` or `before` hook encounters errors then the backup and `after` hooks will be skipped and only the `failed` hooks will run.
 
 ## Environment variables
 
