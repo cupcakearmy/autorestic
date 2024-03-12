@@ -132,10 +132,11 @@ func (c *Config) Describe() {
 
 		tmp = ""
 		hooks := map[string][]string{
-			"Before":  l.Hooks.Before,
-			"After":   l.Hooks.After,
-			"Failure": l.Hooks.Failure,
-			"Success": l.Hooks.Success,
+			"PreValidate": l.Hooks.PreValidate,
+			"Before":      l.Hooks.Before,
+			"After":       l.Hooks.After,
+			"Failure":     l.Hooks.Failure,
+			"Success":     l.Hooks.Success,
 		}
 		for hook, commands := range hooks {
 			if len(commands) > 0 {

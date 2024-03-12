@@ -56,6 +56,8 @@ version: 2
 
 extras:
   hooks: &foo
+    prevalidate:
+      - echo "Wake up!"
     before:
       - echo "Hello"
     after:
