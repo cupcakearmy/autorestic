@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -61,9 +62,10 @@ func isAutoresticRunning() bool {
 
 	lines := strings.Split(out.String(), "\n")
 	autoresticProcesses := []string{}
+	currentPid := fmt.Sprint(os.Getpid())
 
 	for _, line := range lines {
-		if strings.Contains(line, "autorestic") && !strings.Contains(line, "grep autorestic") {
+		if strings.Contains(line, "autorestic") && !strings.Contains(line, "grep autorestic") && !strings.Contains(line, currentPid) {
 			autoresticProcesses = append(autoresticProcesses, line)
 		}
 	}
