@@ -183,6 +183,7 @@ func (b Backend) ExecDocker(l Location, args []string) (int, string, error) {
 	case "s3":
 	case "azure":
 	case "gs":
+	case "rest":
 		// No additional setup needed
 	case "rclone":
 		// Read host rclone config and mount it into the container
