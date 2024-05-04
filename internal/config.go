@@ -263,16 +263,17 @@ func AddFlagsToCommand(cmd *cobra.Command, backend bool) {
 }
 
 func (c *Config) SaveConfig() error {
-	file := viper.ConfigFileUsed()
-	if err := CopyFile(file, file+".old"); err != nil {
-		return err
-	}
-	colors.Secondary.Println("Saved a backup copy of your file next to the original.")
+	return fmt.Errorf(`Not overwriting config; throwing error`);
+	// file := viper.ConfigFileUsed()
+	// if err := CopyFile(file, file+".old"); err != nil {
+	// 	return err
+	// }
+	// colors.Secondary.Println("Saved a backup copy of your file next to the original.")
 
-	viper.Set("backends", c.Backends)
-	viper.Set("locations", c.Locations)
+	// viper.Set("backends", c.Backends)
+	// viper.Set("locations", c.Locations)
 
-	return viper.WriteConfig()
+	// return viper.WriteConfig()
 }
 
 func optionToString(option string) string {
