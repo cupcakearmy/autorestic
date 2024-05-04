@@ -2,7 +2,7 @@
   <br>
   <br>
   <br>
-  <img align="center" src="https://github.com/cupcakearmy/autorestic/raw/master/.github/logo.png" height="50" alt="autorestic logo">
+  <img align="center" src="https://github.com/cseitz-forks/autorestic/raw/master/.github/logo.png" height="50" alt="autorestic logo">
   <br>
   <br>
   
@@ -13,9 +13,9 @@
   <br><br>
   <a target="_blank" href="https://discord.gg/wS7RpYTYd2">
     <img src="https://img.shields.io/discord/252403122348097536" alt="discord badge" />
-    <img src="https://img.shields.io/github/contributors/cupcakearmy/autorestic" alt="contributor badge" />
-    <img src="https://img.shields.io/github/downloads/cupcakearmy/autorestic/total" alt="downloads badge" />
-    <img src="https://img.shields.io/github/v/release/cupcakearmy/autorestic" alt="version badge" />
+    <img src="https://img.shields.io/github/contributors/cseitz-forks/autorestic" alt="contributor badge" />
+    <img src="https://img.shields.io/github/downloads/cseitz-forks/autorestic/total" alt="downloads badge" />
+    <img src="https://img.shields.io/github/v/release/cseitz-forks/autorestic" alt="version badge" />
   </a>
   </p>
 </p>
@@ -46,7 +46,7 @@ Autorestic is a wrapper around the amazing [restic](https://restic.net/). While 
 
 ### ❓ Questions / Support
 
-Check the [discussions page](https://github.com/cupcakearmy/autorestic/discussions) or [join on discord](https://discord.gg/wS7RpYTYd2)
+Check the [discussions page](https://github.com/cseitz-forks/autorestic/discussions) or [join on discord](https://discord.gg/wS7RpYTYd2)
 
 ## Contributing / Developing
 

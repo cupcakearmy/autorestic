@@ -8,9 +8,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cupcakearmy/autorestic/internal/colors"
-	"github.com/cupcakearmy/autorestic/internal/flags"
-	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/cseitz-forks/autorestic/internal/colors"
+	"github.com/cseitz-forks/autorestic/internal/flags"
+	"github.com/cseitz-forks/autorestic/internal/lock"
 	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"

@@ -9,7 +9,7 @@ For remote backups (S3, B2, GCS, etc.) it's quite easy, as you only need to moun
 ```bash
 docker run --rm \\
   -v $(pwd):/data \\
-  cupcakearmy/autorestic \\
+  cseitz-forks/autorestic \\
   autorestic backup -va -c /data/.autorestic.yaml
 ```
 

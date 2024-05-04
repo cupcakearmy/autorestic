@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cseitz-forks/autorestic/internal"
 	"github.com/spf13/cobra"
 )
 

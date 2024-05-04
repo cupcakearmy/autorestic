@@ -21,8 +21,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/cupcakearmy/autorestic/cmd"
-	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/cseitz-forks/autorestic/cmd"
+	"github.com/cseitz-forks/autorestic/internal/lock"
 )
 
 func handleCtrlC() {

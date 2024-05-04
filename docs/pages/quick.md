@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-wget -qO - https://raw.githubusercontent.com/cupcakearmy/autorestic/master/install.sh | bash
+wget -qO - https://raw.githubusercontent.com/cseitz-forks/autorestic/master/install.sh | bash
 ```
 
 See [installation](/installation) for alternative options.

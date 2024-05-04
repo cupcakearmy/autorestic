@@ -13,9 +13,9 @@ import (
 	"strings"
 
 	"github.com/blang/semver/v4"
-	"github.com/cupcakearmy/autorestic/internal"
-	"github.com/cupcakearmy/autorestic/internal/colors"
-	"github.com/cupcakearmy/autorestic/internal/flags"
+	"github.com/cseitz-forks/autorestic/internal"
+	"github.com/cseitz-forks/autorestic/internal/colors"
+	"github.com/cseitz-forks/autorestic/internal/flags"
 )
 
 const INSTALL_PATH = "/usr/local/bin"
@@ -153,7 +153,7 @@ func Upgrade(restic bool) error {
 	if err != nil {
 		return err
 	}
-	body, err := dlJSON("https://api.github.com/repos/cupcakearmy/autorestic/releases/latest")
+	body, err := dlJSON("https://api.github.com/repos/cseitz-forks/autorestic/releases/latest")
 	if err != nil {
 		return err
 	}

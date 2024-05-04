@@ -17,7 +17,7 @@ jobs:
   #       id: meta
   #       uses: crazy-max/ghaction-docker-meta@v4
   #       with:
-  #         images: cupcakearmy/autorestic
+  #         images: cseitz-forks/autorestic
   #         tags: |
   #           type=semver,pattern={{version}}
   #           type=semver,pattern={{major}}.{{minor}}

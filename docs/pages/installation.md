@@ -5,14 +5,14 @@ Linux & macOS. Windows is not supported. If you have problems installing please 
 Autorestic requires `bash`, `wget` and `bzip2` to be installed. For most systems these should be already installed.
 
 ```bash
-wget -qO - https://raw.githubusercontent.com/cupcakearmy/autorestic/master/install.sh | bash
+wget -qO - https://raw.githubusercontent.com/cseitz-forks/autorestic/master/install.sh | bash
 ```
 
 ## Alternatives
 
 ### Docker
 
-There is an official docker image over at [cupcakearmy/autorestic](https://hub.docker.com/r/cupcakearmy/autorestic).
+There is an official docker image over at [cseitz-forks/autorestic](https://hub.docker.com/r/cseitz-forks/autorestic).
 
 For some examples see [here](/docker).
 

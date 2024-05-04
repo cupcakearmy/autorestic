@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/cupcakearmy/autorestic/internal"
+	"github.com/cseitz-forks/autorestic/internal"
 )
 
 var DIR, _ = filepath.Abs("./dist")

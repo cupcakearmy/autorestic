@@ -1,8 +1,8 @@
 export default {
   logo: <span>Autorestic</span>,
-  docsRepositoryBase: 'https://github.com/cupcakearmy/autorestic/tree/master/docs',
+  docsRepositoryBase: 'https://github.com/cseitz-forks/autorestic/tree/master/docs',
   project: {
-    link: 'https://github.com/cupcakearmy/autorestic',
+    link: 'https://github.com/cseitz-forks/autorestic',
   },
   sidebar: {
     defaultMenuCollapseLevel: 1,

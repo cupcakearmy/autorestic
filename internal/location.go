@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cupcakearmy/autorestic/internal/colors"
-	"github.com/cupcakearmy/autorestic/internal/flags"
-	"github.com/cupcakearmy/autorestic/internal/lock"
-	"github.com/cupcakearmy/autorestic/internal/metadata"
+	"github.com/cseitz-forks/autorestic/internal/colors"
+	"github.com/cseitz-forks/autorestic/internal/flags"
+	"github.com/cseitz-forks/autorestic/internal/lock"
+	"github.com/cseitz-forks/autorestic/internal/metadata"
 	"github.com/robfig/cron"
 )
 
