@@ -104,16 +104,17 @@ func (b Backend) validate() error {
 		// Check if key is set in environment
 		env, _ := b.getEnv()
 		if _, found := env["RESTIC_PASSWORD"]; !found {
+			return fmt.Errorf(`Backend "%s" has no encryption key. The encryption key is required!"`, b.name)
 			// No key set in config file or env => generate random key and save file
-			key := generateRandomKey()
-			b.Key = key
-			c := GetConfig()
-			tmp := c.Backends[b.name]
-			tmp.Key = key
-			c.Backends[b.name] = tmp
-			if err := c.SaveConfig(); err != nil {
-				return err
-			}
+			// key := generateRandomKey()
+			// b.Key = key
+			// c := GetConfig()
+			// tmp := c.Backends[b.name]
+			// tmp.Key = key
+			// c.Backends[b.name] = tmp
+			// if err := c.SaveConfig(); err != nil {
+			// 	return err
+			// }
 		}
 	}
 	env, err := b.getEnv()
