@@ -11,7 +11,7 @@ if [[ $NATIVE_OS == *"linux"* ]]; then
 elif [[ $NATIVE_OS == *"darwin"* ]]; then
     OS=darwin
 else
-    echo "Could not determine OS automatically, please check the release page manually: https://github.com/cupcakearmy/autorestic/releases"
+    echo "Could not determine OS automatically, please check the release page manually: https://github.com/cseitz-forks/autorestic/releases"
     exit 1
 fi
 echo $OS
@@ -26,7 +26,7 @@ elif [[ $NATIVE_ARCH == *"x86"* ]]; then
 elif [[ $NATIVE_ARCH == *"armv7"* ]]; then
     ARCH=arm
 else
-    echo "Could not determine Architecure automatically, please check the release page manually: https://github.com/cupcakearmy/autorestic/releases"
+    echo "Could not determine Architecure automatically, please check the release page manually: https://github.com/cseitz-forks/autorestic/releases"
     exit 1
 fi
 echo $ARCH
@@ -36,7 +36,7 @@ if ! command -v bzip2 &>/dev/null; then
     exit 1
 fi
 
-wget -qO - https://api.github.com/repos/cupcakearmy/autorestic/releases/latest \
+wget -qO - https://api.github.com/repos/cseitz-forks/autorestic/releases/latest \
 | grep "browser_download_url.*_${OS}_${ARCH}" \
 | cut -d : -f 2,3 \
 | tr -d \" \
