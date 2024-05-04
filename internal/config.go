@@ -263,9 +263,7 @@ func AddFlagsToCommand(cmd *cobra.Command, backend bool) {
 }
 
 func (c *Config) SaveConfig() error {
-	if true {
-		return fmt.Errorf(`Not overwriting config; throwing error`);
-	}
+	return fmt.Errorf(`Not overwriting config; throwing error`);
 	// file := viper.ConfigFileUsed()
 	// if err := CopyFile(file, file+".old"); err != nil {
 	// 	return err
