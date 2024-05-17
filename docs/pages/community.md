@@ -1,5 +1,7 @@
 # 🏘 Community
 
+## Software
+
 A list of community driven projects. (No official affiliation)
 
 - SystemD Units: <https://gitlab.com/py_crash/autorestic-systemd-units>
@@ -9,3 +11,7 @@ A list of community driven projects. (No official affiliation)
 - Ansible Role: <https://github.com/FuzzyMistborn/ansible-role-autorestic>
 - Ansible Role: <https://0xacab.org/varac-projects/ansible-role-autorestic>
 - Ansible Role: <https://github.com/dbrennand/ansible-role-autorestic>
+
+## Writing
+
+- [restic: excellent resource for local and cloud backup](https://notes.nicfab.eu/en/posts/restic/)
