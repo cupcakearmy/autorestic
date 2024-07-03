@@ -18,18 +18,28 @@ const (
 	RUNNING = "running"
 )
 
+// getLockfilePath returns the path to the lockfile. If flags.LOCKFILE_PATH is
+// set, its value is used, otherwise the path is generated relative to the
+// config file.
+func getLockfilePath() string {
+	if flags.LOCKFILE_PATH != "" {
+		return flags.LOCKFILE_PATH
+	} else {
+		p := viper.ConfigFileUsed()
+		if p == "" {
+			colors.Error.Println("cannot lock before reading config location")
+			os.Exit(1)
+		}
+		return path.Join(path.Dir(p), ".autorestic.lock.yml")
+	}
+}
+
 func getLock() *viper.Viper {
 	if lock == nil {
-
 		once.Do(func() {
 			lock = viper.New()
 			lock.SetDefault("running", false)
-			p := viper.ConfigFileUsed()
-			if p == "" {
-				colors.Error.Println("cannot lock before reading config location")
-				os.Exit(1)
-			}
-			file = path.Join(path.Dir(p), ".autorestic.lock.yml")
+			file = getLockfilePath()
 			if !flags.CRON_LEAN {
 				colors.Faint.Println("Using lock:\t", file)
 			}
