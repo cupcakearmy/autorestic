@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
@@ -58,6 +59,8 @@ func (b Backend) generateRepo() (string, error) {
 	}
 }
 
+var nonAlphaRegex = regexp.MustCompile("[^A-Za-z0-9]")
+
 func (b Backend) getEnv() (map[string]string, error) {
 	env := make(map[string]string)
 	// Key
@@ -73,7 +76,9 @@ func (b Backend) getEnv() (map[string]string, error) {
 	}
 
 	// From Envfile and passed as env
-	var prefix = "AUTORESTIC_" + strings.ToUpper(b.name) + "_"
+	nameForEnv := strings.ToUpper(b.name)
+	nameForEnv = nonAlphaRegex.ReplaceAllString(nameForEnv, "_")
+	var prefix = "AUTORESTIC_" + nameForEnv + "_"
 	for _, variable := range os.Environ() {
 		var splitted = strings.SplitN(variable, "=", 2)
 		if strings.HasPrefix(splitted[0], prefix) {
