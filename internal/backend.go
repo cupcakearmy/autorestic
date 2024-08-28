@@ -18,13 +18,14 @@ type BackendRest struct {
 }
 
 type Backend struct {
-	name    string
-	Type    string            `mapstructure:"type,omitempty"`
-	Path    string            `mapstructure:"path,omitempty"`
-	Key     string            `mapstructure:"key,omitempty"`
-	Env     map[string]string `mapstructure:"env,omitempty"`
-	Rest    BackendRest       `mapstructure:"rest,omitempty"`
-	Options Options           `mapstructure:"options,omitempty"`
+	name       string
+	Type       string            `mapstructure:"type,omitempty"`
+	Path       string            `mapstructure:"path,omitempty"`
+	Key        string            `mapstructure:"key,omitempty"`
+	RequireKey bool              `mapstructure:"requireKey,omitempty"`
+	Env        map[string]string `mapstructure:"env,omitempty"`
+	Rest       BackendRest       `mapstructure:"rest,omitempty"`
+	Options    Options           `mapstructure:"options,omitempty"`
 }
 
 func GetBackend(name string) (Backend, bool) {
@@ -104,6 +105,9 @@ func (b Backend) validate() error {
 		// Check if key is set in environment
 		env, _ := b.getEnv()
 		if _, found := env["RESTIC_PASSWORD"]; !found {
+			if b.RequireKey {
+				return fmt.Errorf("backend %s requires a key but none was provided", b.name)
+			}
 			// No key set in config file or env => generate random key and save file
 			key := generateRandomKey()
 			b.Key = key

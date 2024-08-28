@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateRepo(t *testing.T) {
@@ -221,5 +222,17 @@ func TestValidate(t *testing.T) {
 			t.Error("expected to get error")
 		}
 		assertEqual(t, err.Error(), "Backend \"foo\" has no \"path\"")
+	})
+
+	t.Run("require key with no key", func(t *testing.T) {
+		b := Backend{
+			name:       "foo",
+			Type:       "local",
+			Path:       "~/foo/bar",
+			RequireKey: true,
+		}
+		err := b.validate()
+		fmt.Printf("error: %v\n", err)
+		assert.EqualError(t, err, "backend foo requires a key but none was provided")
 	})
 }
