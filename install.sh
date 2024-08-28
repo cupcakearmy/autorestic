@@ -10,6 +10,8 @@ if [[ $NATIVE_OS == *"linux"* ]]; then
     OS=linux
 elif [[ $NATIVE_OS == *"darwin"* ]]; then
     OS=darwin
+elif [[ $NATIVE_OS == *"freebsd"* ]]; then
+    OS=freebsd
 else
     echo "Could not determine OS automatically, please check the release page manually: https://github.com/cupcakearmy/autorestic/releases"
     exit 1
@@ -17,7 +19,7 @@ fi
 echo $OS
 
 NATIVE_ARCH=$(uname -m | tr '[:upper:]' '[:lower:]')
-if [[ $NATIVE_ARCH == *"x86_64"* ]]; then
+if [[ $NATIVE_ARCH == *"x86_64"* || $NATIVE_ARCH == *"amd64"* ]]; then
     ARCH=amd64
 elif [[ $NATIVE_ARCH == *"arm64"* || $NATIVE_ARCH == *"aarch64"* ]]; then
     ARCH=arm64
