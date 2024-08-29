@@ -1,7 +1,8 @@
 {
   "scripts": {
     "build": "NEXT_TELEMETRY_DISABLED=1 next build",
-    "dev": "NEXT_TELEMETRY_DISABLED=1 next"
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next",
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start"
   },
   "dependencies": {
     "next": "^14.2.7",
