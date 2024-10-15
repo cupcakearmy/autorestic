@@ -1,10 +1,15 @@
 package internal
 
 import (
+	"path"
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
+
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestOptionToString(t *testing.T) {
@@ -141,6 +146,48 @@ func TestGetOptionsMultipleKeys(t *testing.T) {
 		"--int-flag", "123",
 	}
 	reflect.DeepEqual(result, expected)
+}
+
+func TestSaveConfigProducesReadableConfig(t *testing.T) {
+	workDir := t.TempDir()
+	viper.SetConfigFile(path.Join(workDir, ".autorestic.yml"))
+
+	// Required to appease the config reader
+	viper.Set("version", 2)
+
+	c := Config{
+		Version: "2",
+		Locations: map[string]Location{
+			"test": {
+				Type: "local",
+				name: "test",
+				From: []string{"in-dir"},
+				To:   []string{"test"},
+				// ForgetOption & ConfigOption have previously marshalled in a way that
+				// can't get read correctly
+				ForgetOption: "foo",
+				CopyOption:   map[string][]string{"foo": {"bar"}},
+			},
+		},
+		Backends: map[string]Backend{
+			"test": {
+				name: "test",
+				Type: "local",
+				Path: "backup-target",
+				Key:  "supersecret",
+			},
+		},
+	}
+
+	err := c.SaveConfig()
+	assert.NoError(t, err)
+
+	// Ensure we the config reading logic actually runs
+	config = nil
+	once = sync.Once{}
+	readConfig := GetConfig()
+	assert.NotNil(t, readConfig)
+	assert.Equal(t, c, *readConfig)
 }
 
 func assertEqual[T comparable](t testing.TB, result, expected T) {
