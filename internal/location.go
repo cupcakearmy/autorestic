@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -446,7 +447,10 @@ func (l Location) RunCron() error {
 	now := time.Now()
 	if now.After(next) {
 		lock.SetCron(l.name, now.Unix())
-		l.Backup(true, "")
+		errs := l.Backup(true, "")
+		if len(errs) > 0 {
+			return fmt.Errorf("Failed to backup location \"%s\":\n%w", l.name, errors.Join(errs...))
+		}
 	} else {
 		if !flags.CRON_LEAN {
 			colors.Body.Printf("Skipping \"%s\", not due yet.\n", l.name)
