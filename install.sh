@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e -o pipefail
 shopt -s nocaseglob
 
 OUT_FILE=/usr/local/bin/autorestic
