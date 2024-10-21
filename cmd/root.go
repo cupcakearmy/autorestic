@@ -42,6 +42,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&flags.VERBOSE, "verbose", "v", false, "verbose mode")
 	rootCmd.PersistentFlags().StringVar(&flags.RESTIC_BIN, "restic-bin", "restic", "specify custom restic binary")
 	rootCmd.PersistentFlags().StringVar(&flags.DOCKER_IMAGE, "docker-image", "cupcakearmy/autorestic:"+internal.VERSION, "specify a custom docker image")
+	rootCmd.PersistentFlags().StringVar(&flags.LOCKFILE_PATH, "lockfile-path", "", "specify a custom path for the lockfile (defaults to .autorestic.lock.yml next to the loaded autorestic config file)")
 	cobra.OnInitialize(initConfig)
 }
 

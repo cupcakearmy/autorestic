@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/spf13/viper"
 )
 
@@ -25,6 +26,37 @@ func setup(t *testing.T) {
 	t.Cleanup(func() {
 		os.RemoveAll(d)
 		viper.Reset()
+	})
+}
+
+func TestGetLockfilePath(t *testing.T) {
+	t.Run("when flags.LOCKFILE_PATH is set", func(t *testing.T) {
+		flags.LOCKFILE_PATH = "/path/to/my/autorestic.lock.yml"
+		defer func() { flags.LOCKFILE_PATH = "" }()
+
+		p := getLockfilePath()
+
+		if p != "/path/to/my/autorestic.lock.yml" {
+			t.Errorf("got %v, want %v", p, "/path/to/my/autorestic.lock.yml")
+		}
+	})
+
+	t.Run("when flags.LOCKFILE_PATH is set", func(t *testing.T) {
+		d, err := os.MkdirTemp("", testDirectory)
+		if err != nil {
+			log.Fatalf("error creating temp dir: %v", err)
+			return
+		}
+		viper.SetConfigFile(d + "/.autorestic.yml")
+		defer viper.Reset()
+
+		flags.LOCKFILE_PATH = ""
+
+		p := getLockfilePath()
+
+		if p != d+"/.autorestic.lock.yml" {
+			t.Errorf("got %v, want %v", p, d+"/.autorestic.lock.yml")
+		}
 	})
 }
 
