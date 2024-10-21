@@ -3,8 +3,10 @@ package internal
 import (
 	"fmt"
 	"os"
+	"path"
 	"testing"
 
+	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
@@ -262,4 +264,70 @@ func TestValidate(t *testing.T) {
 		fmt.Printf("error: %v\n", err)
 		assert.EqualError(t, err, "backend foo requires a key but none was provided")
 	})
+}
+
+func TestValidateInitsRepo(t *testing.T) {
+	// This is normally initialized by the cobra commands but they don't run in
+	// this test so we do it ourselves.
+	flags.RESTIC_BIN = "restic"
+
+	workDir := t.TempDir()
+
+	b := Backend{
+		name: "test",
+		Type: "local",
+		Path: path.Join(workDir, "backend"),
+		Key:  "supersecret",
+	}
+
+	config = &Config{Backends: map[string]Backend{"test": b}}
+	defer func() { config = nil }()
+
+	// Check should fail because the repo doesn't exist
+	err := b.Exec([]string{"check"})
+	assert.Error(t, err)
+
+	err = b.validate()
+	assert.NoError(t, err)
+
+	// Check should pass now
+	err = b.Exec([]string{"check"})
+	assert.NoError(t, err)
+}
+
+func TestEnsureInit(t *testing.T) {
+	// This is normally initialized by the cobra commands but they don't run in
+	// this test so we do it ourselves.
+	flags.RESTIC_BIN = "restic"
+
+	workDir := t.TempDir()
+
+	b := Backend{
+		name: "test",
+		Type: "local",
+		Path: path.Join(workDir, "backend"),
+		Key:  "supersecret",
+	}
+
+	config = &Config{Backends: map[string]Backend{"test": b}}
+	defer func() { config = nil }()
+
+	// Check should fail because the repo doesn't exist
+	err := b.Exec([]string{"check"})
+	assert.Error(t, err)
+
+	err = b.EnsureInit()
+	assert.NoError(t, err)
+
+	// Check should pass now
+	err = b.Exec([]string{"check"})
+	assert.NoError(t, err)
+
+	// Run again to make sure it's idempotent
+	err = b.EnsureInit()
+	assert.NoError(t, err)
+
+	// Check should still pass
+	err = b.Exec([]string{"check"})
+	assert.NoError(t, err)
 }

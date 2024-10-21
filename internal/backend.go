@@ -24,6 +24,7 @@ type Backend struct {
 	Path       string            `mapstructure:"path,omitempty"`
 	Key        string            `mapstructure:"key,omitempty"`
 	RequireKey bool              `mapstructure:"requireKey,omitempty"`
+	Init       bool              `mapstructure:"init,omitempty"`
 	Env        map[string]string `mapstructure:"env,omitempty"`
 	Rest       BackendRest       `mapstructure:"rest,omitempty"`
 	Options    Options           `mapstructure:"options,omitempty"`
@@ -130,20 +131,44 @@ func (b Backend) validate() error {
 		return err
 	}
 	options := ExecuteOptions{Envs: env, Silent: true}
-	// Check if already initialized
+
+	err = b.EnsureInit()
+	if err != nil {
+		return err
+	}
+
 	cmd := []string{"check"}
 	cmd = append(cmd, combineBackendOptions("check", b)...)
 	_, _, err = ExecuteResticCommand(options, cmd...)
-	if err == nil {
-		return nil
-	} else {
-		// If not initialize
-		colors.Body.Printf("Initializing backend \"%s\"...\n", b.name)
-		cmd := []string{"init"}
-		cmd = append(cmd, combineBackendOptions("init", b)...)
-		_, _, err := ExecuteResticCommand(options, cmd...)
+	return err
+}
+
+// EnsureInit initializes the backend if it is not already initialized
+func (b Backend) EnsureInit() error {
+	env, err := b.getEnv()
+	if err != nil {
 		return err
 	}
+	options := ExecuteOptions{Envs: env, Silent: true}
+
+	checkInitCmd := []string{"cat", "config"}
+	checkInitCmd = append(checkInitCmd, combineBackendOptions("cat", b)...)
+	_, _, err = ExecuteResticCommand(options, checkInitCmd...)
+
+	// Note that `restic` has a special exit code (10) to indicate that the
+	// repository does not exist. This exit code was introduced in `restic@0.17.0`
+	// on 2024-07-26. We're not using it here because this is a too recent and
+	// people on older versions of `restic` won't have this feature work  correctly.
+	// See: https://restic.readthedocs.io/en/latest/075_scripting.html#exit-codes
+	if err != nil {
+		colors.Body.Printf("Initializing backend \"%s\"...\n", b.name)
+		initCmd := []string{"init"}
+		initCmd = append(initCmd, combineBackendOptions("init", b)...)
+		_, _, err := ExecuteResticCommand(options, initCmd...)
+		return err
+	}
+
+	return err
 }
 
 func (b Backend) Exec(args []string) error {
