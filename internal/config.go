@@ -10,7 +10,6 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
-	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -40,7 +39,7 @@ func exitConfig(err error, msg string) {
 	if msg != "" {
 		colors.Error.Println(msg)
 	}
-	lock.Unlock()
+	Unlock()
 	os.Exit(1)
 }
 

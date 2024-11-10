@@ -1,4 +1,4 @@
-package lock
+package internal
 
 import (
 	"log"

@@ -9,7 +9,6 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
-	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +32,7 @@ To check you can run "ps aux | grep autorestic".`,
 			}
 		}
 
-		err := lock.Unlock()
+		err := internal.Unlock()
 		if err != nil {
 			colors.Error.Println("Could not unlock:", err)
 			return

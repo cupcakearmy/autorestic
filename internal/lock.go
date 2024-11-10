@@ -1,4 +1,4 @@
-package lock
+package internal
 
 import (
 	"os"
@@ -12,7 +12,7 @@ import (
 
 var lock *viper.Viper
 var file string
-var once sync.Once
+var lockOnce sync.Once
 
 const (
 	RUNNING = "running"
@@ -36,7 +36,7 @@ func getLockfilePath() string {
 
 func getLock() *viper.Viper {
 	if lock == nil {
-		once.Do(func() {
+		lockOnce.Do(func() {
 			lock = viper.New()
 			lock.SetDefault("running", false)
 			file = getLockfilePath()
