@@ -17,17 +17,17 @@ import (
 	"github.com/spf13/viper"
 )
 
-const VERSION = "1.8.2"
+const VERSION = "1.8.3"
 
 type OptionMap map[string][]interface{}
 type Options map[string]OptionMap
 
 type Config struct {
-	Version   string              `mapstructure:"version"`
-	Extras    interface{}         `mapstructure:"extras"`
-	Locations map[string]Location `mapstructure:"locations"`
-	Backends  map[string]Backend  `mapstructure:"backends"`
-	Global    Options             `mapstructure:"global"`
+	Version   string              `mapstructure:"version" yaml:"version"`
+	Extras    interface{}         `mapstructure:"extras" yaml:"extras"`
+	Locations map[string]Location `mapstructure:"locations" yaml:"locations"`
+	Backends  map[string]Backend  `mapstructure:"backends" yaml:"backends"`
+	Global    Options             `mapstructure:"global" yaml:"global"`
 }
 
 var once sync.Once

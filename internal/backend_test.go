@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateRepo(t *testing.T) {
@@ -194,6 +195,33 @@ func TestGetEnv(t *testing.T) {
 		assertEqual(t, result["B2_ACCOUNT_ID"], "foo123")
 		assertEqual(t, result["B2_ACCOUNT_KEY"], "foo456")
 	})
+
+	for _, char := range "@-_:/" {
+		t.Run(fmt.Sprintf("env var with special char (%c)", char), func(t *testing.T) {
+			// generate env variables
+			// TODO better way to teardown
+			defer os.Unsetenv("AUTORESTIC_FOO_BAR_RESTIC_PASSWORD")
+			defer os.Unsetenv("AUTORESTIC_FOO_BAR_B2_ACCOUNT_ID")
+			defer os.Unsetenv("AUTORESTIC_FOO_BAR_B2_ACCOUNT_KEY")
+			os.Setenv("AUTORESTIC_FOO_BAR_RESTIC_PASSWORD", "secret123")
+			os.Setenv("AUTORESTIC_FOO_BAR_B2_ACCOUNT_ID", "foo123")
+			os.Setenv("AUTORESTIC_FOO_BAR_B2_ACCOUNT_KEY", "foo456")
+
+			b := Backend{
+				name: fmt.Sprintf("foo%cbar", char),
+				Type: "local",
+				Path: "/foo/bar",
+			}
+			result, err := b.getEnv()
+			if err != nil {
+				t.Errorf("unexpected error %v", err)
+			}
+			assertEqual(t, result["RESTIC_REPOSITORY"], "/foo/bar")
+			assertEqual(t, result["RESTIC_PASSWORD"], "secret123")
+			assertEqual(t, result["B2_ACCOUNT_ID"], "foo123")
+			assertEqual(t, result["B2_ACCOUNT_KEY"], "foo456")
+		})
+	}
 }
 
 func TestValidate(t *testing.T) {
@@ -221,5 +249,17 @@ func TestValidate(t *testing.T) {
 			t.Error("expected to get error")
 		}
 		assertEqual(t, err.Error(), "Backend \"foo\" has no \"path\"")
+	})
+
+	t.Run("require key with no key", func(t *testing.T) {
+		b := Backend{
+			name:       "foo",
+			Type:       "local",
+			Path:       "~/foo/bar",
+			RequireKey: true,
+		}
+		err := b.validate()
+		fmt.Printf("error: %v\n", err)
+		assert.EqualError(t, err, "backend foo requires a key but none was provided")
 	})
 }

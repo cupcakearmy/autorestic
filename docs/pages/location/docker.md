@@ -18,7 +18,7 @@ services:
 
 ```yaml | .autorestic.yml
 locations:
-  foo:
+  hello:
     from: my-data
     type: volume
     # ...
