@@ -3,6 +3,7 @@ package internal
 import (
 	"os"
 	"path"
+	"path/filepath"
 	"sync"
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
@@ -18,20 +19,33 @@ const (
 	RUNNING = "running"
 )
 
-// getLockfilePath returns the path to the lockfile. If flags.LOCKFILE_PATH is
-// set, its value is used, otherwise the path is generated relative to the
-// config file.
+// getLockfilePath returns the path to the lockfile. The path for the lockfile
+// can be sources from multiple places If flags.LOCKFILE_PATH is set, its value
+// is used; if the config has the `lockfile` option set, its value is used;
+// otherwise the path is generated relative to the config file.
 func getLockfilePath() string {
 	if flags.LOCKFILE_PATH != "" {
-		return flags.LOCKFILE_PATH
-	} else {
-		p := viper.ConfigFileUsed()
-		if p == "" {
-			colors.Error.Println("cannot lock before reading config location")
-			os.Exit(1)
+		abs, err := filepath.Abs(flags.LOCKFILE_PATH)
+		if err != nil {
+			return flags.LOCKFILE_PATH
 		}
-		return path.Join(path.Dir(p), ".autorestic.lock.yml")
+		return abs
 	}
+
+	if lockfile := GetConfig().Lockfile; lockfile != "" {
+		abs, err := filepath.Abs(lockfile)
+		if err != nil {
+			return lockfile
+		}
+		return abs
+	}
+
+	p := viper.ConfigFileUsed()
+	if p == "" {
+		colors.Error.Println("cannot lock before reading config location")
+		os.Exit(1)
+	}
+	return path.Join(path.Dir(p), ".autorestic.lock.yml")
 }
 
 func getLock() *viper.Viper {

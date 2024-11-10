@@ -23,6 +23,7 @@ type Options map[string]OptionMap
 
 type Config struct {
 	Version   string              `mapstructure:"version" yaml:"version"`
+	Lockfile  string              `mapstructure:"lockfile,omitempty" yaml:"lockfile,omitempty"`
 	Extras    interface{}         `mapstructure:"extras" yaml:"extras"`
 	Locations map[string]Location `mapstructure:"locations" yaml:"locations"`
 	Backends  map[string]Backend  `mapstructure:"backends" yaml:"backends"`
