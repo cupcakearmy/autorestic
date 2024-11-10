@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -33,26 +34,26 @@ const (
 )
 
 type Hooks struct {
-	Dir         string    `mapstructure:"dir"`
-	PreValidate HookArray `mapstructure:"prevalidate,omitempty"`
-	Before      HookArray `mapstructure:"before,omitempty"`
-	After       HookArray `mapstructure:"after,omitempty"`
-	Success     HookArray `mapstructure:"success,omitempty"`
-	Failure     HookArray `mapstructure:"failure,omitempty"`
+	Dir         string    `mapstructure:"dir" yaml:"dir"`
+	PreValidate HookArray `mapstructure:"prevalidate,omitempty" yaml:"prevalidate,omitempty"`
+	Before      HookArray `mapstructure:"before,omitempty" yaml:"before,omitempty"`
+	After       HookArray `mapstructure:"after,omitempty" yaml:"after,omitempty"`
+	Success     HookArray `mapstructure:"success,omitempty" yaml:"success,omitempty"`
+	Failure     HookArray `mapstructure:"failure,omitempty" yaml:"failure,omitempty"`
 }
 
 type LocationCopy = map[string][]string
 
 type Location struct {
-	name         string               `mapstructure:",omitempty"`
-	From         []string             `mapstructure:"from,omitempty"`
-	Type         string               `mapstructure:"type,omitempty"`
-	To           []string             `mapstructure:"to,omitempty"`
-	Hooks        Hooks                `mapstructure:"hooks,omitempty"`
-	Cron         string               `mapstructure:"cron,omitempty"`
-	Options      Options              `mapstructure:"options,omitempty"`
-	ForgetOption LocationForgetOption `mapstructure:"forget,omitempty"`
-	CopyOption   LocationCopy         `mapstructure:"copy,omitempty"`
+	name         string               `mapstructure:",omitempty" yaml:",omitempty"`
+	From         []string             `mapstructure:"from,omitempty" yaml:"from,omitempty"`
+	Type         string               `mapstructure:"type,omitempty" yaml:"type,omitempty"`
+	To           []string             `mapstructure:"to,omitempty" yaml:"to,omitempty"`
+	Hooks        Hooks                `mapstructure:"hooks,omitempty" yaml:"hooks,omitempty"`
+	Cron         string               `mapstructure:"cron,omitempty" yaml:"cron,omitempty"`
+	Options      Options              `mapstructure:"options,omitempty" yaml:"options,omitempty"`
+	ForgetOption LocationForgetOption `mapstructure:"forget,omitempty" yaml:"forget,omitempty"`
+	CopyOption   LocationCopy         `mapstructure:"copy,omitempty" yaml:"copy,omitempty"`
 }
 
 func GetLocation(name string) (Location, bool) {
@@ -454,7 +455,10 @@ func (l Location) RunCron() error {
 	now := time.Now()
 	if now.After(next) {
 		lock.SetCron(l.name, now.Unix())
-		l.Backup(true, "")
+		errs := l.Backup(true, "")
+		if len(errs) > 0 {
+			return fmt.Errorf("Failed to backup location \"%s\":\n%w", l.name, errors.Join(errs...))
+		}
 	} else {
 		if !flags.CRON_LEAN {
 			colors.Body.Printf("Skipping \"%s\", not due yet.\n", l.name)

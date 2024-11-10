@@ -14,20 +14,20 @@ import (
 )
 
 type BackendRest struct {
-	User     string `mapstructure:"user,omitempty"`
-	Password string `mapstructure:"password,omitempty"`
+	User     string `mapstructure:"user,omitempty" yaml:"user,omitempty"`
+	Password string `mapstructure:"password,omitempty" yaml:"password,omitempty"`
 }
 
 type Backend struct {
 	name       string
-	Type       string            `mapstructure:"type,omitempty"`
-	Path       string            `mapstructure:"path,omitempty"`
-	Key        string            `mapstructure:"key,omitempty"`
-	RequireKey bool              `mapstructure:"requireKey,omitempty"`
-	Init       bool              `mapstructure:"init,omitempty"`
-	Env        map[string]string `mapstructure:"env,omitempty"`
-	Rest       BackendRest       `mapstructure:"rest,omitempty"`
-	Options    Options           `mapstructure:"options,omitempty"`
+	Type       string            `mapstructure:"type,omitempty" yaml:"type,omitempty"`
+	Path       string            `mapstructure:"path,omitempty" yaml:"path,omitempty"`
+	Key        string            `mapstructure:"key,omitempty" yaml:"key,omitempty"`
+	RequireKey bool              `mapstructure:"requireKey,omitempty" yaml:"requireKey,omitempty"`
+	Init       bool              `mapstructure:"init,omitempty" yaml:"init,omitempty"`
+	Env        map[string]string `mapstructure:"env,omitempty" yaml:"env,omitempty"`
+	Rest       BackendRest       `mapstructure:"rest,omitempty" yaml:"rest,omitempty"`
+	Options    Options           `mapstructure:"options,omitempty" yaml:"options,omitempty"`
 }
 
 func GetBackend(name string) (Backend, bool) {
