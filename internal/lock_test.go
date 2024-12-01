@@ -17,7 +17,7 @@ import (
 func setup(t *testing.T) {
 	t.Helper()
 	cleanup := func() {
-		flags.LOCKFILE_PATH = ""
+		flags.LOCKFILE = ""
 		config = nil
 		once = sync.Once{}
 		viper.Reset()
@@ -62,7 +62,7 @@ func TestGetLockfilePath(t *testing.T) {
 		for _, testCase := range testCases {
 			t.Run(testCase.name, func(t *testing.T) {
 				setup(t)
-				flags.LOCKFILE_PATH = testCase.flag
+				flags.LOCKFILE = testCase.flag
 				if testCase.config != "" {
 					viper.Set("lockfile", testCase.config)
 					err := viper.WriteConfig()

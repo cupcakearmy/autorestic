@@ -20,14 +20,14 @@ const (
 )
 
 // getLockfilePath returns the path to the lockfile. The path for the lockfile
-// can be sources from multiple places If flags.LOCKFILE_PATH is set, its value
-// is used; if the config has the `lockfile` option set, its value is used;
+// can be sources from multiple places If flags.LOCKFILE is set, its value is
+// used; if the config has the `lockfile` option set, its value is used;
 // otherwise the path is generated relative to the config file.
 func getLockfilePath() string {
-	if flags.LOCKFILE_PATH != "" {
-		abs, err := filepath.Abs(flags.LOCKFILE_PATH)
+	if flags.LOCKFILE != "" {
+		abs, err := filepath.Abs(flags.LOCKFILE)
 		if err != nil {
-			return flags.LOCKFILE_PATH
+			return flags.LOCKFILE
 		}
 		return abs
 	}
