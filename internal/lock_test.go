@@ -1,62 +1,88 @@
 package internal
 
 import (
-	"log"
 	"os"
 	"os/exec"
+	"path"
 	"strconv"
+	"sync"
 	"testing"
 
 	"github.com/cupcakearmy/autorestic/internal/flags"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
-
-var testDirectory = "autorestic_test_tmp"
 
 // All tests must share the same lock file as it is only initialized once
 func setup(t *testing.T) {
-	d, err := os.MkdirTemp("", testDirectory)
-	if err != nil {
-		log.Fatalf("error creating temp dir: %v", err)
-		return
-	}
-	// set config file location
-	viper.SetConfigFile(d + "/.autorestic.yml")
-
-	t.Cleanup(func() {
-		os.RemoveAll(d)
+	t.Helper()
+	cleanup := func() {
+		flags.LOCKFILE_PATH = ""
+		config = nil
+		once = sync.Once{}
 		viper.Reset()
-	})
+	}
+
+	cleanup()
+	d := t.TempDir()
+	viper.SetConfigFile(d + "/.autorestic.yml")
+	viper.Set("version", 2)
+	viper.WriteConfig()
+
+	t.Cleanup(cleanup)
 }
 
 func TestGetLockfilePath(t *testing.T) {
-	t.Run("when flags.LOCKFILE_PATH is set", func(t *testing.T) {
-		flags.LOCKFILE_PATH = "/path/to/my/autorestic.lock.yml"
-		defer func() { flags.LOCKFILE_PATH = "" }()
+	t.Run("user specified", func(t *testing.T) {
+		testCases := []struct {
+			name     string
+			flag     string
+			config   string
+			expected string
+		}{
+			{
+				name:     "flag and config",
+				flag:     "/flag.lock.yml",
+				config:   "/config.lock.yml",
+				expected: "/flag.lock.yml",
+			},
+			{
+				name:     "flag only",
+				flag:     "/flag.lock.yml",
+				config:   "",
+				expected: "/flag.lock.yml",
+			},
+			{
+				name:     "config only",
+				flag:     "",
+				config:   "/config.lock.yml",
+				expected: "/config.lock.yml",
+			},
+		}
+		for _, testCase := range testCases {
+			t.Run(testCase.name, func(t *testing.T) {
+				setup(t)
+				flags.LOCKFILE_PATH = testCase.flag
+				if testCase.config != "" {
+					viper.Set("lockfile", testCase.config)
+					err := viper.WriteConfig()
+					assert.NoError(t, err)
+				}
 
-		p := getLockfilePath()
-
-		if p != "/path/to/my/autorestic.lock.yml" {
-			t.Errorf("got %v, want %v", p, "/path/to/my/autorestic.lock.yml")
+				p := getLockfilePath()
+				assert.Equal(t, testCase.expected, p)
+			})
 		}
 	})
 
-	t.Run("when flags.LOCKFILE_PATH is set", func(t *testing.T) {
-		d, err := os.MkdirTemp("", testDirectory)
-		if err != nil {
-			log.Fatalf("error creating temp dir: %v", err)
-			return
-		}
-		viper.SetConfigFile(d + "/.autorestic.yml")
-		defer viper.Reset()
+	t.Run("default", func(t *testing.T) {
+		setup(t)
 
-		flags.LOCKFILE_PATH = ""
+		configPath := viper.ConfigFileUsed()
+		expectedLockfile := path.Join(path.Dir(configPath), ".autorestic.lock.yml")
 
 		p := getLockfilePath()
-
-		if p != d+"/.autorestic.lock.yml" {
-			t.Errorf("got %v, want %v", p, d+"/.autorestic.lock.yml")
-		}
+		assert.Equal(t, expectedLockfile, p)
 	})
 }
 
