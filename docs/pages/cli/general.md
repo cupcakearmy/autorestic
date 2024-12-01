@@ -37,7 +37,7 @@ autorestic --restic-bin /some/path/to/my/custom/restic/binary
 
 ## `--lockfile-path`
 
-Specify the path for the lockfile used by `autorestic`. If omitted, this will default to `.autorestic.lock.yml` next to the loaded config file.
+Specify the path for the [lockfile](../lockfile.md) used by `autorestic`. If omitted, this will default to `.autorestic.lock.yml` next to the loaded config file.
 
 ```bash
 autorestic --lockfile-path /path/to/my/.autorestic.lock.yml
