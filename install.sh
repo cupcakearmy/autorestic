@@ -6,7 +6,7 @@ if [ "$EUID" -eq 0 ]; then
 elif command -v sudo &> /dev/null; then
     elevated="sudo bash -c"  # Use sudo if available
 elif command -v su &> /dev/null; then
-    elevated="su -c"  # Use su if sudo isn't available
+    elevated="su root -c"  # Use su if sudo isn't available
 else
     echo "Error: Neither sudo nor su is available. Unable to run command as root."
     exit 1
@@ -57,9 +57,11 @@ wget -qO - https://api.github.com/repos/cupcakearmy/autorestic/releases/latest \
 | grep "browser_download_url.*_${OS}_${ARCH}" \
 | xargs | cut -d ' ' -f 2 \
 | wget -O "${TMP_FILE}.bz2" -i -
-$elevated "bzip2 -cd ${TMP_FILE}.bz2 > ${OUT_FILE}"
-$elevated "chmod +x ${OUT_FILE}"
-$elevated "rm ${TMP_FILE}.bz2"
+$elevated "
+  bzip2 -cd ${TMP_FILE}.bz2 > ${OUT_FILE}
+  chmod +x ${OUT_FILE}
+  autorestic install
+"
+rm ${TMP_FILE}.bz2
 
-$elevated "autorestic install"
 echo "Successfully installed autorestic under ${OUT_FILE}"
