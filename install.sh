@@ -1,6 +1,16 @@
 #!/bin/bash
 # Check if the script is running as root
-[ "$EUID" -eq 0 ] || exec sudo bash "$0" "$@"
+# Initialize the elevated variable to ensure we can run commands as root
+if [ "$EUID" -eq 0 ]; then
+    elevated="bash -c"  # No need for sudo or su if running as root
+elif command -v sudo &> /dev/null; then
+    elevated="sudo bash -c"  # Use sudo if available
+elif command -v su &> /dev/null; then
+    elevated="su -c"  # Use su if sudo isn't available
+else
+    echo "Error: Neither sudo nor su is available. Unable to run command as root."
+    exit 1
+fi
 set -e -o pipefail
 shopt -s nocaseglob
 
@@ -47,9 +57,9 @@ wget -qO - https://api.github.com/repos/cupcakearmy/autorestic/releases/latest \
 | grep "browser_download_url.*_${OS}_${ARCH}" \
 | xargs | cut -d ' ' -f 2 \
 | wget -O "${TMP_FILE}.bz2" -i -
-bzip2 -cd "${TMP_FILE}.bz2" > "${OUT_FILE}"
-chmod +x ${OUT_FILE}
-rm "${TMP_FILE}.bz2"
+$elevated "bzip2 -cd ${TMP_FILE}.bz2 > ${OUT_FILE}"
+$elevated "chmod +x ${OUT_FILE}"
+$elevated "rm ${TMP_FILE}.bz2"
 
 autorestic install
 echo "Successfully installed autorestic under ${OUT_FILE}"
