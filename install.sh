@@ -61,5 +61,5 @@ $elevated "bzip2 -cd ${TMP_FILE}.bz2 > ${OUT_FILE}"
 $elevated "chmod +x ${OUT_FILE}"
 $elevated "rm ${TMP_FILE}.bz2"
 
-autorestic install
+$elevated "autorestic install"
 echo "Successfully installed autorestic under ${OUT_FILE}"
