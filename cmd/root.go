@@ -8,7 +8,6 @@ import (
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
-	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -18,7 +17,7 @@ import (
 func CheckErr(err error) {
 	if err != nil {
 		colors.Error.Fprintln(os.Stderr, "Error:", err)
-		lock.Unlock()
+		internal.Unlock()
 		os.Exit(1)
 	}
 }
@@ -42,6 +41,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&flags.VERBOSE, "verbose", "v", false, "verbose mode")
 	rootCmd.PersistentFlags().StringVar(&flags.RESTIC_BIN, "restic-bin", "restic", "specify custom restic binary")
 	rootCmd.PersistentFlags().StringVar(&flags.DOCKER_IMAGE, "docker-image", "cupcakearmy/autorestic:"+internal.VERSION, "specify a custom docker image")
+	rootCmd.PersistentFlags().StringVar(&flags.LOCKFILE, "lockfile", "", "specify a custom path for the lockfile (defaults to .autorestic.lock.yml next to the loaded autorestic config file)")
 	cobra.OnInitialize(initConfig)
 }
 

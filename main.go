@@ -22,7 +22,7 @@ import (
 	"syscall"
 
 	"github.com/cupcakearmy/autorestic/cmd"
-	"github.com/cupcakearmy/autorestic/internal/lock"
+	"github.com/cupcakearmy/autorestic/internal"
 )
 
 func handleCtrlC() {
@@ -31,7 +31,7 @@ func handleCtrlC() {
 	go func() {
 		sig := <-c
 		fmt.Println("Signal:", sig)
-		lock.Unlock()
+		internal.Unlock()
 		os.Exit(0)
 	}()
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal"
 	"github.com/cupcakearmy/autorestic/internal/colors"
-	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/spf13/cobra"
 )
 
@@ -14,9 +13,9 @@ var execCmd = &cobra.Command{
 	Short: "Execute arbitrary native restic commands for given backends",
 	Run: func(cmd *cobra.Command, args []string) {
 		internal.GetConfig()
-		err := lock.Lock()
+		err := internal.Lock()
 		CheckErr(err)
-		defer lock.Unlock()
+		defer internal.Unlock()
 
 		selected, err := internal.GetAllOrSelected(cmd, true)
 		CheckErr(err)
