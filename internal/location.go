@@ -139,7 +139,7 @@ func (l Location) ExecuteHooks(commands []string, options ExecuteOptions) error 
 	colors.Secondary.Println("\nRunning hooks")
 	for _, command := range commands {
 		colors.Body.Println("> " + command)
-		_, out, err := ExecuteCommand(options, "-c", command)
+		_, out, err := ExecuteCommand(options, shellArgs, command)
 		if err != nil {
 			colors.Error.Println(out)
 			return err
@@ -179,7 +179,7 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 	}
 	cwd, _ := GetPathRelativeToConfig(".")
 	options := ExecuteOptions{
-		Command: "bash",
+		Command: shellName,
 		Dir:     cwd,
 		Envs: map[string]string{
 			"AUTORESTIC_LOCATION": l.name,
