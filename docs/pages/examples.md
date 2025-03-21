@@ -23,11 +23,11 @@ extras:
   healthchecks: &healthchecks
     hooks:
       before:
-        - 'curl -m 10 --retry 5 -X POST -H "Content-Type: text/plain" --data "Starting backup for location: ${AUTORESTIC_LOCATION}" https://<healthchecks-url>/ping/<uid>/start'
+        - 'curl -m 10 --retry 5 -X POST -H "Content-Type: text/plain" --data "Starting backup for location: ${AUTORESTIC_LOCATION}" https://<healthchecks-url>/<uuid>/start'
       failure:
-        - 'curl -m 10 --retry 5 -X POST -H "Content-Type: text/plain" --data "Backup failed for location: ${AUTORESTIC_LOCATION}" https://<healthchecks-url>/ping/<uid>/fail'
+        - 'curl -m 10 --retry 5 -X POST -H "Content-Type: text/plain" --data "Backup failed for location: ${AUTORESTIC_LOCATION}" https://<healthchecks-url>/<uuid>/fail'
       success:
-        - 'curl -m 10 --retry 5 -X POST -H "Content-Type: text/plain" --data "Backup successful for location: ${AUTORESTIC_LOCATION}" https://<healthchecks-url>/ping/<uid>'
+        - 'curl -m 10 --retry 5 -X POST -H "Content-Type: text/plain" --data "Backup successful for location: ${AUTORESTIC_LOCATION}" https://<healthchecks-url>/<uuid>'
 
 locations:
   something:
