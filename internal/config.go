@@ -188,15 +188,31 @@ func CheckConfig() error {
 	if !CheckIfResticIsCallable() {
 		return fmt.Errorf(`%s was not found. Install either with "autorestic install" or manually`, flags.RESTIC_BIN)
 	}
-	for name, backend := range c.Backends {
-		backend.name = name
-		if err := backend.validate(); err != nil {
+
+	cwd, _ := GetPathRelativeToConfig(".")
+	for name, location := range c.Locations {
+		location.name = name
+
+		// Hooks before location validation
+		options := ExecuteOptions{
+			Command: "bash",
+			Dir:     cwd,
+			Envs: map[string]string{
+				"AUTORESTIC_LOCATION": location.name,
+			},
+		}
+		if err := location.ExecuteHooks(location.Hooks.PreValidate, options); err != nil {
+			return err
+		}
+
+		if err := location.validate(); err != nil {
 			return err
 		}
 	}
-	for name, location := range c.Locations {
-		location.name = name
-		if err := location.validate(); err != nil {
+
+	for name, backend := range c.Backends {
+		backend.name = name
+		if err := backend.validate(); err != nil {
 			return err
 		}
 	}
