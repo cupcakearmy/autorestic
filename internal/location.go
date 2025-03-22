@@ -168,7 +168,7 @@ func (l Location) getLocationTags() string {
 	return buildTag("location", l.name)
 }
 
-func (l Location) Backup(cron bool, specificBackend string) []error {
+func (l Location) Backup(cron bool, dry bool, specificBackend string) []error {
 	var errors []error
 	var backends []string
 	colors.PrimaryPrint("  Backing up location \"%s\"  ", l.name)
@@ -227,6 +227,9 @@ func (l Location) Backup(cron bool, specificBackend string) []error {
 		cmd = append(cmd, combineAllOptions("backup", l, backend)...)
 		if cron {
 			cmd = append(cmd, "--tag", buildTag("cron"))
+		}
+		if dry {
+			cmd = append(cmd, "--dry-run")
 		}
 		cmd = append(cmd, "--tag", l.getLocationTags())
 		backupOptions := ExecuteOptions{
@@ -447,7 +450,7 @@ func (l Location) RunCron() error {
 	now := time.Now()
 	if now.After(next) {
 		lock.SetCron(l.name, now.Unix())
-		errs := l.Backup(true, "")
+		errs := l.Backup(true, false, "")
 		if len(errs) > 0 {
 			return fmt.Errorf("Failed to backup location \"%s\":\n%w", l.name, errors.Join(errs...))
 		}
