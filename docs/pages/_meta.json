@@ -3,6 +3,7 @@
   "quick": "Quick Start",
   "installation": "Installation",
   "config": "Configuration",
+  "lockfile": "Lockfile",
   "location": "Locations",
   "backend": "Backend",
   "cli": "CLI",

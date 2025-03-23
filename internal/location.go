@@ -11,7 +11,6 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
-	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/cupcakearmy/autorestic/internal/metadata"
 	"github.com/robfig/cron"
 )
@@ -445,11 +444,11 @@ func (l Location) RunCron() error {
 	if err != nil {
 		return err
 	}
-	last := time.Unix(lock.GetCron(l.name), 0)
+	last := time.Unix(GetCron(l.name), 0)
 	next := schedule.Next(last)
 	now := time.Now()
 	if now.After(next) {
-		lock.SetCron(l.name, now.Unix())
+		SetCron(l.name, now.Unix())
 		errs := l.Backup(true, false, "")
 		if len(errs) > 0 {
 			return fmt.Errorf("Failed to backup location \"%s\":\n%w", l.name, errors.Join(errs...))

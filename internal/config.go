@@ -10,7 +10,6 @@ import (
 
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
-	"github.com/cupcakearmy/autorestic/internal/lock"
 	"github.com/joho/godotenv"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -24,6 +23,7 @@ type Options map[string]OptionMap
 
 type Config struct {
 	Version   string              `mapstructure:"version" yaml:"version"`
+	Lockfile  string              `mapstructure:"lockfile,omitempty" yaml:"lockfile,omitempty"`
 	Extras    interface{}         `mapstructure:"extras" yaml:"extras"`
 	Locations map[string]Location `mapstructure:"locations" yaml:"locations"`
 	Backends  map[string]Backend  `mapstructure:"backends" yaml:"backends"`
@@ -40,7 +40,7 @@ func exitConfig(err error, msg string) {
 	if msg != "" {
 		colors.Error.Println(msg)
 	}
-	lock.Unlock()
+	Unlock()
 	os.Exit(1)
 }
 
