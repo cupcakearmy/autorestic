@@ -17,9 +17,11 @@ var backupCmd = &cobra.Command{
 		err := internal.Lock()
 		CheckErr(err)
 		defer internal.Unlock()
+		dry, _ := cmd.Flags().GetBool("dry-run")
 
 		selected, err := internal.GetAllOrSelected(cmd, false)
 		CheckErr(err)
+
 		errors := 0
 		for _, name := range selected {
 			var splitted = strings.Split(name, "@")
@@ -28,7 +30,7 @@ var backupCmd = &cobra.Command{
 				specificBackend = splitted[1]
 			}
 			location, _ := internal.GetLocation(splitted[0])
-			errs := location.Backup(false, specificBackend)
+			errs := location.Backup(false, dry, specificBackend)
 			for _, err := range errs {
 				colors.Error.Printf("%s\n\n", err)
 				errors++
@@ -43,4 +45,5 @@ var backupCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(backupCmd)
 	internal.AddFlagsToCommand(backupCmd, false)
+	backupCmd.Flags().Bool("dry-run", false, "do not write changes, show what would be affected")
 }
