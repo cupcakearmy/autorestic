@@ -5,7 +5,7 @@
     "start": "NEXT_TELEMETRY_DISABLED=1 next start"
   },
   "dependencies": {
-    "next": "^14.2.7",
+    "next": "^14.2.21",
     "nextra": "^2.13.4",
     "nextra-theme-docs": "^2.13.4",
     "react": "^18.3.1",
