@@ -223,6 +223,14 @@ func (l Location) Backup(cron bool, dry bool, specificBackend string) []error {
 			continue
 		}
 
+		if backend.Init {
+			err = backend.EnsureInit()
+			if err != nil {
+				errors = append(errors, err)
+				continue
+			}
+		}
+
 		cmd := []string{"backup"}
 		cmd = append(cmd, combineAllOptions("backup", l, backend)...)
 		if cron {
