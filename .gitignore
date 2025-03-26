@@ -10,3 +10,4 @@ test
 autorestic
 data
 dist
+*.exe
