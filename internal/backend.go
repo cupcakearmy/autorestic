@@ -19,14 +19,15 @@ type BackendRest struct {
 }
 
 type Backend struct {
-	name       string
-	Type       string            `mapstructure:"type,omitempty" yaml:"type,omitempty"`
-	Path       string            `mapstructure:"path,omitempty" yaml:"path,omitempty"`
-	Key        string            `mapstructure:"key,omitempty" yaml:"key,omitempty"`
-	RequireKey bool              `mapstructure:"requireKey,omitempty" yaml:"requireKey,omitempty"`
-	Env        map[string]string `mapstructure:"env,omitempty" yaml:"env,omitempty"`
-	Rest       BackendRest       `mapstructure:"rest,omitempty" yaml:"rest,omitempty"`
-	Options    Options           `mapstructure:"options,omitempty" yaml:"options,omitempty"`
+	name         string
+	Type         string            `mapstructure:"type,omitempty" yaml:"type,omitempty"`
+	Path         string            `mapstructure:"path,omitempty" yaml:"path,omitempty"`
+	Key          string            `mapstructure:"key,omitempty" yaml:"key,omitempty"`
+	RequireKey   bool              `mapstructure:"requireKey,omitempty" yaml:"requireKey,omitempty"`
+	AllowFailure bool              `mapstructure:"allowFailure,omitempty" yaml:"allowFailure,omitempty"`
+	Env          map[string]string `mapstructure:"env,omitempty" yaml:"env,omitempty"`
+	Rest         BackendRest       `mapstructure:"rest,omitempty" yaml:"rest,omitempty"`
+	Options      Options           `mapstructure:"options,omitempty" yaml:"options,omitempty"`
 }
 
 func GetBackend(name string) (Backend, bool) {
