@@ -54,7 +54,7 @@ backends:
   hdd:
     type: local
     path: /mnt/my_external_storage
-    key: 'if not key is set it will be generated for you'
+    key: 'if no key is set it will be generated for you'
 ```
 
 ## Check
