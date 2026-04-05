@@ -1,0 +1,14 @@
+[tools]
+go = "latest"
+restic = "latest"
+
+[tasks]
+build = { description = "Build the project", run = "go build -v ." }
+
+test = { description = "Run tests", run = "go test -v ./..." }
+
+coverage = { description = "Generate coverage report", run = "go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out && go tool cover -html=coverage.out -o coverage.html", depends = [
+  "test"
+] }
+
+clean = { run = "rm -f coverage.*", description = "Clean up coverage files" }
