@@ -1,6 +1,14 @@
 package internal
 
-import "testing"
+import (
+	"os"
+	"path"
+	"sync"
+	"testing"
+
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestGetType(t *testing.T) {
 
@@ -100,11 +108,27 @@ func TestLocationBackupWithMock(t *testing.T) {
 	// Inject mock
 	mock := &MockExecutor{
 		ExecuteResticFunc: func(options ExecuteOptions, args ...string) (int, string, error) {
-			assertEqual(t, args[0], "backup")
+			assert.Equal(t, "backup", args[0])
 			return 0, "success", nil
 		},
 	}
 	DefaultExecutor = mock
+
+	// Setup dummy config
+	workDir := t.TempDir()
+	configFile := path.Join(workDir, ".autorestic.yml")
+	err := os.WriteFile(configFile, []byte("version: 2"), 0644)
+	assert.NoError(t, err)
+
+	viper.Reset()
+	viper.SetConfigFile(configFile)
+	viper.Set("version", 2)
+	// Register test-backend
+	viper.Set("backends.test-backend.type", "local")
+	viper.Set("backends.test-backend.path", workDir)
+
+	config = nil
+	once = sync.Once{}
 
 	loc := Location{
 		name: "test-location",
