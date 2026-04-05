@@ -91,3 +91,30 @@ func TestBuildRestoreCommand(t *testing.T) {
 	expected := []string{"restore", "--target", "to", "--tag", "ar:location:foo", "snapshot", "options"}
 	assertSliceEqual(t, result, expected)
 }
+
+func TestLocationBackupWithMock(t *testing.T) {
+	// Backup original
+	originalExecutor := DefaultExecutor
+	defer func() { DefaultExecutor = originalExecutor }()
+
+	// Inject mock
+	mock := &MockExecutor{
+		ExecuteResticFunc: func(options ExecuteOptions, args ...string) (int, string, error) {
+			assertEqual(t, args[0], "backup")
+			return 0, "success", nil
+		},
+	}
+	DefaultExecutor = mock
+
+	loc := Location{
+		name: "test-location",
+		To:   []string{"test-backend"},
+		From: []string{"/"},
+		Type: "local",
+	}
+
+	errs := loc.Backup(false, false, "")
+	if len(errs) != 0 {
+		t.Errorf("expected no error, got %v", errs)
+	}
+}

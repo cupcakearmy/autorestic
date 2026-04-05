@@ -1,0 +1,13 @@
+[tools]
+go = "latest"
+restic = "latest"
+
+[tasks.test]
+run = "go test -v ./..."
+
+[tasks.coverage]
+run = "go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out && go tool cover -html=coverage.out -o coverage.html"
+description = "Generate coverage report"
+
+[tasks.clean]
+run = "rm -f coverage.out coverage.html"

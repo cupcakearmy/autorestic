@@ -39,7 +39,14 @@ func (w ColoredWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func ExecuteCommand(options ExecuteOptions, args ...string) (int, string, error) {
+type Executor interface {
+	Execute(options ExecuteOptions, args ...string) (int, string, error)
+	ExecuteRestic(options ExecuteOptions, args ...string) (int, string, error)
+}
+
+type RealExecutor struct{}
+
+func (e *RealExecutor) Execute(options ExecuteOptions, args ...string) (int, string, error) {
 	cmd := exec.Command(options.Command, args...)
 	env := os.Environ()
 	for k, v := range options.Envs {
@@ -76,12 +83,22 @@ func ExecuteCommand(options ExecuteOptions, args ...string) (int, string, error)
 	return 0, out.String(), nil
 }
 
-func ExecuteResticCommand(options ExecuteOptions, args ...string) (int, string, error) {
+func (e *RealExecutor) ExecuteRestic(options ExecuteOptions, args ...string) (int, string, error) {
 	options.Command = flags.RESTIC_BIN
 	var c = GetConfig()
 	var optionsAsString = getOptions(c.Global, []string{"all"})
 	args = append(optionsAsString, args...)
-	return ExecuteCommand(options, args...)
+	return e.Execute(options, args...)
+}
+
+var DefaultExecutor Executor = &RealExecutor{}
+
+func ExecuteCommand(options ExecuteOptions, args ...string) (int, string, error) {
+	return DefaultExecutor.Execute(options, args...)
+}
+
+func ExecuteResticCommand(options ExecuteOptions, args ...string) (int, string, error) {
+	return DefaultExecutor.ExecuteRestic(options, args...)
 }
 
 func CopyFile(from, to string) error {
