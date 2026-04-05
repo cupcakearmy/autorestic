@@ -5,11 +5,11 @@
     "start": "NEXT_TELEMETRY_DISABLED=1 next start"
   },
   "dependencies": {
-    "next": "^14.2.7",
+    "next": "^14.2.35",
     "nextra": "^2.13.4",
     "nextra-theme-docs": "^2.13.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
-  "packageManager": "pnpm@9.9.0"
+  "packageManager": "pnpm@10.33.0"
 }
