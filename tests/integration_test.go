@@ -221,3 +221,60 @@ backends:
 	// Verify copy in output
 	assert.Contains(t, output, "Copying local → remote")
 }
+
+func TestPermissions(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// 1. Create a source file with specific permissions (0600)
+	sourceFile := "source.txt"
+	sourcePath := filepath.Join(tempDir, sourceFile)
+	err := os.WriteFile(sourcePath, []byte("data"), 0600)
+	assert.NoError(t, err)
+
+	repoPath := filepath.Join(tempDir, "repo")
+	initRepo(t, repoPath)
+
+	configContent := `
+version: 2
+locations:
+  my-data:
+    from: 
+      - ` + sourceFile + `
+    to: local
+backends:
+  local:
+    type: local
+    path: ` + repoPath + `
+    key: password
+`
+	configPath := filepath.Join(tempDir, "autorestic.yml")
+	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	assert.NoError(t, err)
+
+	// 2. Backup
+	runAutorestic(t, tempDir, configPath, "backup", "-l", "my-data")
+
+	// 3. Restore
+	restoreDir := filepath.Join(tempDir, "restore")
+	err = os.MkdirAll(restoreDir, 0755)
+	assert.NoError(t, err)
+	runAutorestic(t, tempDir, configPath, "restore", "-l", "my-data", "--to", restoreDir)
+
+	// 4. Verify permissions
+	// Use walk to find the restored file
+	var restoredFile string
+	err = filepath.Walk(restoreDir, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() && info.Name() == "source.txt" {
+			restoredFile = path
+		}
+		return nil
+	})
+	assert.NoError(t, err)
+	assert.NotEmpty(t, restoredFile, "source.txt not found")
+
+	info, err := os.Stat(restoredFile)
+	assert.NoError(t, err)
+
+	// Check permissions (masking only for permission bits)
+	assert.Equal(t, os.FileMode(0600), info.Mode().Perm())
+}
