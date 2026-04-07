@@ -40,7 +40,7 @@ func (w ColoredWriter) Write(p []byte) (n int, err error) {
 }
 
 func ExecuteCommand(options ExecuteOptions, args ...string) (int, string, error) {
-	cmd := exec.Command(options.Command, args...)
+	cmd := execCommand(options.Command, args...)
 	env := os.Environ()
 	for k, v := range options.Envs {
 		env = append(env, fmt.Sprintf("%s=%s", k, v))

@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal"
@@ -37,10 +38,17 @@ func Execute() {
 }
 
 func init() {
+	restic := "restic"
+	// For Windows we default the executable differently as the current directory
+	// is usually not included in search path by default.
+	if runtime.GOOS == "windows" {
+		restic = "./restic"
+	}
+
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.autorestic.yml or ./.autorestic.yml)")
 	rootCmd.PersistentFlags().BoolVar(&flags.CI, "ci", false, "CI mode disabled interactive mode and colors and enables verbosity")
 	rootCmd.PersistentFlags().BoolVarP(&flags.VERBOSE, "verbose", "v", false, "verbose mode")
-	rootCmd.PersistentFlags().StringVar(&flags.RESTIC_BIN, "restic-bin", "restic", "specify custom restic binary")
+	rootCmd.PersistentFlags().StringVar(&flags.RESTIC_BIN, "restic-bin", restic, "specify custom restic binary")
 	rootCmd.PersistentFlags().StringVar(&flags.DOCKER_IMAGE, "docker-image", "cupcakearmy/autorestic:"+internal.VERSION, "specify a custom docker image")
 	cobra.OnInitialize(initConfig)
 }
