@@ -1,6 +1,6 @@
 # 🐳 Docker
 
-The docker image is build with rclone and restic already included. It's ment more as a utility image.
+The Docker image is built with rclone and restic already included. It's meant more as a utility image.
 
 ## Remote hosts
 
@@ -15,7 +15,7 @@ docker run --rm \\
 
 ## Rclone
 
-For rclone you will have to also mount the rclone config file to `/root/.config/rclone/rclone.conf`.
+For rclone you will also need to mount the rclone config file to `/root/.config/rclone/rclone.conf`.
 
 To check where it is located you can run the following command: `rclone config file`.
 
