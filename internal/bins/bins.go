@@ -1,7 +1,6 @@
 package bins
 
 import (
-	"compress/bzip2"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,8 +16,6 @@ import (
 	"github.com/cupcakearmy/autorestic/internal/colors"
 	"github.com/cupcakearmy/autorestic/internal/flags"
 )
-
-const INSTALL_PATH = "/usr/local/bin"
 
 type GithubReleaseAsset struct {
 	Name string `json:"name"`
@@ -46,11 +43,11 @@ func dlJSON(url string) (GithubRelease, error) {
 }
 
 func Uninstall(restic bool) error {
-	if err := os.Remove(path.Join(INSTALL_PATH, "autorestic")); err != nil {
+	if err := os.Remove(path.Join(installPath(), exeName("autorestic"))); err != nil {
 		return err
 	}
 	if restic {
-		if err := os.Remove(path.Join(INSTALL_PATH, "restic")); err != nil {
+		if err := os.Remove(path.Join(installPath(), exeName("restic"))); err != nil {
 			return err
 		}
 	}
@@ -58,7 +55,7 @@ func Uninstall(restic bool) error {
 }
 
 func downloadAndInstallAsset(body GithubRelease, name string) error {
-	ending := fmt.Sprintf("_%s_%s.bz2", runtime.GOOS, runtime.GOARCH)
+	ending := fmt.Sprintf("_%s_%s.%s", runtime.GOOS, runtime.GOARCH, formatName)
 	for _, asset := range body.Assets {
 		if strings.HasSuffix(asset.Name, ending) {
 			// Download archive
@@ -70,12 +67,15 @@ func downloadAndInstallAsset(body GithubRelease, name string) error {
 			defer resp.Body.Close()
 
 			// Uncompress
-			bz := bzip2.NewReader(resp.Body)
+			bz, err := decompress(resp)
+			if err != nil {
+				return err
+			}
 
 			// Save to tmp file in the same directory as the install directory
-			// Linux does not support overwriting the file that is currently being running
-			// But it can be delete the old one and a new one moved in its place.
-			tmp, err := os.CreateTemp(INSTALL_PATH, "autorestic-")
+			// Linux does not support overwriting the file that is currently running
+			// But it can delete the old one and a new one can be moved in its place.
+			tmp, err := os.CreateTemp(installPath(), "autorestic-")
 			if err != nil {
 				return err
 			}
@@ -86,8 +86,10 @@ func downloadAndInstallAsset(body GithubRelease, name string) error {
 			if _, err := io.Copy(tmp, bz); err != nil {
 				return err
 			}
+			// On Windows the rename below will fail if the file remains open.
+			tmp.Close()
 
-			to := path.Join(INSTALL_PATH, name)
+			to := path.Join(installPath(), exeName(name))
 			defer os.Remove(tmp.Name()) // Cleanup temporary file after thread exits
 
 			mode := os.FileMode(0755)
@@ -109,7 +111,7 @@ func downloadAndInstallAsset(body GithubRelease, name string) error {
 				return err
 			}
 
-			colors.Success.Printf("Successfully installed '%s' under %s\n", name, INSTALL_PATH)
+			colors.Success.Printf("Successfully installed '%s' under %s\n", name, installPath())
 			return nil
 		}
 	}
@@ -132,7 +134,7 @@ func InstallRestic() error {
 
 func upgradeRestic() error {
 	_, _, err := internal.ExecuteCommand(internal.ExecuteOptions{
-		Command: flags.RESTIC_BIN,
+		Command: exeName(flags.RESTIC_BIN),
 	}, "self-update")
 	return err
 }
