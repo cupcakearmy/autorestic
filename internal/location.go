@@ -282,11 +282,16 @@ func (l Location) Backup(cron bool, dry bool, specificBackend string) []error {
 				for _, copyToTarget := range copyTo {
 					b2, _ := GetBackend(copyToTarget)
 					colors.Secondary.Println("Copying " + copyFrom + " → " + copyToTarget)
-					env, _ := b1.getEnv()
-					env2, _ := b2.getEnv()
-					// Add the second repo to the env with a "2" suffix
-					for k, v := range env2 {
-						env[k+"2"] = v
+					envFrom, _ := b1.getEnv()
+					env, _ := b2.getEnv()
+					// Add the source repo to the env with a "RESTIC_FROM_" prefix
+					for k, v := range envFrom {
+						kFrom := strings.Replace(k, "RESTIC_", "RESTIC_FROM_", 1);
+						env[kFrom] = v
+						if k == "RESTIC_REST_USERNAME" ||
+						   k == "RESTIC_REST_PASSWORD" {
+							colors.Secondary.Printf("Warning: %s cannot be used to authenticate with the source repository when copying\n", kFrom)
+						}
 					}
 					_, _, err := ExecuteResticCommand(ExecuteOptions{
 						Envs: env,
