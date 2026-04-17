@@ -270,6 +270,13 @@ func (l Location) Backup(cron bool, dry bool, specificBackend string) []error {
 
 		// If error save it and continue
 		if err != nil {
+			if backend.AllowFailure {
+				colors.Faint.Printf("skipping backend \"%s\" since allowFailure was set to \"true\"\n", to)
+				if flags.VERBOSE {
+					colors.Error.Printf("reason: %s", out)
+				}
+				continue
+			}
 			colors.Error.Println(out)
 			errors = append(errors, fmt.Errorf("%s@%s:\n%s%s", l.name, backend.name, out, err))
 			continue
