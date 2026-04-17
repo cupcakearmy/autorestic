@@ -133,7 +133,7 @@ func (b Backend) validate() error {
 	// Check if already initialized
 	cmd := []string{"check"}
 	cmd = append(cmd, combineBackendOptions("check", b)...)
-	_, _, err = ExecuteResticCommand(options, cmd...)
+	_, out, err := ExecuteResticCommand(options, cmd...)
 	if err == nil {
 		return nil
 	} else {
@@ -142,6 +142,9 @@ func (b Backend) validate() error {
 		cmd := []string{"init"}
 		cmd = append(cmd, combineBackendOptions("init", b)...)
 		_, _, err := ExecuteResticCommand(options, cmd...)
+		if err != nil {
+			colors.Error.Println(out)
+		}
 		return err
 	}
 }

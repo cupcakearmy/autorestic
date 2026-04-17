@@ -288,11 +288,12 @@ func (l Location) Backup(cron bool, dry bool, specificBackend string) []error {
 					for k, v := range env2 {
 						env[k+"2"] = v
 					}
-					_, _, err := ExecuteResticCommand(ExecuteOptions{
+					_, out, err := ExecuteResticCommand(ExecuteOptions{
 						Envs: env,
 					}, "copy", md.SnapshotID)
 
 					if err != nil {
+						colors.Error.Println(out)
 						errors = append(errors, err)
 					}
 				}
@@ -358,8 +359,9 @@ func (l Location) Forget(prune bool, dry bool) error {
 			cmd = append(cmd, "--dry-run")
 		}
 		cmd = append(cmd, combineAllOptions("forget", l, backend)...)
-		_, _, err = ExecuteResticCommand(options, cmd...)
+		_, out, err := ExecuteResticCommand(options, cmd...)
 		if err != nil {
+			colors.Error.Println(out)
 			return err
 		}
 	}
