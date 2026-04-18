@@ -18,5 +18,5 @@ func (e addedExtractor) Extract(metadata *BackupLogMetadata, line string) {
 }
 
 func NewAddedExtractor() MetadatExtractor {
-	return addedExtractor{regexp.MustCompile(`(?i)^Added to the repo(sitory)?: ([\d\.]+ \w+)( \([\d\.]+[\w\s]+\))?`)}
+	return addedExtractor{regexp.MustCompile(`(?i)^Added to the repo(sitory)?: ([\d\.]+ \w+)( +\([\d\.]+[\w\s]+\))?`)}
 }
