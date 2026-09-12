@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/cupcakearmy/autorestic/internal"
@@ -17,7 +17,7 @@ var unlockCmd = &cobra.Command{
 	Use:   "unlock",
 	Short: "Unlock autorestic only if you are sure that no other instance is running",
 	Long: `Unlock autorestic only if you are sure that no other instance is running.
-To check you can run "ps aux | grep autorestic".`,
+To check you can run "ps aux | grep '[a]utorestic'".`,
 	Run: func(cmd *cobra.Command, args []string) {
 		internal.GetConfig()
 
@@ -48,26 +48,23 @@ func init() {
 	unlockCmd.Flags().Bool("force", false, "force unlock")
 }
 
-// isAutoresticRunning checks if autorestic is running
-// and returns true if it is.
-// It also prints the processes to stdout.
+// isAutoresticRunning checks if an autorestic binary is running and returns
+// true if it is. It also prints matching processes to stdout.
 func isAutoresticRunning() bool {
-	cmd := exec.Command("sh", "-c", "ps aux | grep autorestic")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
+	out, err := exec.Command("ps", "aux").Output()
 	if err != nil {
 		return false
 	}
 
-	lines := strings.Split(out.String(), "\n")
+	lines := strings.Split(string(out), "\n")
 	autoresticProcesses := []string{}
 	currentPid := fmt.Sprint(os.Getpid())
 
 	for _, line := range lines {
-		if strings.Contains(line, "autorestic") && !strings.Contains(line, "grep autorestic") && !strings.Contains(line, currentPid) {
-			autoresticProcesses = append(autoresticProcesses, line)
+		if !psLineLooksLikeAutorestic(line, currentPid) {
+			continue
 		}
+		autoresticProcesses = append(autoresticProcesses, line)
 	}
 
 	if len(autoresticProcesses) > 0 {
@@ -76,6 +73,28 @@ func isAutoresticRunning() bool {
 			colors.Faint.Println(proc)
 		}
 		return true
+	}
+	return false
+}
+
+// psLineLooksLikeAutorestic reports whether a `ps aux` line is a running
+// autorestic binary. Substring matches on unit names like
+// `systemctl start autorestic-backup.service` are ignored (see #406).
+func psLineLooksLikeAutorestic(line, currentPid string) bool {
+	fields := strings.Fields(line)
+	// USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND...
+	if len(fields) < 11 {
+		return false
+	}
+	if fields[1] == currentPid {
+		return false
+	}
+
+	for _, tok := range fields[10:] {
+		base := filepath.Base(tok)
+		if base == "autorestic" || base == "autorestic.exe" {
+			return true
+		}
 	}
 	return false
 }
